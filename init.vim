@@ -1,29 +1,24 @@
 set nocompatible
 filetype off                  " required
 " set the runtime path to include Vundle and initialize
+set rtp+=/usr/local/opt/fzf
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
-Plugin 'ctrlpvim/ctrlp.vim'
-Plugin 'adonis0147/ctrlp-cIndexer'
-Plugin 'FelikZ/ctrlp-py-matcher'
 Plugin 'xltan/pyflakes-vim'
-Plugin 'majutsushi/tagbar'
 Plugin 'tpope/vim-fugitive'
 Plugin 'tpope/vim-surround'
 Plugin 'tpope/vim-commentary'
 Plugin 'itchyny/lightline.vim'
-Plugin 'dyng/ctrlsf.vim'
 Plugin 'easymotion/vim-easymotion'
 Plugin 'junegunn/vim-easy-align'
+Plugin 'junegunn/fzf.vim'
 Plugin 'altercation/vim-colors-solarized'
 Plugin 'michaeljsmith/vim-indent-object'
 Plugin 'Valloric/YouCompleteMe'
 Plugin 'ludovicchabant/vim-gutentags'
 Plugin 'henrik/vim-indexed-search'
 Plugin 'milkypostman/vim-togglelist'
-Plugin 'mattn/webapi-vim'
-Plugin 'mattn/gist-vim'
 Plugin 'beyondmarc/glsl.vim'
 Plugin 'beyondmarc/hlsl.vim'
 Plugin 'jeroenbourgois/vim-actionscript'
@@ -43,7 +38,7 @@ let g:solarized_termcolors = 256
 
 colors solarized
 
-set guifont=Monaco\ for\ Powerline:h9
+set guifont=Monaco\ for\ Powerline:h12
 set guioptions=
 set backspace=indent,eol,start
 
@@ -57,7 +52,7 @@ set laststatus=2
 set wildmenu
 set hidden
 set autowrite
-
+set autoread
 
 set backupdir=$HOME/.swap
 set directory=$HOME/.swap//
@@ -69,8 +64,6 @@ set incsearch
 
 set ruler
 set nu
-
-set autoread
 
 if !empty(&viminfo)
   set viminfo^=!,%1024
@@ -113,8 +106,8 @@ let g:lightline = {
       \   'mode': 'LightLineMode',
       \   'ctrlpmark': 'CtrlPMark',
       \ },
-	  \ 'separator': { 'left': '⮀', 'right': '⮂' },
-      \ 'subseparator': { 'left': '⮁', 'right': '⮃' }
+	  \ 'separator': { 'left': "\ue0b0", 'right': "\ue0b2" },
+      \ 'subseparator': { 'left': "\ue0b1", 'right': "\ue0b3" }
       \ }
 
 function! LightLineModified()
@@ -209,35 +202,36 @@ function! TagbarStatusFunc(current, sort, fname, ...) abort
   return lightline#statusline(0)
 endfunction
 
-" ctrlp
-let g:ctrlp_map = '<c-p>'
-let g:ctrlp_cmd = 'CtrlP'
-" Setup some default ignores
-let g:ctrlp_custom_ignore = {
-  \ 'dir': '\v[\/](\.(git|hg|svn)|\_site|packedIpa|extension|lib|Lib|multi_target_plists|Lib|intern|bt2code|(server\\com)|(\v\.(egg|app)))$',
-  \ 'file': '\v\.(fxl|cache|ktx|pvr|tga|sfx|fx|pyc|exe|so|dll|class|png|jpg|jpeg)$',
-\}
-let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
-let g:ctrlp_working_path_mode = 'w'
-let g:ctrlp_lazy_udpate = 50
-let g:ctrlp_max_files = 0
-let g:ctrlp_max_depth = 40
-let g:ctrlp_use_caching = 1
-let g:ctrlp_clear_cache_on_exit = 0
-" let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:10,results:20'
-let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
-" let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
-let g:cIndexer_custom_ignore_extensions = ['sfx', 'gim', 'gis', 'ags', 'mesh', 'mtg', 'ter', 'cache']
-let g:cIndexer_custom_ignore_dirs = ['_site', 'engine', 'packedIpa', 'extension', 'lib', 'Lib', 'multi_target_plist', 'intern', '.app', '.egg', 'ai', 'example.*', '_backup']
+" " ctrlp
+" let g:ctrlp_map = '<c-p>'
+" let g:ctrlp_cmd = 'CtrlP'
+" " Setup some default ignores
+" let g:ctrlp_custom_ignore = {
+" \ 'dir': '\v[\/](\.(git|hg|svn)|\_site|packedIpa|extension|lib|Lib|multi_target_plists|Lib|intern|bt2code|(server\\com)|(\v\.(egg|app)))$',
+" \ 'file': '\v\.(fxl|cache|ktx|pvr|tga|sfx|fx|pyc|exe|so|dll|class|png|jpg|jpeg)$',
+" \}
+" let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
+" let g:ctrlp_working_path_mode = 'w'
+" let g:ctrlp_lazy_udpate = 50
+" let g:ctrlp_max_files = 0
+" let g:ctrlp_max_depth = 40
+" let g:ctrlp_use_caching = 1
+" let g:ctrlp_clear_cache_on_exit = 0
+" " let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:10,results:20'
+" let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
+" " let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
+" let g:cIndexer_custom_ignore_extensions = ['sfx', 'gim', 'gis', 'ags', 'mesh', 'mtg', 'ter', 'cache']
+" let g:cIndexer_custom_ignore_dirs = ['_site', 'engine', 'packedIpa', 'extension', 'lib', 'Lib', 'multi_target_plist', 'intern', '.app', '.egg', 'ai', 'example.*', '_backup']
+" " Easy bindings for its various modes
+nmap <leader>b :BTags<cr>
+nmap <leader>v :Buffers<cr>
+nmap <leader>r :History<cr>
+nmap <leader>t :Tags<cr>
+nmap <leader>p :Files<cr>
+
+nmap <leader>f :Ag
 
 nmap <leader>e :Ex<cr>
-
-" Easy bindings for its various modes
-nmap <leader>b :CtrlPBufTag<cr>
-nmap <leader>v :CtrlPBuffer<cr>
-nmap <leader>r :CtrlPMRU<cr>
-nmap <leader>m :CtrlPMixed<cr>
-imap <C-P> <ESC>:CtrlPMRU<cr>
 
 " let g:syntastic_always_populate_loc_list = 1
 " let g:syntastic_auto_loc_list = 1
@@ -288,15 +282,6 @@ let g:gist_detect_filetype = 1
 let g:gist_show_privates = 1
 let g:gist_post_private = 1
 
-let g:ctrlsf_ackprg = 'ag'
-let g:ctrlsf_default_root = 'project'
-
-nmap     <leader>f :CtrlSF <C-R><C-W><space>
-vmap     <leader>f <Plug>CtrlSFVwordPath
-nmap     <leader>p :CtrlSF -filetype python <C-R><C-W><space>
-nmap     <leader>a :CtrlSF -filetype actionscript <C-R><C-W><space>
-nnoremap <leader>t :CtrlSFToggle<CR>
-
 vnoremap // y/<C-R>"<CR>
 
 "make < > shifts keep selection
@@ -312,38 +297,24 @@ let g:hlsl_file_extensions = '*.nfx,*.hlsl,*.vs,*.ps,*.fx'
 
 cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<cr>
 
-let g:SuperTabDefaultCompletionType = "<c-n>"
-let g:SuperTabContextDefaultCompletionType = "<c-n>"
-
 nnoremap <C-L> :nohlsearch<CR>
 nnoremap <C-n> :sav <C-R>=fnameescape(expand('%:h')).'\'<cr>
 
 augroup vimrc_autocmd
-  au GUIEnter * simalt ~x
   au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
   au! BufNewFile,BufRead *.as  setf actionscript
   au filetype python setlocal noexpandtab tabstop=4
   au filetype actionscript setlocal noexpandtab tabstop=4
 augroup END
 
-cabbrev q <c-r>=(getcmdtype()==':' && getcmdpos()==1 ? 'close' : 'q')<CR>
-
-cabbrev spy -filetype python
-cabbrev sas -filetype actionscript
 cabbrev ics client/script
 cabbrev ict client/tools
 cabbrev icr client/res
 cabbrev is server
-
-cabbrev ccn C:\g4\trunk
-cabbrev ctw C:\g4\branches\international_g4tw_release\tw_trunk
-cabbrev ckr C:\g4\branches\international_g4kr_release\kr_trunk
-cabbrev ceg C:\g4\NeoX\src\3d-engine\branches\mobile\engine
 
 " easy align
 " Start interactive EasyAlign in visual mode (e.g. vipga)
 xmap ga <Plug>(EasyAlign)
 " Start interactive EasyAlign for a motion/text object (e.g. gaip)
 nmap ga <Plug>(EasyAlign)
-
 
