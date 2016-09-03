@@ -15,6 +15,8 @@ Plugin 'tpope/vim-rsi'
 
 Plugin 'altercation/vim-colors-solarized'
 
+Plugin 'google/vim-searchindex'
+
 Plugin 'junegunn/vim-easy-align'
 if(has("win32"))
   Plugin 'FelikZ/ctrlp-py-matcher'
@@ -69,6 +71,12 @@ set directory=$HOME/.swap//
 set undodir=$HOME/.swap
 set undofile
 
+set nobackup
+
+set noimd
+set imi=2
+set ims=2
+
 set hlsearch
 set incsearch
 
@@ -84,7 +92,7 @@ set formatoptions+=j " Delete comment character when joining commented lines
 set ignorecase
 set smartcase
 
-set tags=./tags,tags,../tags,../../tags
+set tags=tags,../tags,../../tags,../../../tags
 
 if !&scrolloff
   set scrolloff=3
@@ -95,6 +103,8 @@ endif
 
 set encoding=utf-8
 set fileencoding=utf-8
+set foldmethod=syntax
+set nofoldenable
 
 let mapleader = ","
 
@@ -127,7 +137,7 @@ if(has("win32"))
   nmap <leader>r :CtrlPMRUFiles<CR>
 else
   set guifont=Monaco\ for\ Powerline:h12
-  nmap <C-e> :silent !zsh<CR>
+  nmap <C-e> :sh<CR>
   
   " fzf
   nmap <leader>b :BTags<cr>
@@ -216,4 +226,16 @@ vnoremap <silent> # :<C-U>
   \gV:call setreg('"', old_reg, old_regtype)<CR>
 inoremap <C-^> <ESC><C-^><CR>
 nmap <leader>e :Ex<CR>
+
+noremap <C-W>		:q<CR>
+vnoremap <C-W>		<C-C>:q<CR>
+inoremap <C-W>		<ESC>:q<CR>
+nnoremap Y y$
+
+" markdown
+nnoremap <leader>1 m`yypVr=``
+nnoremap <leader>2 m`yypVr-``
+nnoremap <leader>3 m`^i### <esc>``4l
+nnoremap <leader>4 m`^i#### <esc>``5l
+nnoremap <leader>5 m`^i##### <esc>``6l
 
