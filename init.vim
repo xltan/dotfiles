@@ -12,7 +12,6 @@ Plug 'tpope/vim-rsi'
 Plug 'scrooloose/syntastic'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-vinegar'
-Plug 'majutsushi/tagbar'
 
 Plug 'altercation/vim-colors-solarized'
 Plug 'vimwiki/vimwiki'
