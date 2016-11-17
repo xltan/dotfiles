@@ -5,35 +5,37 @@ if(!has("win32"))
   set rtp+=/usr/local/opt/fzf
 endif
 
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
+call plug#begin('~/vimfiles/bundle')
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-rsi'
 
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-commentary'
-Plugin 'tpope/vim-rsi'
+Plug 'scrooloose/syntastic'
+Plug 'tpope/vim-commentary'
+Plug 'tpope/vim-vinegar'
+Plug 'majutsushi/tagbar'
 
-Plugin 'altercation/vim-colors-solarized'
+Plug 'altercation/vim-colors-solarized'
+Plug 'vimwiki/vimwiki'
 
-Plugin 'google/vim-searchindex'
+Plug 'SirVer/ultisnips'
+Plug 'honza/vim-snippets'
 
-Plugin 'junegunn/vim-easy-align'
+Plug 'junegunn/vim-easy-align'
 if(has("win32"))
-  Plugin 'FelikZ/ctrlp-py-matcher'
-  Plugin 'ctrlpvim/ctrlp.vim'
-  Plugin 'adonis0147/ctrlp-cIndexer'
+  Plug 'FelikZ/ctrlp-py-matcher'
+  Plug 'ctrlpvim/ctrlp.vim'
+  Plug 'adonis0147/ctrlp-cIndexer'
 else
-  Plugin 'junegunn/fzf.vim'
-  Plugin 'tpope/vim-fugitive'
+  Plug 'junegunn/fzf.vim'
+  Plug 'tpope/vim-fugitive'
 endif
 
-Plugin 'dyng/ctrlsf.vim'
-Plugin 'michaeljsmith/vim-indent-object'
-Plugin 'xltan/pyflakes-vim'
-Plugin 'vim-scripts/actionscript.vim--Leider'
+Plug 'dyng/ctrlsf.vim'
+Plug 'michaeljsmith/vim-indent-object'
+Plug 'vim-scripts/actionscript.vim--Leider'
 
-Plugin 'ludovicchabant/vim-gutentags'
-call vundle#end()
+Plug 'ludovicchabant/vim-gutentags'
+call plug#end()
 
 filetype plugin indent on
 
@@ -48,7 +50,6 @@ set cursorline
 let g:solarized_italic = 0
 let g:solarized_bold = 0 
 let g:solarized_termcolors = 256 
-
 colors solarized
 
 set guioptions=
@@ -58,9 +59,8 @@ set autoindent
 set noexpandtab
 set tabstop=4
 set smarttab
-" set smarttab
 
-set laststatus=2
+" set laststatus=2
 set wildmenu
 set hidden
 set autowrite
@@ -73,10 +73,6 @@ set undofile
 
 set nobackup
 
-set noimd
-set imi=2
-set ims=2
-
 set hlsearch
 set incsearch
 
@@ -84,7 +80,7 @@ set ruler
 set nu
 
 if !empty(&viminfo)
-  set viminfo^=!,%1024
+  set viminfo='100,<50,s10,h,%1024
 endif
 
 set formatoptions+=j " Delete comment character when joining commented lines
@@ -112,7 +108,7 @@ nnoremap <Leader>zz :let &scrolloff=999-&scrolloff<CR>
 
 if(has("win32"))
   set guifont=Monaco:h9
-  nmap <C-e> :silent !start explorer %:p:h:gs?\/?\\\\\\?<CR>
+  nmap <C-e> :silent !start explorer /select, %:p<CR>
   
   " ctrlp
   let g:ctrlp_map = '<c-p>'
@@ -133,8 +129,9 @@ if(has("win32"))
   let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
   " let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
   let g:cIndexer_custom_ignore_extensions = ['sfx', 'gim', 'gis', 'ags', 'mesh', 'mtg', 'ter', 'cache']
-  let g:cIndexer_custom_ignore_dirs = ['_site', 'engine', 'packedIpa', 'extension', 'lib', 'Lib', 'multi_target_plist', 'intern', '.app', '.egg', 'ai', 'example.*', '_backup']
+  let g:cIndexer_custom_ignore_dirs = ['_site', '_editer', 'engine', 'packedIpa', 'extension', 'lib', 'Lib', 'multi_target_plist', 'intern', 'ai', '_backup', 'server\/com']
   nmap <leader>r :CtrlPMRUFiles<CR>
+
 else
   set guifont=Monaco\ for\ Powerline:h12
   nmap <C-e> :sh<CR>
@@ -150,9 +147,11 @@ else
   python from powerline.vim import setup as powerline_setup
   python powerline_setup()
   python del powerline_setup
+
 endif
 
-let g:ctrlsf_ackprg="ag"
+let g:ctrlsf_ackprg="rg"
+
 vmap     <leader>f <Plug>CtrlSFVwordPath
 nmap     <leader>f <Plug>CtrlSFCwordPath
 nnoremap <leader>q :CtrlSFToggle<CR>
@@ -182,16 +181,13 @@ noremap <C-S>		:update<CR>
 vnoremap <C-S>		<C-C>:update<CR>
 inoremap <C-S>		<ESC>:update<CR>
 
-nnoremap <S-L> <C-W>w
-nnoremap <S-H> <C-W>W
-
 "make < > shifts keep selection
 vnoremap < <gv
 vnoremap > >gv
 
 cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<cr>
 
-nnoremap <C-L> :nohlsearch<CR>
+nnoremap <ESC> :nohl<CR>
 nnoremap <C-n> :sav <C-R>=fnameescape(expand('%:h')).'\'<cr>
 
 augroup vimrc_autocmd
@@ -200,12 +196,6 @@ augroup vimrc_autocmd
   au filetype python setlocal noexpandtab tabstop=4 shiftwidth=4
   au filetype actionscript setlocal noexpandtab tabstop=4 shiftwidth=4
 augroup END
-
-cabbrev ics client/script
-cabbrev ict client/tools
-cabbrev icr client/res
-cabbrev is server
-cabbrev ccn c:\g4\trunk\
 
 " easy align
 " Start interactive EasyAlign in visual mode (e.g. vipga)
@@ -227,10 +217,11 @@ vnoremap <silent> # :<C-U>
 inoremap <C-^> <ESC><C-^><CR>
 nmap <leader>e :Ex<CR>
 
-noremap <C-W>		:q<CR>
-vnoremap <C-W>		<C-C>:q<CR>
-inoremap <C-W>		<ESC>:q<CR>
 nnoremap Y y$
+
+" ultisnips
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnippets"]
+let g:UltiSnipsDoHash=0
 
 " markdown
 nnoremap <leader>1 m`yypVr=``
@@ -239,3 +230,53 @@ nnoremap <leader>3 m`^i### <esc>``4l
 nnoremap <leader>4 m`^i#### <esc>``5l
 nnoremap <leader>5 m`^i##### <esc>``6l
 
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:netrw_list_hide= '.*\.swp$,.*\.pyc$'
+let g:netrw_liststyle=1
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 0
+let g:syntastic_check_on_wq = 1
+let g:syntastic_python_checkers = ['pyflakes']
+
+let g:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
+
+if(has("win32"))
+  function! SvnCommand(cmd, path)
+  	execute 'silent! !start '.g:tortoise_svn_path. ' /command:'. a:cmd. ' /path:"'. a:path. '"'
+  endfunction
+  
+  nnoremap <leader>tu :call SvnCommand('update /closeonend:3', expand('%:p'))<CR>
+  nnoremap <leader>tw :call SvnCommand('commit /closeonend:3', expand('%:p'))<CR>
+  nnoremap <leader>tc :call SvnCommand('commit /closeonend:3', g:g4_project_root)<CR>
+  nnoremap <leader>tr :call SvnCommand('revert', expand('%:p'))<CR>
+  nnoremap <leader>tl :call SvnCommand('log', expand('%:p'))<CR>
+  nnoremap <leader>ta :call SvnCommand('add', expand('%:p'))<CR>
+  nnoremap <leader>td :call SvnCommand('diff', expand('%:p'))<CR>
+  nnoremap <leader>tb :call SvnCommand('blame /line:'. line('.'), expand('%:p'))<CR>
+  
+  nnoremap <C-j> <C-w>j
+  nnoremap <C-k> <C-w>k
+  nnoremap <C-h> <C-w>h:let &winwidth = &columns * 11 / 20<cr>
+  nnoremap <C-l> <C-w>l:let &winwidth = &columns * 11 / 20<cr>
+  nnoremap d<C-j> <C-w>j<C-w>c
+  nnoremap d<C-k> <C-w>k<C-w>c
+  nnoremap d<C-h> <C-w>h<C-w>c
+  nnoremap d<C-l> <C-w>l<C-w>c
+  
+  command! -nargs=0 TagbarToggleStatusline call TagbarToggleStatusline()
+  nnoremap <silent> <c-f5> :TagbarToggleStatusline<CR>
+  function! TagbarToggleStatusline()
+     let tStatusline = '%{exists(''*tagbar#currenttag'')?
+  			\tagbar#currenttag(''     [%s] '',''''):''''}'
+     if stridx(&statusline, tStatusline) != -1
+  	  let &statusline = substitute(&statusline, '\V'.tStatusline, '', '')
+     else
+  	  let &statusline = substitute(&statusline, '\ze%=%-', tStatusline, '')
+     endif
+  endfunction
+endif
