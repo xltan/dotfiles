@@ -5,7 +5,7 @@ if(!has("win32"))
   set rtp+=/usr/local/opt/fzf
 endif
 
-call plug#begin('~/vimfiles/bundle')
+call plug#begin('~/.vim/bundle')
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
 
@@ -60,7 +60,7 @@ set noexpandtab
 set tabstop=4
 set smarttab
 
-" set laststatus=2
+set laststatus=2
 set wildmenu
 set hidden
 set autowrite
@@ -230,9 +230,14 @@ nnoremap <leader>3 m`^i### <esc>``4l
 nnoremap <leader>4 m`^i#### <esc>``5l
 nnoremap <leader>5 m`^i##### <esc>``6l
 
-set statusline+=%#warningmsg#
-set statusline+=%{SyntasticStatuslineFlag()}
-set statusline+=%*
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-h> <C-w>h:let &winwidth = &columns * 11 / 20<cr>
+nnoremap <C-l> <C-w>l:let &winwidth = &columns * 11 / 20<cr>
+nnoremap d<C-j> <C-w>j<C-w>c
+nnoremap d<C-k> <C-w>k<C-w>c
+nnoremap d<C-h> <C-w>h<C-w>c
+nnoremap d<C-l> <C-w>l<C-w>c
 
 let g:netrw_list_hide= '.*\.swp$,.*\.pyc$'
 let g:netrw_liststyle=1
@@ -258,25 +263,4 @@ if(has("win32"))
   nnoremap <leader>ta :call SvnCommand('add', expand('%:p'))<CR>
   nnoremap <leader>td :call SvnCommand('diff', expand('%:p'))<CR>
   nnoremap <leader>tb :call SvnCommand('blame /line:'. line('.'), expand('%:p'))<CR>
-  
-  nnoremap <C-j> <C-w>j
-  nnoremap <C-k> <C-w>k
-  nnoremap <C-h> <C-w>h:let &winwidth = &columns * 11 / 20<cr>
-  nnoremap <C-l> <C-w>l:let &winwidth = &columns * 11 / 20<cr>
-  nnoremap d<C-j> <C-w>j<C-w>c
-  nnoremap d<C-k> <C-w>k<C-w>c
-  nnoremap d<C-h> <C-w>h<C-w>c
-  nnoremap d<C-l> <C-w>l<C-w>c
-  
-  command! -nargs=0 TagbarToggleStatusline call TagbarToggleStatusline()
-  nnoremap <silent> <c-f5> :TagbarToggleStatusline<CR>
-  function! TagbarToggleStatusline()
-     let tStatusline = '%{exists(''*tagbar#currenttag'')?
-  			\tagbar#currenttag(''     [%s] '',''''):''''}'
-     if stridx(&statusline, tStatusline) != -1
-  	  let &statusline = substitute(&statusline, '\V'.tStatusline, '', '')
-     else
-  	  let &statusline = substitute(&statusline, '\ze%=%-', tStatusline, '')
-     endif
-  endfunction
 endif
