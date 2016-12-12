@@ -13,7 +13,6 @@ Plug 'tpope/vim-vinegar'
 
 Plug 'altercation/vim-colors-solarized'
 Plug 'rakr/vim-one'
-Plug 'tyrannicaltoucan/vim-quantum'
 Plug 'vimwiki/vimwiki'
 
 Plug 'sheerun/vim-polyglot'
@@ -26,8 +25,7 @@ Plug 'Valloric/ListToggle'
 
 Plug 'maralla/completor.vim'
 Plug 'maralla/validator.vim'
-
-Plug 'nixprime/cpsm'
+Plug 'vim-scripts/matchit.zip'
 
 if(has("win32"))
   Plug 'FelikZ/ctrlp-py-matcher'
@@ -56,7 +54,7 @@ set background=dark
 set cursorline
 
 if has("termguicolors")
-    set termguicolors
+  set termguicolors
 endif
 
 
@@ -64,8 +62,6 @@ endif
 " let g:solarized_bold = 0 
 " let g:solarized_termcolors = 256 
 " colors solarized
-" let g:quantum_black = 1
-" colorscheme quantum
 
 colors one
 
@@ -158,10 +154,8 @@ else
   
   " fzf
   nmap <leader>b :BTags<cr>
-  nmap <leader>v :Buffers<cr>
   nmap <leader>r :History<cr>
   nmap <leader>t :Tags<cr>
-  nmap <leader>a :Ag 
   nmap <c-p> :Files<cr>
   
   python from powerline.vim import setup as powerline_setup
@@ -262,9 +256,8 @@ nnoremap d<C-l> <C-w>l<C-w>c
 let g:netrw_list_hide= '.*\.swp$,.*\.pyc$'
 let g:netrw_liststyle=1
 
-let g:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
-
 if(has("win32"))
+  let g:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
   function! SvnCommand(cmd, path)
   	execute 'silent! !start '.g:tortoise_svn_path. ' /command:'. a:cmd. ' /path:"'. a:path. '"'
   endfunction
