@@ -5,22 +5,30 @@ if(!has("win32"))
   set rtp+=/usr/local/opt/fzf
 endif
 
-call plug#begin('~/.vim/bundle')
+call plug#begin('~/vimfiles/bundle')
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
-
-Plug 'scrooloose/syntastic'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-vinegar'
-Plug 'majutsushi/tagbar'
 
 Plug 'altercation/vim-colors-solarized'
+Plug 'rakr/vim-one'
+Plug 'tyrannicaltoucan/vim-quantum'
 Plug 'vimwiki/vimwiki'
 
+Plug 'sheerun/vim-polyglot'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 
 Plug 'junegunn/vim-easy-align'
+Plug 'junegunn/vim-peekaboo'
+Plug 'Valloric/ListToggle'
+
+Plug 'maralla/completor.vim'
+Plug 'maralla/validator.vim'
+
+Plug 'nixprime/cpsm'
+
 if(has("win32"))
   Plug 'FelikZ/ctrlp-py-matcher'
   Plug 'ctrlpvim/ctrlp.vim'
@@ -47,10 +55,19 @@ set background=dark
 
 set cursorline
 
-let g:solarized_italic = 0
-let g:solarized_bold = 0 
-let g:solarized_termcolors = 256 
-colors solarized
+if has("termguicolors")
+    set termguicolors
+endif
+
+
+" let g:solarized_italic = 0
+" let g:solarized_bold = 0 
+" let g:solarized_termcolors = 256 
+" colors solarized
+" let g:quantum_black = 1
+" colorscheme quantum
+
+colors one
 
 set guioptions=
 set backspace=indent,eol,start
@@ -101,6 +118,9 @@ set encoding=utf-8
 set fileencoding=utf-8
 set foldmethod=syntax
 set nofoldenable
+if has('win32')
+  set renderoptions=type:directx
+endif
 
 let mapleader = ","
 
@@ -154,8 +174,8 @@ let g:ctrlsf_ackprg="rg"
 
 vmap     <leader>f <Plug>CtrlSFVwordPath
 nmap     <leader>f <Plug>CtrlSFCwordPath
-nnoremap <leader>q :CtrlSFToggle<CR>
-inoremap <leader>q <Esc>:CtrlSFToggle<CR>
+nnoremap <leader>s :CtrlSFToggle<CR>
+inoremap <leader>s <Esc>:CtrlSFToggle<CR>
 
 " similiar workaround for windows
 " CTRL-X and SHIFT-Del are Cut
@@ -242,12 +262,6 @@ nnoremap d<C-l> <C-w>l<C-w>c
 let g:netrw_list_hide= '.*\.swp$,.*\.pyc$'
 let g:netrw_liststyle=1
 
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_auto_loc_list = 1
-let g:syntastic_check_on_open = 0
-let g:syntastic_check_on_wq = 1
-let g:syntastic_python_checkers = ['pyflakes']
-
 let g:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
 
 if(has("win32"))
@@ -264,3 +278,6 @@ if(has("win32"))
   nnoremap <leader>td :call SvnCommand('diff', expand('%:p'))<CR>
   nnoremap <leader>tb :call SvnCommand('blame /line:'. line('.'), expand('%:p'))<CR>
 endif
+
+let g:completor_min_chars = 3
+
