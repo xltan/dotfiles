@@ -15,12 +15,10 @@ Plug 'altercation/vim-colors-solarized'
 Plug 'rakr/vim-one'
 Plug 'vimwiki/vimwiki'
 
-Plug 'sheerun/vim-polyglot'
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 
 Plug 'junegunn/vim-easy-align'
-Plug 'junegunn/vim-peekaboo'
 Plug 'Valloric/ListToggle'
 
 Plug 'maralla/completor.vim'
@@ -31,6 +29,7 @@ if(has("win32"))
   Plug 'FelikZ/ctrlp-py-matcher'
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'adonis0147/ctrlp-cIndexer'
+  Plug 'ivalkeen/vim-ctrlp-tjump'
 else
   Plug 'junegunn/fzf.vim'
   Plug 'tpope/vim-fugitive'
@@ -56,7 +55,6 @@ set cursorline
 if has("termguicolors")
   set termguicolors
 endif
-
 
 " let g:solarized_italic = 0
 " let g:solarized_bold = 0 
@@ -115,7 +113,7 @@ set fileencoding=utf-8
 set foldmethod=syntax
 set nofoldenable
 if has('win32')
-  set renderoptions=type:directx
+  set renderoptions=type:directx,gamma:1.7,geom:1,renmode:5,taamode:1
 endif
 
 let mapleader = ","
@@ -134,6 +132,7 @@ if(has("win32"))
   \ 'dir': '\v[\/](\.(git|hg|svn)|\_site|packedIpa|extension|lib|Lib|multi_target_plists|Lib|intern|bt2code|(server\\com)|(\v\.(egg|app)))$',
   \ 'file': '\v\.(fxl|cache|ktx|pvr|tga|sfx|fx|pyc|exe|so|dll|class|png|jpg|jpeg)$',
   \}
+  " let g:ctrlp_user_command = 'rg . --files --color=never --glob ""'
   let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
   let g:ctrlp_working_path_mode = 'w'
   let g:ctrlp_lazy_udpate = 50
@@ -144,10 +143,15 @@ if(has("win32"))
   " let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:10,results:20'
   let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
   " let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
-  let g:cIndexer_custom_ignore_extensions = ['sfx', 'gim', 'gis', 'ags', 'mesh', 'mtg', 'ter', 'cache']
-  let g:cIndexer_custom_ignore_dirs = ['_site', '_editer', 'engine', 'packedIpa', 'extension', 'lib', 'Lib', 'multi_target_plist', 'intern', 'ai', '_backup', 'server\/com']
+  let g:cIndexer_custom_ignore_extensions = ['sfx', 'gim', 'gis', 'ags', 'mesh', 'mtg', 'ter', 'cache', 'scn'] 
+  let g:cIndexer_custom_ignore_dirs = ['_site', '_editer', 'packedIpa', 'extension', 'multi_target_plist', 'intern', 'ai', '_backup', 'server\/com']
   nmap <leader>r :CtrlPMRUFiles<CR>
+  nmap <leader>b :CtrlPBufTag<CR>
 
+  nnoremap <c-]> :CtrlPtjump<cr>
+  vnoremap <c-]> :CtrlPtjumpVisual<cr>
+  let g:ctrlp_tjump_only_silent = 1
+  let g:ctrlp_tjump_skip_tag_name = 1
 else
   set guifont=Monaco\ for\ Powerline:h12
   nmap <C-e> :sh<CR>
@@ -246,12 +250,8 @@ nnoremap <leader>5 m`^i##### <esc>``6l
 
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
-nnoremap <C-h> <C-w>h:let &winwidth = &columns * 11 / 20<cr>
-nnoremap <C-l> <C-w>l:let &winwidth = &columns * 11 / 20<cr>
-nnoremap d<C-j> <C-w>j<C-w>c
-nnoremap d<C-k> <C-w>k<C-w>c
-nnoremap d<C-h> <C-w>h<C-w>c
-nnoremap d<C-l> <C-w>l<C-w>c
+nnoremap <C-h> <C-w>h
+nnoremap <C-l> <C-w>l
 
 let g:netrw_list_hide= '.*\.swp$,.*\.pyc$'
 let g:netrw_liststyle=1
