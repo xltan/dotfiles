@@ -43,14 +43,10 @@ Plug 'ludovicchabant/vim-gutentags'
 call plug#end()
 
 filetype plugin indent on
-
+syntax enable
 set t_Co=256
 
-syntax enable
-
 set background=dark
-
-set cursorline
 
 if has("termguicolors")
   set termguicolors
@@ -63,6 +59,7 @@ endif
 
 colors one
 
+set cursorline
 set guioptions=
 set backspace=indent,eol,start
 
@@ -205,11 +202,10 @@ vnoremap > >gv
 
 cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<cr>
 
-nnoremap <ESC> :nohl<CR>
+nnoremap <silent> <S-L> :nohl<CR>
 nnoremap <C-n> :sav <C-R>=fnameescape(expand('%:h')).'\'<cr>
 
 augroup vimrc_autocmd
-  au GUIEnter * simalt ~x
   au BufRead,BufNewFile *.as set filetype=actionscript
   au filetype python setlocal noexpandtab tabstop=4 shiftwidth=4
   au filetype actionscript setlocal noexpandtab tabstop=4 shiftwidth=4
