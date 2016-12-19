@@ -11,13 +11,14 @@ Plug 'tpope/vim-rsi'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-vinegar'
 
-Plug 'altercation/vim-colors-solarized'
+" Plug 'altercation/vim-colors-solarized'
 Plug 'rakr/vim-one'
 Plug 'vimwiki/vimwiki'
 
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
 
+Plug 'justinmk/vim-sneak'
 Plug 'junegunn/vim-easy-align'
 Plug 'Valloric/ListToggle'
 
@@ -101,24 +102,20 @@ set smartcase
 
 set tags=tags,../tags,../../tags,../../../tags
 
+set encoding=utf-8
+set fileencoding=utf-8
+set foldmethod=syntax
+set nofoldenable
+
+let mapleader = ","
+
+nnoremap <Leader>zz :let &scrolloff=999-&scrolloff<CR>
 if !&scrolloff
   set scrolloff=3
 endif
 if !&sidescrolloff
   set sidescrolloff=5
 endif
-
-set encoding=utf-8
-set fileencoding=utf-8
-set foldmethod=syntax
-set nofoldenable
-if has('win32')
-  set renderoptions=type:directx,gamma:1.7,geom:1,renmode:5,taamode:1
-endif
-
-let mapleader = ","
-
-nnoremap <Leader>zz :let &scrolloff=999-&scrolloff<CR>
 
 if(has("win32"))
   set guifont=Monaco:h9
@@ -140,11 +137,12 @@ if(has("win32"))
   let g:ctrlp_max_depth = 40
   let g:ctrlp_use_caching = 1
   let g:ctrlp_clear_cache_on_exit = 0
+  let g:ctrlp_mruf_default_order = 1
   " let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:10,results:20'
   let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
   " let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
   let g:cIndexer_custom_ignore_extensions = ['sfx', 'gim', 'gis', 'ags', 'mesh', 'mtg', 'ter', 'cache', 'scn'] 
-  let g:cIndexer_custom_ignore_dirs = ['_site', '_editer', 'packedIpa', 'extension', 'multi_target_plist', 'intern', 'ai', '_backup', 'server\/com']
+  let g:cIndexer_custom_ignore_dirs = ['_site', 'extension', '_editer', 'packedIpa', 'extension', 'multi_target_plist', 'intern', 'ai', '_backup', 'server\/com']
   nmap <leader>r :CtrlPMRUFiles<CR>
   nmap <leader>b :CtrlPBufTag<CR>
 
@@ -232,7 +230,9 @@ vnoremap <silent> # :<C-U>
   \gvy?<C-R><C-R>=substitute(
   \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
   \gV:call setreg('"', old_reg, old_regtype)<CR>
+
 inoremap <C-^> <ESC><C-^><CR>
+inoremap <C-K> <C-O>D
 nmap <leader>e :Ex<CR>
 
 nnoremap Y y$
@@ -273,4 +273,11 @@ if(has("win32"))
 endif
 
 let g:completor_min_chars = 3
+
+nmap r <Plug>Sneak_s
+nmap R <Plug>Sneak_S
+xmap r <Plug>Sneak_s
+xmap R <Plug>Sneak_S
+omap r <Plug>Sneak_s
+omap R <Plug>Sneak_S
 
