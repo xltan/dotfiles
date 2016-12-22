@@ -11,14 +11,16 @@ Plug 'tpope/vim-rsi'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-vinegar'
 
-Plug 'altercation/vim-colors-solarized'
+" Plug 'altercation/vim-colors-solarized'
 Plug 'rakr/vim-one'
-Plug 'joshdick/onedark.vim'
 Plug 'vimwiki/vimwiki'
 Plug 'vim-airline/vim-airline'
 
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
+
+Plug 'justinmk/vim-sneak'
+Plug 'justinmk/vim-gtfo'
 
 Plug 'junegunn/vim-easy-align'
 Plug 'Valloric/ListToggle'
@@ -31,7 +33,6 @@ if(has("win32"))
   Plug 'FelikZ/ctrlp-py-matcher'
   Plug 'ctrlpvim/ctrlp.vim'
   Plug 'adonis0147/ctrlp-cIndexer'
-  Plug 'ivalkeen/vim-ctrlp-tjump'
 else
   Plug 'junegunn/fzf.vim'
   Plug 'tpope/vim-fugitive'
@@ -59,7 +60,9 @@ endif
 " let g:solarized_termcolors = 256 
 " colors solarized
 
-colors onedark
+colors one
+hi SignColumn guibg=#282c34
+hi StatusLineNC guibg=#5c6370 guifg=#282c34
 
 set cursorline
 set guioptions=
@@ -71,7 +74,7 @@ set tabstop=4
 set shiftwidth=4
 set smarttab
 
-set laststatus=2
+" set laststatus=2
 set wildmenu
 set hidden
 set autowrite
@@ -101,6 +104,14 @@ set smartcase
 
 set tags=tags,../tags,../../tags,../../../tags
 
+set encoding=utf-8
+set fileencoding=utf-8
+set foldmethod=syntax
+set nofoldenable
+
+let mapleader = ","
+
+nnoremap <Leader>zz :let &scrolloff=999-&scrolloff<CR>
 if !&scrolloff
   set scrolloff=3
 endif
@@ -108,58 +119,50 @@ if !&sidescrolloff
   set sidescrolloff=5
 endif
 
-set encoding=utf-8
-set fileencoding=utf-8
-set foldmethod=syntax
-set nofoldenable
-if has('win32')
-  set renderoptions=type:directx,gamma:1.7,geom:1,renmode:5,taamode:1
-endif
-
-let mapleader = ","
-
-nnoremap <Leader>zz :let &scrolloff=999-&scrolloff<CR>
-
 if(has("win32"))
+  " set renderoptions=type:directx,
+  " 	\gamma:1.8,contrast:1,geom:1,
+  " 	\renmode:5,taamode:1,level:1
+
   set guifont=Monaco:h9
-  nmap <C-e> :silent !start explorer /select, %:p<CR>
+  nmap <silent> <leader>w :e ~\iCloudDrive\notes\<CR>
   
   " ctrlp
   let g:ctrlp_map = '<c-p>'
   let g:ctrlp_cmd = 'CtrlP'
   " Setup some default ignores
-  let g:ctrlp_custom_ignore = {
-  \ 'dir': '\v[\/](\.(git|hg|svn)|\_site|packedIpa|extension|lib|Lib|multi_target_plists|Lib|intern|bt2code|(server\\com)|(\v\.(egg|app)))$',
-  \ 'file': '\v\.(fxl|cache|ktx|pvr|tga|sfx|fx|pyc|exe|so|dll|class|png|jpg|jpeg)$',
-  \}
+  " let g:ctrlp_custom_ignore = {
+  " \ 'dir': '\v[\/](\.(git|hg|svn)|\_site|packedIpa|extension|lib|Lib|multi_target_plists|Lib|intern|bt2code|(server\\com)|(\v\.(egg|app)))$',
+  " \ 'file': '\v\.(fxl|cache|ktx|pvr|tga|sfx|fx|pyc|exe|so|dll|class|png|jpg|jpeg)$',
+  " \}
   " let g:ctrlp_user_command = 'rg . --files --color=never --glob ""'
+  " let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
   let g:ctrlp_cache_dir = $HOME.'/.cache/ctrlp'
   let g:ctrlp_working_path_mode = 'w'
-  let g:ctrlp_lazy_udpate = 50
+  let g:ctrlp_lazy_udpate = 100
   let g:ctrlp_max_files = 0
   let g:ctrlp_max_depth = 40
   let g:ctrlp_use_caching = 1
   let g:ctrlp_clear_cache_on_exit = 0
-  " let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:10,results:20'
+  let g:ctrlp_mruf_default_order = 1
+  let g:ctrlp_match_window = 'bottom,order:btt,min:1,max:10,results:30'
   let g:ctrlp_match_func = { 'match': 'pymatcher#PyMatch' }
-  " let g:ctrlp_match_func = {'match': 'cpsm#CtrlPMatch'}
   let g:cIndexer_custom_ignore_extensions = ['sfx', 'gim', 'gis', 'ags', 'mesh', 'mtg', 'ter', 'cache', 'scn'] 
-  let g:cIndexer_custom_ignore_dirs = ['_site', '_editer', 'packedIpa', 'extension', 'multi_target_plist', 'intern', 'ai', '_backup', 'server\/com']
+  let g:cIndexer_custom_ignore_dirs = ['_site', 'extension', '_editer', 'packedIpa', 'extension', 'multi_target_plist', 'intern', 'ai', '_backup', 'server\/com']
   nmap <leader>r :CtrlPMRUFiles<CR>
   nmap <leader>b :CtrlPBufTag<CR>
 
-  nnoremap <c-]> :CtrlPtjump<cr>
-  vnoremap <c-]> :CtrlPtjumpVisual<cr>
+  " nnoremap <c-]> :CtrlPtjump<cr>
+  " vnoremap <c-]> :CtrlPtjumpVisual<cr>
   let g:ctrlp_tjump_only_silent = 1
   let g:ctrlp_tjump_skip_tag_name = 1
 else
+  nmap <silent> <leader>w :e ~\iCloudDrive\notes\<CR>
   set guifont=Monaco\ for\ Powerline:h12
-  nmap <C-e> :sh<CR>
   
   " fzf
-  nmap <leader>b :BTags<cr>
   nmap <leader>r :History<cr>
-  nmap <leader>t :Tags<cr>
+  nmap <leader>b :BTags<cr>
   nmap <c-p> :Files<cr>
 endif
 
@@ -226,8 +229,9 @@ vnoremap <silent> # :<C-U>
   \gvy?<C-R><C-R>=substitute(
   \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
   \gV:call setreg('"', old_reg, old_regtype)<CR>
+
 inoremap <C-^> <ESC><C-^><CR>
-nmap <leader>e :Ex<CR>
+inoremap <C-K> <C-O>D
 
 nnoremap Y y$
 
@@ -247,10 +251,8 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 
-let g:netrw_list_hide= '.*\.swp$,.*\.pyc$'
-let g:netrw_liststyle=1
-
 if(has("win32"))
+  map <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
   let g:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
   function! SvnCommand(cmd, path)
   	execute 'silent! !start '.g:tortoise_svn_path. ' /command:'. a:cmd. ' /path:"'. a:path. '"'
@@ -267,6 +269,14 @@ if(has("win32"))
 endif
 
 let g:completor_min_chars = 3
+let g:validator_permament_sign = 1
+
+nmap r <Plug>Sneak_s
+nmap R <Plug>Sneak_S
+xmap r <Plug>Sneak_s
+xmap R <Plug>Sneak_S
+omap r <Plug>Sneak_s
+omap R <Plug>Sneak_S
 
 if &diff
   highlight! link DiffText MatchParen
