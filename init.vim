@@ -13,7 +13,9 @@ Plug 'tpope/vim-vinegar'
 
 Plug 'altercation/vim-colors-solarized'
 Plug 'rakr/vim-one'
+Plug 'joshdick/onedark.vim'
 Plug 'vimwiki/vimwiki'
+Plug 'vim-airline/vim-airline'
 
 Plug 'SirVer/ultisnips'
 Plug 'honza/vim-snippets'
@@ -57,7 +59,7 @@ endif
 " let g:solarized_termcolors = 256 
 " colors solarized
 
-colors one
+colors onedark
 
 set cursorline
 set guioptions=
@@ -66,6 +68,7 @@ set backspace=indent,eol,start
 set autoindent
 set noexpandtab
 set tabstop=4
+set shiftwidth=4
 set smarttab
 
 set laststatus=2
@@ -158,11 +161,6 @@ else
   nmap <leader>r :History<cr>
   nmap <leader>t :Tags<cr>
   nmap <c-p> :Files<cr>
-  
-  python from powerline.vim import setup as powerline_setup
-  python powerline_setup()
-  python del powerline_setup
-
 endif
 
 let g:ctrlsf_ackprg="rg"
@@ -269,4 +267,8 @@ if(has("win32"))
 endif
 
 let g:completor_min_chars = 3
+
+if &diff
+  highlight! link DiffText MatchParen
+endif
 
