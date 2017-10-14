@@ -92,7 +92,6 @@ else
   let g:tagbar_iconchars = ['▸', '▾']
 endif
 
-nmap <leader>tt :TagbarToggle<CR>
 let g:tagbar_type_go = {
     \ 'ctagstype' : 'go',
     \ 'kinds'     : [
@@ -153,6 +152,7 @@ let s:objc = {
 \ }
 let g:tagbar_type_objcpp = s:objc
 let g:tagbar_type_objc = s:objc
+nnoremap <silent> <leader>tt :TagbarToggle<CR>
 nnoremap <silent> <leader>ts :TagbarCurrentTag f<CR>
 
 Plug 'justinmk/vim-dirvish'
@@ -188,7 +188,7 @@ Plug 'junegunn/vim-easy-align'
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
-if has('max') || has('win32')
+if has('mac') || has('win32')
   Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }
   let g:ycm_enable_diagnostic_highlighting = 0
   let g:ycm_confirm_extra_conf = 0
@@ -262,15 +262,11 @@ let g:Lf_UseCache = 1
 let g:Lf_NeedCacheTime = 0.3
 let g:Lf_CursorBlink = 0
 
-nmap <leader>r :LeaderfMruCwd<CR>
-nmap <leader>b :LeaderfBufTag<CR>
-nmap <leader>tg :LeaderfTag<CR>
-nmap <leader>hr :LeaderfMru<CR>
-nmap <leader>hc :LeaderfHistoryCmd<CR>
-nmap <leader>hs :LeaderfHistorySearch<CR>
-nmap <leader>hh :LeaderfHelp<CR>
-nmap q: :LeaderfHistoryCmd<CR>
-nmap q/ :LeaderfHistorySearch<CR>
+nnoremap <leader>r :LeaderfMru<CR>
+nnoremap <leader>b :LeaderfBufTag<CR>
+nnoremap <leader>tg :LeaderfTag<CR>
+nnoremap q: :LeaderfHistoryCmd<CR>
+nnoremap q/ :LeaderfHistorySearch<CR>
 
 Plug 'xltan/LeaderF-tjump'
 nmap <C-]> :LeaderfTjump <C-r><C-w><CR>
@@ -279,9 +275,7 @@ nmap <C-]> :LeaderfTjump <C-r><C-w><CR>
 " Plug 'rust-lang/rust.vim'
 " let g:rustfmt_autosave = 0
 Plug 'fatih/vim-go'
-let g:go_bin_path='~/.vim/gotools'
 Plug 'octol/vim-cpp-enhanced-highlight'
-
 Plug 'pboettch/vim-cmake-syntax'
 Plug 'fingerblaster/vim-fish'
 
@@ -343,6 +337,7 @@ hi SpecialKey guifg=#7C8390
 hi! link Comment SpecialKey
 hi! link StatusLineTerm StatusLine
 hi! link StatusLineTermNC StatusLineNC
+hi! link QuickFixLine SpellCap
 
 " hi SignColumn guibg=bg
 " hi VertSplit guifg=bg
@@ -352,7 +347,7 @@ hi Lf_hl_match gui=NONE guifg=SpringGreen
 hi Lf_hl_matchRefine gui=NONE guifg=Magenta
 
 set guioptions=
-set statusline=%<%f\ %h%m%r%=%-14.(%l,%c%V%)\ %P
+set statusline=%<%f\ %h%m%r%=%{fugitive#statusline()}\ %-14.(%l,%c%V%)\ %P
 
 set nu
 set hlsearch
@@ -381,7 +376,7 @@ set undofile
 
 set winwidth=100
 set winminwidth=10
-set completeopt-=preview
+set completeopt=menuone,preview
 
 set ignorecase smartcase
 set lazyredraw
@@ -466,9 +461,9 @@ cmap <S-Insert> <C-R>+
 exe 'inoremap <script> <C-Q> <C-G>u' . paste#paste_cmd['i']
 exe 'vnoremap <script> <C-Q> ' . paste#paste_cmd['v']
 
-nnoremap <C-S>   :update<CR>
-vnoremap <C-S>  <C-C>:update<CR>
-inoremap <C-S>  <Esc>:update<CR>
+nnoremap <silent> <C-S>   :update<CR>
+vnoremap <silent> <C-S>  <C-C>:update<CR>
+inoremap <silent> <C-S>  <Esc>:update<CR>
 
 cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
 nmap <C-n> :sav %%
@@ -482,8 +477,8 @@ tnoremap <C-h> <C-w>h
 tnoremap <C-l> <C-w>l
 tnoremap <C-j> <C-w>j
 tnoremap <C-k> <C-w>k
-nnoremap <C-\> :%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
 tnoremap <C-\> <C-W>N:%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
+nnoremap <C-\> :%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
 inoremap <C-\> <Esc>:%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
 
 inoremap <C-^> <Esc><C-^>
@@ -614,8 +609,6 @@ nnoremap <leader>en :e ~/Dropbox/notes<CR>
 nnoremap <leader>es :e $vimfiles/UltiSnips<CR>
 
 cab ar AsyncRun
-
-" leader used: c, e, f, g, l, q, r, s, t, u, w, x, z
 
 let alternatePathDict = {
     \ 'client/script/com/data' : 'server/g4server/avatarattrs',
