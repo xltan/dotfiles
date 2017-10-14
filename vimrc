@@ -472,7 +472,6 @@ nnoremap <silent> <S-L> :nohl<CR>
 
 tnoremap <Esc> <C-W>N
 tnoremap <C-^> <C-W>N<C-^>
-tnoremap <C-z> <C-W>N<C-^>
 tnoremap <C-h> <C-w>h
 tnoremap <C-l> <C-w>l
 tnoremap <C-j> <C-w>j
@@ -504,7 +503,10 @@ function! ToggleTerm()
   term ++curwin ++close
 endfunction
 
-nnoremap <silent> <C-z> :call ToggleTerm()<CR>
+if has('gui_running')
+  nnoremap <silent> <C-z> :call ToggleTerm()<CR>
+  tnoremap <C-z> <C-W>N<C-^>
+endif
 
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
