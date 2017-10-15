@@ -376,7 +376,7 @@ set listchars=tab:\|\ ,eol:¬
 
 set autoindent
 set expandtab smarttab
-set shiftwidth=4 tabstop=4 softtabstop=4
+set shiftwidth=2 tabstop=2 softtabstop=2
 
 set laststatus=2
 
