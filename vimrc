@@ -159,7 +159,8 @@ Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
     unmap <buffer> q
     keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
-    nnoremap <buffer> <silent> gh :keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
+    nnoremap <silent><buffer> gr :<C-u>noautocmd Dirvish %<CR>
+    nnoremap <silent><buffer> gh :keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
     nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
     xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
 endfun
