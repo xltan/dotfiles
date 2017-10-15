@@ -44,7 +44,7 @@ export HISTTIMEFORMAT="%Y/%m/%d %H:%M:%S:   "
 ### Global
 export GOPATH="$HOME/go"
 if [ -z "$PATH_EXPANDED" ]; then
-  export PATH="$HOME/.cargo/bin:$PATH:$GOPATH/bin:$HOME/.bin:HOME/Library/Android/sdk/platform-tools:/usr/local/opt/python/libexec/bin:/usr/local/bin:/usr/local/sbin:$PATH"
+  export PATH="$HOME/.cargo/bin:$GOPATH/bin:$HOME/.bin:HOME/Library/Android/sdk/platform-tools:/usr/local/opt/python/libexec/bin:/usr/local/bin:/usr/local/sbin:$PATH"
   export PATH_EXPANDED=1
 fi
 export EDITOR=mvim

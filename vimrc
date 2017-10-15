@@ -158,16 +158,15 @@ nnoremap <silent> <leader>ts :TagbarCurrentTag f<CR>
 Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
     unmap <buffer> q
-    call ToggleDotfiles()
-    nnoremap <buffer> gh :call ToggleDotfiles()<CR>
+    keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
+    nnoremap <buffer> <silent> gh :keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
     nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
     xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
 endfun
 
 aug dirvish
-  autocmd!
-  autocmd FileType dirvish nnoremap <silent><buffer>
-    \ gh :silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
+  au!
+  autocmd FileType dirvish call SetupDirvish()
 aug END
 
 Plug 'justinmk/vim-sneak'
@@ -197,6 +196,7 @@ if has('mac') || has('win32')
   let g:ycm_collect_identifiers_from_comments_and_strings = 1
   let g:ycm_complete_in_comments = 1
   let g:ycm_always_populate_location_list = 1
+  let g:ycm_autoclose_preview_window_after_completion = 1
   nnoremap <leader>j :YcmCompleter GoTo<CR>
 endif
 
@@ -347,7 +347,7 @@ hi Lf_hl_match gui=NONE guifg=SpringGreen
 hi Lf_hl_matchRefine gui=NONE guifg=Magenta
 
 set guioptions=
-set statusline=%<%f\ %h%m%r%=%{fugitive#statusline()}\ %-14.(%l,%c%V%)\ %P
+set statusline=%<%f\ %h%m%r%=%{fugitive#statusline()}\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 set nu
 set hlsearch
@@ -416,7 +416,7 @@ command! AV call s:a('botright vertical split')
 aug vimrc_autocmd
   autocmd!
   " autocmd filetype markdown setlocal conceallevel=2
-  autocmd FileType help wincmd L
+  autocmd FileType help wincmd H
   autocmd filetype vim setlocal tabstop=2 shiftwidth=2
   autocmd filetype python setlocal noexpandtab tabstop=4 shiftwidth=4
   " autocmd filetype python setlocal equalprg=yapf

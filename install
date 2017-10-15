@@ -1,8 +1,0 @@
-#!/bin/sh
-
-BASE=$(pwd)
-mkdir -pv bak
-for rc in *rc *profile git-prompt.sh tmux.conf ignore flake8 pylintrc ycm_extra_conf.py ctags; do
-  [ -e ~/."$rc" ] && mv -v ~/."$rc" bak/."$rc"
-  ln -sfv "$BASE/$rc" ~/."$rc"
-done
