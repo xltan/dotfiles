@@ -184,6 +184,14 @@ Plug 'justinmk/vim-gtfo'
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
 
+" Plug 'romainl/vim-qf'
+" nmap <leader>z <Plug>qf_qf_stay_toggle
+" let g:qf_auto_open_quickfix = 0
+" let g:qf_auto_open_loclist = 0
+" let g:qf_auto_resize = 0
+" let g:qf_bufname_or_text = 0
+" let g:qf_mapping_ack_style = 1
+
 Plug 'junegunn/vim-easy-align'
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
@@ -279,6 +287,7 @@ Plug 'fatih/vim-go'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'pboettch/vim-cmake-syntax'
 Plug 'fingerblaster/vim-fish'
+Plug 'mattboehm/vim-unstack'
 
 if has('win32')
   Plug 'milinnovations/vim-actionscript'
@@ -319,6 +328,12 @@ runtime! plugin/unimpaired.vim
 packadd! matchit
 " }}}
 
+let g:unstack_populate_quickfix=1
+let g:unstack_extractors = [
+    \ unstack#extractors#Regex('\v^ *File "([^"]+)", line ([0-9]+).*', '\1', '\2'),
+    \ unstack#extractors#Regex('\v^[^ ]?.* *File "([^"]+)", line ([0-9]+).*', 'client/\1', '\2'),
+    \ ] + unstack#extractors#GetDefaults()
+
 nmap <silent> [a <Plug>(ale_previous_wrap)
 nmap <silent> ]a <Plug>(ale_next_wrap)
 
@@ -348,7 +363,7 @@ hi Lf_hl_match gui=NONE guifg=SpringGreen
 hi Lf_hl_matchRefine gui=NONE guifg=Magenta
 
 set guioptions=
-set statusline=%<%f\ %h%m%r%=%{fugitive#statusline()}\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
+set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 set nu
 set hlsearch
@@ -431,6 +446,7 @@ aug vimrc_autocmd
   autocmd filetype git setlocal nonumber
   autocmd WinLeave,InsertEnter * setlocal nocursorline
   autocmd WinEnter,InsertLeave * setlocal cursorline
+  " autocmd User AsyncRunStart call asyncrun#quickfix_toggle(10, 1)
   " autocmd BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
 aug END
 

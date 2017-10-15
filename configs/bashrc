@@ -28,8 +28,7 @@ shopt -s checkwinsize
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 
 ### Disable CTRL-S and CTRL-Q
-[[ $- =~ i ]] && stty -ixoff -ixon
-
+stty -ixoff
 
 # Environment variables
 # --------------------------------------------------------------------
