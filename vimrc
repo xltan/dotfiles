@@ -25,17 +25,10 @@ Plug 'tpope/vim-markdown'
 let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh']
 
 Plug 'tpope/vim-endwise'
-inoremap (<CR> (<CR>)<Esc>O
-inoremap {<CR> {<CR>}<Esc>O
-inoremap {; {<CR>};<Esc>O
-inoremap {, {<CR>},<Esc>O
-inoremap [<CR> [<CR>]<Esc>O
-inoremap ([[ ([[<CR>]])<Esc>O
-inoremap ([=[ ([=[<CR>]])<Esc>O
-inoremap [; [<CR>];<Esc>O
-inoremap [, [<CR>],<Esc>O
 
 Plug 'wellle/targets.vim'
+let g:targets_aiAI = 'ai  '
+
 if has('mac')
   Plug 'wookayin/vim-typora'
   Plug 'rizzatti/dash.vim'
@@ -157,12 +150,11 @@ nnoremap <silent> <leader>ts :TagbarCurrentTag f<CR>
 
 Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
-    unmap <buffer> q
-    keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
-    nnoremap <silent><buffer> gr :<C-u>noautocmd Dirvish %<CR>
-    nnoremap <silent><buffer> gh :keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
-    nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
-    xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
+  silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
+  nnoremap <silent><buffer> gr :noautocmd Dirvish %<CR>
+  nnoremap <silent><buffer> gh :silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
+  nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
+  xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
 endfun
 
 aug dirvish
@@ -185,9 +177,9 @@ Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
 
 " Plug 'romainl/vim-qf'
-" nmap <leader>z <Plug>qf_qf_stay_toggle
-" let g:qf_auto_open_quickfix = 0
-" let g:qf_auto_open_loclist = 0
+" nmap <leader>z <Plug>qf_qf_toggle
+" let g:qf_auto_open_quickfix = 1
+" let g:qf_auto_open_loclist = 1
 " let g:qf_auto_resize = 0
 " let g:qf_bufname_or_text = 0
 " let g:qf_mapping_ack_style = 1
@@ -195,6 +187,10 @@ let g:lt_quickfix_list_toggle_map = '<leader>z'
 Plug 'junegunn/vim-easy-align'
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
+
+Plug 'jiangmiao/auto-pairs'
+let g:AutoPairs = {'[':']', '{':'}',"'":"'",'"':'"', '`':'`'}
+" inoremap <buffer><silent> ) <C-R>=AutoPairsInsert(')')<CR>
 
 if has('mac') || has('win32')
   Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }
@@ -205,8 +201,8 @@ if has('mac') || has('win32')
   let g:ycm_collect_identifiers_from_comments_and_strings = 1
   let g:ycm_complete_in_comments = 1
   let g:ycm_always_populate_location_list = 1
-  let g:ycm_autoclose_preview_window_after_completion = 1
-  nnoremap <leader>j :YcmCompleter GoTo<CR>
+  " let g:ycm_autoclose_preview_window_after_completion = 1
+  let g:ycm_autoclose_preview_window_after_insertion = 1
 endif
 
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
@@ -231,10 +227,6 @@ command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
 Plug 'dyng/ctrlsf.vim'
 let g:ctrlsf_ackprg="rg"
 let g:ctrlsf_context = '-C 2'
-let g:ctrlsf_mapping = {
-\ "next": "<C-n>",
-\ "prev": "<C-p>",
-\ }
 let g:ctrlsf_populate_qflist = 1
 vmap <leader>f <Plug>CtrlSFVwordPath
 nmap <leader>ff <Plug>CtrlSFCwordPath
@@ -259,7 +251,7 @@ let g:Lf_CommandMap = {
     \ '<C-]>': ['<C-V>'],
     \ '<C-X>': ['<C-S>'],
     \ '<C-V>': ['<C-Q>'],
-    \ '<C-P>': ['<C-O>']
+    \ '<C-P>': ['<C-O>'],
     \}
 let g:Lf_StlSeparator = { 'left': '', 'right': '' }
 let g:Lf_WildIgnore = {
@@ -271,14 +263,16 @@ let g:Lf_UseCache = 1
 let g:Lf_NeedCacheTime = 0.3
 let g:Lf_CursorBlink = 0
 
-nnoremap <leader>r :LeaderfMru<CR>
+nnoremap <leader>h :LeaderfMru<CR>
 nnoremap <leader>b :LeaderfBufTag<CR>
 nnoremap <leader>tg :LeaderfTag<CR>
-nnoremap q: :LeaderfHistoryCmd<CR>
-nnoremap q/ :LeaderfHistorySearch<CR>
+nnoremap <leader>: :LeaderfHistoryCmd<CR>
+nnoremap <leader>/ :LeaderfHistorySearch<CR>
 
 Plug 'xltan/LeaderF-tjump'
 nmap <C-]> :LeaderfTjump <C-r><C-w><CR>
+
+Plug 'junegunn/goyo.vim'
 
 " language related
 " Plug 'rust-lang/rust.vim'
@@ -287,7 +281,10 @@ Plug 'fatih/vim-go'
 Plug 'octol/vim-cpp-enhanced-highlight'
 Plug 'pboettch/vim-cmake-syntax'
 Plug 'fingerblaster/vim-fish'
+Plug 'Vimjas/vim-python-pep8-indent'
+
 Plug 'mattboehm/vim-unstack'
+nnoremap <C-x> :UnstackFromClipboard<CR>
 
 if has('win32')
   Plug 'milinnovations/vim-actionscript'
@@ -325,13 +322,16 @@ call plug#end()
 
 " Eager-load these plugins so we can override their settings. {{{
 runtime! plugin/unimpaired.vim
+runtime! plugin/rsi.vim
 packadd! matchit
 " }}}
+inoremap <expr> <C-E> col('.')>strlen(getline('.'))?"\<Lt>C-E>":"\<Lt>End>"
 
 let g:unstack_populate_quickfix=1
 let g:unstack_extractors = [
     \ unstack#extractors#Regex('\v^ *File "([^"]+)", line ([0-9]+).*', '\1', '\2'),
     \ unstack#extractors#Regex('\v^[^ ]?.* *File "([^"]+)", line ([0-9]+).*', 'client/\1', '\2'),
+    \ unstack#extractors#Regex('\v^[^ ]?.* ([^ ]+): ([0-9]+).+', 'client/\1', '\2'),
     \ ] + unstack#extractors#GetDefaults()
 
 nmap <silent> [a <Plug>(ale_previous_wrap)
@@ -362,7 +362,7 @@ hi! link ValidatorWarningSign ErrorMsg
 hi Lf_hl_match gui=NONE guifg=SpringGreen
 hi Lf_hl_matchRefine gui=NONE guifg=Magenta
 
-set guioptions=
+set guioptions=a
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 set nu
@@ -429,10 +429,13 @@ endfunction
 command! A call s:a('e')
 command! AV call s:a('botright vertical split')
 
+function! s:helptab()
+  wincmd T
+  nnoremap <buffer> q :q<cr>
+endfunction
 aug vimrc_autocmd
   autocmd!
-  " autocmd filetype markdown setlocal conceallevel=2
-  autocmd FileType help wincmd H
+  autocmd filetype help call s:helptab()
   autocmd filetype vim setlocal tabstop=2 shiftwidth=2
   autocmd filetype python setlocal noexpandtab tabstop=4 shiftwidth=4
   " autocmd filetype python setlocal equalprg=yapf
@@ -446,7 +449,7 @@ aug vimrc_autocmd
   autocmd filetype git setlocal nonumber
   autocmd WinLeave,InsertEnter * setlocal nocursorline
   autocmd WinEnter,InsertLeave * setlocal cursorline
-  " autocmd User AsyncRunStart call asyncrun#quickfix_toggle(10, 1)
+  autocmd QuickFixCmdPost * botright cwindow
   " autocmd BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
 aug END
 
@@ -478,9 +481,9 @@ cmap <S-Insert> <C-R>+
 exe 'inoremap <script> <C-Q> <C-G>u' . paste#paste_cmd['i']
 exe 'vnoremap <script> <C-Q> ' . paste#paste_cmd['v']
 
-nnoremap <silent> <C-S>   :update<CR>
-vnoremap <silent> <C-S>  <C-C>:update<CR>
-inoremap <silent> <C-S>  <Esc>:update<CR>
+nnoremap <silent> <C-S> :update<CR>
+vnoremap <silent> <C-S> <C-C>:update<CR>
+inoremap <silent> <C-S> <Esc>:update<CR>
 
 cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
 nmap <C-n> :sav %%
@@ -530,8 +533,8 @@ nnoremap <C-l> <C-w>l
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 
-nnoremap [<space> :<c-u>put! =repeat(nr2char(10), v:count1)<cr>'[
-nnoremap ]<space> :<c-u>put =repeat(nr2char(10), v:count1)<cr>
+nnoremap [<space> :put! =repeat(nr2char(10), v:count1)<cr>'[
+nnoremap ]<space> :put =repeat(nr2char(10), v:count1)<cr>
 
 nnoremap [w gT
 nnoremap ]w gt
@@ -572,7 +575,7 @@ elseif has("win32")
   " set renderoptions=type:directx,
   "                   \gamma:1.4,contrast:1,geom:1,
   "                   \renmode:5,taamode:1,level:1
-  noremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+  nnoremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
 
   let s:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
   function! SvnCommand(cmd, path)
@@ -593,11 +596,11 @@ endif
 function! s:GenTagArgument()
   if match(getcwd(), 'g4\\trunk') >= 0
     return '--links=no --pattern-length-limit=0
-                  \ --exclude=unittest --exclude=tools
-                  \ --exclude=extension --exclude=_runtime --exclude=doc
-                  \ --exclude=ai --exclude=server\\com
-                  \ --exclude=tools_no_upload --exclude=engine\\src
-                  \ --languages=python,actionscript --recurse .'
+          \ --exclude=unittest --exclude=tools
+          \ --exclude=extension --exclude=_runtime --exclude=doc
+          \ --exclude=ai --exclude=server\\com
+          \ --exclude=tools_no_upload --exclude=engine\\src
+          \ --languages=python,actionscript --recurse .'
   else
     return '-R .'
   endif
@@ -606,6 +609,7 @@ endfunction
 nnoremap <silent> <leader>xc :execute 'AsyncRun ctags '.<SID>GenTagArgument()<CR>
 
 nnoremap <leader>q :bd<CR>
+nnoremap <leader>w :tabclose<CR>
 
 function! s:make_info()
   if &filetype == 'python'
