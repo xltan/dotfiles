@@ -9,20 +9,22 @@ set fileencoding=utf-8
 let $vimfiles=split(&rtp, ",")[0]
 call plug#begin($vimfiles . '/bundle')
 Plug 'joshdick/onedark.vim'
-" Plug 'rhysd/vim-color-spring-night'
-Plug 'junegunn/seoul256.vim'
+Plug 'xltan/vim-hybrid'
+" Plug 'kodemeister/vim-hybrid'
 
-" Plug 'tpope/vim-vinegar'
+Plug 'tpope/tpope-vim-abolish'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-fugitive'
-Plug 'tpope/tpope-vim-abolish'
 Plug 'tpope/vim-markdown'
 let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh']
+
+Plug 'Raimondi/delimitMate'
+let delimitMate_expand_cr = 1
+let delimitMate_jump_expansion = 1
 
 Plug 'tpope/vim-endwise'
 
@@ -32,9 +34,12 @@ let g:targets_aiAI = 'ai  '
 if has('mac')
   Plug 'wookayin/vim-typora'
   Plug 'rizzatti/dash.vim'
+  " on windows, this is slow
+  Plug 'tpope/vim-fugitive'
   let g:dash_map = {
   \ 'java' : 'android',
   \ 'cpp' : 'gl4',
+  \ 'go' : 'gl4',
   \ 'c' : 'gl4',
   \ }
   nmap <silent> K <Plug>DashSearch
@@ -59,8 +64,8 @@ map g* <Plug>(asterisk-gz*)
 map g# <Plug>(asterisk-gz#)
 let g:asterisk#keeppos = 1
 
-Plug 'mbbill/undotree', { 'on': ['UndotreeToggle'] }
-nnoremap <silent> <leader>u :UndotreeToggle<CR>:UndotreeFocus<CR>
+Plug 'mbbill/undotree'
+nnoremap <silent> <leader>u :UndotreeToggle<CR>
 
 Plug 'kana/vim-niceblock'
 
@@ -150,7 +155,7 @@ nnoremap <silent> <leader>ts :TagbarCurrentTag f<CR>
 
 Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
-  silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
+  " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
   nnoremap <silent><buffer> gr :noautocmd Dirvish %<CR>
   nnoremap <silent><buffer> gh :silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
   nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
@@ -175,6 +180,7 @@ Plug 'justinmk/vim-gtfo'
 
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
+let g:lt_height = 9
 
 " Plug 'romainl/vim-qf'
 " nmap <leader>z <Plug>qf_qf_toggle
@@ -188,9 +194,7 @@ Plug 'junegunn/vim-easy-align'
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
-Plug 'jiangmiao/auto-pairs'
-let g:AutoPairs = {'[':']', '{':'}',"'":"'",'"':'"', '`':'`'}
-" inoremap <buffer><silent> ) <C-R>=AutoPairsInsert(')')<CR>
+Plug 'junegunn/vim-emoji'
 
 if has('mac') || has('win32')
   Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }
@@ -203,6 +207,17 @@ if has('mac') || has('win32')
   let g:ycm_always_populate_location_list = 1
   " let g:ycm_autoclose_preview_window_after_completion = 1
   let g:ycm_autoclose_preview_window_after_insertion = 1
+  nmap gd :YcmCompleter GoTo<CR>
+  imap <silent> <BS> <C-R>=YcmOnDeleteChar()<CR><Plug>delimitMateBS
+  let g:ycm_error_symbol = '>>'
+  let g:ycm_warning_symbol = '--'
+
+  function! YcmOnDeleteChar()
+    if pumvisible()
+      return "\<C-y>"
+    endif
+    return "" 
+  endfunction
 endif
 
 Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
@@ -214,11 +229,11 @@ Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
 " \}
 " let g:ale_lint_on_text_changed = 'never'
 
-" Plug 'vim-python/python-syntax'
-" let g:python_highlight_all = 1
 Plug 'maralla/validator.vim'
 let g:validator_error_symbol = '>>'
 let g:validator_warning_symbol = '--'
+let g:validator_go_checkers = ['gometalinter']
+let g:validator_ignore = ['c', 'cpp']
 
 Plug 'skywind3000/asyncrun.vim'
 command! -bang -nargs=* -complete=file Make AsyncRun! -program=make @ <args>
@@ -262,6 +277,49 @@ let g:Lf_PreviewResult = { 'BufTag': 0, 'Function': 0 }
 let g:Lf_UseCache = 1
 let g:Lf_NeedCacheTime = 0.3
 let g:Lf_CursorBlink = 0
+let g:Lf_StlPalette = {
+    \'stlName': {
+    \    'gui': 'NONE',
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlCategory': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlNameOnlyMode': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlFullPathMode': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlFuzzyMode': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlRegexMode': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlCwd': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlBlank': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlLineInfo': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \},
+    \'stlTotal': {
+    \    'guifg': '#c5c8c6',
+    \    'guibg': '#2d3c46',
+    \}
+    \}
 
 nnoremap <leader>h :LeaderfMru<CR>
 nnoremap <leader>b :LeaderfBufTag<CR>
@@ -270,25 +328,38 @@ nnoremap <leader>: :LeaderfHistoryCmd<CR>
 nnoremap <leader>/ :LeaderfHistorySearch<CR>
 
 Plug 'xltan/LeaderF-tjump'
-nmap <C-]> :LeaderfTjump <C-r><C-w><CR>
 
 Plug 'junegunn/goyo.vim'
 
 " language related
 " Plug 'rust-lang/rust.vim'
 " let g:rustfmt_autosave = 0
+ 
+Plug 'vim-python/python-syntax'
+let g:python_version_2 = 1
+let g:python_highlight_class_vars = 0
+let g:python_highlight_indent_errors = 0
+let g:python_highlight_space_errors = 0
+let g:python_highlight_operators = 0
+let g:python_highlight_all = 1
+let g:python_slow_sync = 0
+
 Plug 'fatih/vim-go'
-Plug 'octol/vim-cpp-enhanced-highlight'
+let g:go_def_mode = 'godef'
+let g:go_fmt_command = "goimports"
+
+unlet c_comment_strings
+
 Plug 'pboettch/vim-cmake-syntax'
-Plug 'fingerblaster/vim-fish'
 Plug 'Vimjas/vim-python-pep8-indent'
+Plug 'mattn/emmet-vim'
+let g:user_emmet_install_global = 0
+let g:user_emmet_leader_key='<C-j>'
 
 Plug 'mattboehm/vim-unstack'
 nnoremap <C-x> :UnstackFromClipboard<CR>
 
-if has('win32')
-  Plug 'milinnovations/vim-actionscript'
-endif
+Plug 'milinnovations/vim-actionscript'
 
 " Plug 'lervag/vimtex'
 " let g:tex_flavor = 'latex'
@@ -327,8 +398,17 @@ packadd! matchit
 " }}}
 inoremap <expr> <C-E> col('.')>strlen(getline('.'))?"\<Lt>C-E>":"\<Lt>End>"
 
+" words:
+inoremap <M-t> <esc>diwbPa <esc>ea
+if !has("gui_running") " from tpope/vim-rsi
+  silent! exe "set <F36>=\<esc>t"
+  map! <F36> <M-t>
+  map <F36> <M-t>
+endif
+
 let g:unstack_populate_quickfix=1
 let g:unstack_extractors = [
+    \ unstack#extractors#Regex('\v^ *File "[\/\\]([^"]+)", line ([0-9]+).*', '\1', '\2'),
     \ unstack#extractors#Regex('\v^ *File "([^"]+)", line ([0-9]+).*', '\1', '\2'),
     \ unstack#extractors#Regex('\v^[^ ]?.* *File "([^"]+)", line ([0-9]+).*', 'client/\1', '\2'),
     \ unstack#extractors#Regex('\v^[^ ]?.* ([^ ]+): ([0-9]+).+', 'client/\1', '\2'),
@@ -337,7 +417,7 @@ let g:unstack_extractors = [
 nmap <silent> [a <Plug>(ale_previous_wrap)
 nmap <silent> ]a <Plug>(ale_next_wrap)
 
-set synmaxcol=400
+set synmaxcol=500
 
 if has("termguicolors")
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -345,24 +425,20 @@ if has("termguicolors")
   set termguicolors
 endif
 
+augroup color
+  autocmd!
+  autocmd ColorScheme * hi! link pythonFunction Normal
+  autocmd ColorScheme * hi Lf_hl_match gui=NONE guifg=SpringGreen
+  autocmd ColorScheme * hi Lf_hl_matchRefine gui=NONE guifg=Magenta
+augroup END
+
+" colors onedark
 set background=dark
-" let g:spring_night_kill_italic=1
-" let g:spring_night_kill_bold=1
-colors onedark
-hi SpecialKey guifg=#7C8390
-hi! link Comment SpecialKey
-hi! link StatusLineTerm StatusLine
-hi! link StatusLineTermNC StatusLineNC
-hi! link QuickFixLine SpellCap
+let g:hybrid_custom_term_colors = 1
+let g:hybrid_reduced_contrast = 1
+colorscheme hybrid
 
-" hi SignColumn guibg=bg
-" hi VertSplit guifg=bg
-hi! link ValidatorErrorSign ErrorMsg
-hi! link ValidatorWarningSign ErrorMsg
-hi Lf_hl_match gui=NONE guifg=SpringGreen
-hi Lf_hl_matchRefine gui=NONE guifg=Magenta
-
-set guioptions=a
+set guioptions=
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 set nu
@@ -406,6 +482,20 @@ set cpoptions+=>
 set belloff=all
 set history=1000
 
+function! s:super()
+  if &filetype == 'python'
+    let pattern = '^class [^(]*(\zs[^)]*\ze):'
+    let lineno = search(pattern, 'n')
+    let content = getline(lineno)
+    let m = matchstr(content, pattern)
+    let sm = split(m, '\.')
+    exe 'tag '.sm[len(sm)-1]
+    return
+  endif
+endfunction
+noremap <silent> ]s :call <SID>super()<CR>
+noremap <silent> [s <C-^>
+
 function! s:a(cmd)
   let name = expand('%:r')
   let ext = tolower(expand('%:e'))
@@ -429,29 +519,49 @@ endfunction
 command! A call s:a('e')
 command! AV call s:a('botright vertical split')
 
-function! s:helptab()
-  wincmd T
-  nnoremap <buffer> q :q<cr>
-endfunction
+augroup go
+  autocmd!
+  autocmd FileType go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+  autocmd FileType go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+  autocmd FileType go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+  autocmd FileType go setlocal tabstop=4 shiftwidth=4
+augroup END
+
+augroup python
+  autocmd!
+  autocmd FileType python let b:delimitMate_nesting_quotes = ['"']
+  autocmd filetype python setlocal noexpandtab tabstop=4 shiftwidth=4
+  autocmd filetype python nmap <silent><leader>a :call ToggleAlternateFile(expand('%:p'))<CR>
+  " autocmd filetype python setlocal equalprg=yapf
+augroup END
+
+augroup cpp
+  autocmd filetype c,cpp,objc,objcpp setlocal equalprg=clang-format
+  autocmd filetype c,cpp,objc,objcpp,go nmap <silent><leader>a :A<CR>
+  autocmd filetype c,cpp,objc,objcpp,cs,java,actionscript setlocal commentstring=//\ %s
+  autocmd filetype c,cpp,objc,objcpp,actionscript,go,python nmap <C-]> :LeaderfTjump <C-r><C-w><CR>
+augroup END
+
 aug vimrc_autocmd
   autocmd!
-  autocmd filetype help call s:helptab()
+  autocmd FileType html,css EmmetInstall
+  autocmd filetype help wincmd L
   autocmd filetype vim setlocal tabstop=2 shiftwidth=2
-  autocmd filetype python setlocal noexpandtab tabstop=4 shiftwidth=4
-  " autocmd filetype python setlocal equalprg=yapf
-  autocmd filetype python nmap <silent><leader>a :call ToggleAlternateFile(expand('%:p'))<CR>
   autocmd filetype actionscript setlocal noexpandtab tabstop=4 shiftwidth=4
   autocmd filetype make set noexpandtab
   autocmd filetype tex setlocal tabstop=2 shiftwidth=2
-  autocmd filetype c,cpp,objc,objcpp setlocal equalprg=clang-format
-  autocmd filetype c,cpp,objc nmap <silent><leader>a :A<CR>
-  autocmd filetype c,cpp,objc,objcpp,cs,java,actionscript setlocal commentstring=//\ %s
   autocmd filetype git setlocal nonumber
   autocmd WinLeave,InsertEnter * setlocal nocursorline
   autocmd WinEnter,InsertLeave * setlocal cursorline
-  autocmd QuickFixCmdPost * botright cwindow
+  autocmd QuickFixCmdPost * botright cwindow 9
   " autocmd BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
 aug END
+
+nnoremap <silent> cos :if exists("g:syntax_on") <Bar>
+	\   syntax off <Bar>
+	\ else <Bar>
+	\   syntax enable <Bar>
+	\ endif <CR>
 
 function! s:map_change_option(...)
   let [key, opt] = a:000[0:1]
@@ -565,6 +675,7 @@ nnoremap <silent> <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"nam
 
 if has("mac")
   set guifont=SF\ Mono:h12
+  " set macligatures
   set macthinstrokes
   set macmeta
   set linespace=1
@@ -620,6 +731,7 @@ function! s:make_info()
 endfunction
 
 nnoremap <silent> <leader>xm :update<CR>:execute 'AsyncRun '.<SID>make_info()<CR>
+nnoremap <silent> <leader>xx :AsyncStop<CR>
 nnoremap <silent> <leader>sa :AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
 
 nnoremap <M-p> "0p
@@ -734,19 +846,5 @@ function! s:tab_message(cmd)
     silent put=message
   endif
 endfunction
-command! -nargs=+ -complete=command TabMessage call <SID>tab_message(<q-args>)
-
-function! s:tab_message(cmd)
-  redir => message
-  silent execute a:cmd
-  redir END
-  if empty(message)
-    echoerr "no output"
-  else
-    tabnew
-    setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified
-    silent put=message
-  endif
-endfunction
-command! -nargs=+ -complete=command TabMessage call <SID>tab_message(<q-args>)
+command! -nargs=+ -complete=command TabMessage call s:tab_message(<q-args>)
 
