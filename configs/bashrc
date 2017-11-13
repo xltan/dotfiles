@@ -95,17 +95,6 @@ PS1="\w> "
 # Shortcut functions
 # --------------------------------------------------------------------
 
-..cd() {
-  cd ..
-  cd "$@"
-}
-
-_parent_dirs() {
-  COMPREPLY=( $(cd ..; find . -mindepth 1 -maxdepth 1 -type d -print | cut -c3- | grep "^${COMP_WORDS[COMP_CWORD]}") )
-}
-
-complete -F _parent_dirs -o default -o bashdefault ..cd
-
 viw() {
   vim "$(which "$1")"
 }
@@ -173,3 +162,29 @@ v() {
 }
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
+
+# leetcode completion
+_yargs_completions()
+{
+    local cur_word args type_list
+
+    cur_word="${COMP_WORDS[COMP_CWORD]}"
+    args=("${COMP_WORDS[@]}")
+
+    # ask yargs to generate completions.
+    type_list=$(leetcode --get-yargs-completions "${args[@]}")
+
+    COMPREPLY=( $(compgen -W "${type_list}" -- ${cur_word}) )
+
+    # if no match was found, fall back to filename completion
+    if [ ${#COMPREPLY[@]} -eq 0 ]; then
+      COMPREPLY=( $(compgen -f -- "${cur_word}" ) )
+    fi
+
+    return 0
+}
+complete -F _yargs_completions leetcode
+
+export CDPATH=.:$HOME/go/src
+
+alias cdpath="export CDPATH=.:$PWD"
