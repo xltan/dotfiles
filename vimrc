@@ -156,6 +156,7 @@ nnoremap <silent> <leader>ts :TagbarCurrentTag f<CR>
 Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
+  nnoremap <silent><buffer> gd :sort ,^.*[\/],<CR>
   nnoremap <silent><buffer> gr :noautocmd Dirvish %<CR>
   nnoremap <silent><buffer> gh :silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
   nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
@@ -207,7 +208,7 @@ if has('mac') || has('win32')
   let g:ycm_always_populate_location_list = 1
   " let g:ycm_autoclose_preview_window_after_completion = 1
   let g:ycm_autoclose_preview_window_after_insertion = 1
-  nmap gd :YcmCompleter GoTo<CR>
+  nmap <silent> gd :YcmCompleter GoTo<CR>
   imap <silent> <BS> <C-R>=YcmOnDeleteChar()<CR><Plug>delimitMateBS
   let g:ycm_error_symbol = '>>'
   let g:ycm_warning_symbol = '--'
@@ -218,22 +219,23 @@ if has('mac') || has('win32')
     endif
     return "" 
   endfunction
+
+  Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
 endif
 
-Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
-
-" Plug 'w0rp/ale'
-" let g:ale_linters = {
-" \   'python': ['flake8', 'pylint'],
-" \   'c': [], 'cpp': [], 'objcpp': [], 'objc': [],
-" \}
+Plug 'w0rp/ale'
+let g:ale_linters = {
+\   'python': ['flake8'],
+\   'go': ['golint'],
+\   'c': [], 'cpp': [], 'objcpp': [], 'objc': [],
+\}
 " let g:ale_lint_on_text_changed = 'never'
 
-Plug 'maralla/validator.vim'
-let g:validator_error_symbol = '>>'
-let g:validator_warning_symbol = '--'
-let g:validator_go_checkers = ['gometalinter']
-let g:validator_ignore = ['c', 'cpp']
+" Plug 'maralla/validator.vim'
+" let g:validator_error_symbol = '>>'
+" let g:validator_warning_symbol = '--'
+" let g:validator_go_checkers = ['gometalinter']
+" let g:validator_ignore = ['c', 'cpp']
 
 Plug 'skywind3000/asyncrun.vim'
 command! -bang -nargs=* -complete=file Make AsyncRun! -program=make @ <args>
@@ -271,7 +273,7 @@ let g:Lf_CommandMap = {
 let g:Lf_StlSeparator = { 'left': '', 'right': '' }
 let g:Lf_WildIgnore = {
     \ 'dir': ['.svn','.git','.hg'],
-    \ 'file': ['*.sw?','~$*','*.bak','*.exe','*.o','*.so','*.py[co]']
+    \ 'file': ['*.sw?','~$*','*.bak','*.exe','*.o','*.so','*.py[co]','tags']
     \}
 let g:Lf_PreviewResult = { 'BufTag': 0, 'Function': 0 }
 let g:Lf_UseCache = 1
@@ -329,12 +331,16 @@ nnoremap <leader>/ :LeaderfHistorySearch<CR>
 
 Plug 'xltan/LeaderF-tjump'
 
+Plug 'mattboehm/vim-unstack'
+nnoremap <C-x> :UnstackFromClipboard<CR>
+
 Plug 'junegunn/goyo.vim'
+let g:goyo_width = 150
+let g:goyo_linenr = 1
 
 " language related
 " Plug 'rust-lang/rust.vim'
 " let g:rustfmt_autosave = 0
- 
 Plug 'vim-python/python-syntax'
 let g:python_version_2 = 1
 let g:python_highlight_class_vars = 0
@@ -347,6 +353,7 @@ let g:python_slow_sync = 0
 Plug 'fatih/vim-go'
 let g:go_def_mode = 'godef'
 let g:go_fmt_command = "goimports"
+let g:go_list_type = "quickfix"
 
 unlet c_comment_strings
 
@@ -356,10 +363,8 @@ Plug 'mattn/emmet-vim'
 let g:user_emmet_install_global = 0
 let g:user_emmet_leader_key='<C-j>'
 
-Plug 'mattboehm/vim-unstack'
-nnoremap <C-x> :UnstackFromClipboard<CR>
-
 Plug 'milinnovations/vim-actionscript'
+Plug 'tikhomirov/vim-glsl'
 
 " Plug 'lervag/vimtex'
 " let g:tex_flavor = 'latex'
@@ -398,6 +403,9 @@ packadd! matchit
 " }}}
 inoremap <expr> <C-E> col('.')>strlen(getline('.'))?"\<Lt>C-E>":"\<Lt>End>"
 
+nmap <silent> [a <Plug>(ale_previous_wrap)
+nmap <silent> ]a <Plug>(ale_next_wrap)
+
 " words:
 inoremap <M-t> <esc>diwbPa <esc>ea
 if !has("gui_running") " from tpope/vim-rsi
@@ -413,9 +421,6 @@ let g:unstack_extractors = [
     \ unstack#extractors#Regex('\v^[^ ]?.* *File "([^"]+)", line ([0-9]+).*', 'client/\1', '\2'),
     \ unstack#extractors#Regex('\v^[^ ]?.* ([^ ]+): ([0-9]+).+', 'client/\1', '\2'),
     \ ] + unstack#extractors#GetDefaults()
-
-nmap <silent> [a <Plug>(ale_previous_wrap)
-nmap <silent> ]a <Plug>(ale_next_wrap)
 
 set synmaxcol=500
 
@@ -477,7 +482,7 @@ set nofixeol
 set formatoptions+=j " Delete comment character when joining commented lines
 set cinoptions=:0,g0,(0,Ws,l1
 set viminfo^=!
-set wildignore=*.pyc,*.exe,.DS_Store,._*,.svn,.git,.vscode
+set wildignore=*.pyc,*.pyo,*.exe,.DS_Store,._*,.svn,.git,.vscode,tags
 set cpoptions+=>
 set belloff=all
 set history=1000
@@ -536,10 +541,11 @@ augroup python
 augroup END
 
 augroup cpp
-  autocmd filetype c,cpp,objc,objcpp setlocal equalprg=clang-format
-  autocmd filetype c,cpp,objc,objcpp,go nmap <silent><leader>a :A<CR>
+  autocmd filetype c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
+  autocmd filetype c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
   autocmd filetype c,cpp,objc,objcpp,cs,java,actionscript setlocal commentstring=//\ %s
-  autocmd filetype c,cpp,objc,objcpp,actionscript,go,python nmap <C-]> :LeaderfTjump <C-r><C-w><CR>
+  autocmd filetype c,cpp,objc,objcpp,actionscript,go,python nmap <buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
+  autocmd BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
 augroup END
 
 aug vimrc_autocmd
@@ -600,13 +606,15 @@ nmap <C-n> :sav %%
 
 nnoremap <silent> <S-L> :nohl<CR>
 
-tnoremap <Esc> <C-W>N
-tnoremap <C-^> <C-W>N<C-^>
-tnoremap <C-h> <C-w>h
-tnoremap <C-l> <C-w>l
-tnoremap <C-j> <C-w>j
-tnoremap <C-k> <C-w>k
-tnoremap <C-\> <C-W>N:%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
+set termkey=<C-B>
+
+tnoremap <Esc> <C-B>N
+tnoremap <C-^> <C-B>N<C-^>
+tnoremap <C-h> <C-B>h
+tnoremap <C-l> <C-B>l
+tnoremap <C-j> <C-B>j
+tnoremap <C-k> <C-B>k
+tnoremap <C-\> <C-B>N:%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
 nnoremap <C-\> :%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
 inoremap <C-\> <Esc>:%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
 
@@ -635,7 +643,7 @@ endfunction
 
 if has('gui_running')
   nnoremap <silent> <C-z> :call ToggleTerm()<CR>
-  tnoremap <C-z> <C-W>N<C-^>
+  tnoremap <C-z> <C-B>N<C-^>
 endif
 
 nnoremap <C-h> <C-w>h
@@ -683,6 +691,7 @@ elseif has("win32")
   set guifont=Monaco\ for\ Powerline:h9
   set gfw=Microsoft\ Yahei\ Mono:h9
   set linespace=2
+  " set guifont=Fira\ Code:h9
   " set renderoptions=type:directx,
   "                   \gamma:1.4,contrast:1,geom:1,
   "                   \renmode:5,taamode:1,level:1
@@ -717,20 +726,35 @@ function! s:GenTagArgument()
   endif
 endfunction
 
-nnoremap <silent> <leader>xc :execute 'AsyncRun ctags '.<SID>GenTagArgument()<CR>
+nnoremap <silent> <leader>q :bd<CR>
+nnoremap <silent> <leader>w :tabclose<CR>
 
-nnoremap <leader>q :bd<CR>
-nnoremap <leader>w :tabclose<CR>
-
-function! s:make_info()
+function! s:make_info(args)
+  let cmd = ''
   if &filetype == 'python'
-    return 'python %'
+    let cmd = "python %"
+  elseif &filetype == 'cpp'
+    let cmd = 'make CC="g++" CXXFLAGS="-g -std=c++11" %< && ./%<'
+  elseif &filetype == 'c'
+    let cmd = 'make CC="gcc" CFLAGS="-g" %< && ./%<'
   else
-    return 'make'
+    let cmd = "make %<"
   endif
+  return cmd.' '.a:args
 endfunction
 
-nnoremap <silent> <leader>xm :update<CR>:execute 'AsyncRun '.<SID>make_info()<CR>
+function! s:run(args)
+  exe '!'.<SID>make_info(a:args)
+endfunction
+
+function! s:async_run(args)
+  exe 'AsyncRun '.<SID>make_info(a:args)
+endfunction
+
+command! -nargs=* -complete=command Run call s:run(<q-args>)
+command! -nargs=0 -complete=command Clean :silent !rm %<
+nnoremap <silent> <leader>xm :call <SID>async_run('')<CR>
+nnoremap <silent> <leader>xc :execute 'AsyncRun ctags '.<SID>GenTagArgument()<CR>
 nnoremap <silent> <leader>xx :AsyncStop<CR>
 nnoremap <silent> <leader>sa :AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
 
@@ -780,11 +804,10 @@ nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
 
 function! s:preserve(command)
   let _s=@/
-  let l = line('.')
-  let c = col('.')
-  execute a:command
+  let l:winview = winsaveview()
+  execute 'silent '.a:command
+  call winrestview(l:winview)
   let @/=_s
-  call cursor(l,c)
 endfunc
 
 nmap _$ :call <SID>preserve("%s/\\s\\+$//e")<CR>
