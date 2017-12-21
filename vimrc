@@ -8,9 +8,7 @@ set fileencoding=utf-8
 
 let $vimfiles=split(&rtp, ",")[0]
 call plug#begin($vimfiles . '/bundle')
-Plug 'joshdick/onedark.vim'
 Plug 'xltan/vim-hybrid'
-" Plug 'kodemeister/vim-hybrid'
 
 Plug 'tpope/tpope-vim-abolish'
 Plug 'tpope/vim-surround'
@@ -22,19 +20,25 @@ Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-markdown'
 let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh']
 
-Plug 'Raimondi/delimitMate'
 let delimitMate_expand_cr = 1
 let delimitMate_jump_expansion = 1
+Plug 'Raimondi/delimitMate'
 
 Plug 'tpope/vim-endwise'
 
-Plug 'wellle/targets.vim'
+let g:detectindent_preferred_when_mixed = 1
+let g:detectindent_max_lines_to_analyse = 128
+Plug 'ciaranm/detectindent'
+
 let g:targets_aiAI = 'ai  '
+Plug 'wellle/targets.vim'
 
 if has('mac')
   Plug 'wookayin/vim-typora'
   Plug 'rizzatti/dash.vim'
-  " on windows, this is slow
+  nmap <silent> K <Plug>DashSearch
+
+  " fugitive is slow on windows
   Plug 'tpope/vim-fugitive'
   let g:dash_map = {
   \ 'java' : 'android',
@@ -42,7 +46,6 @@ if has('mac')
   \ 'go' : 'gl4',
   \ 'c' : 'gl4',
   \ }
-  nmap <silent> K <Plug>DashSearch
 else
   Plug 'rhysd/devdocs.vim'
   nmap <silent> K <Plug>(devdocs-under-cursor)
@@ -62,7 +65,6 @@ map *  <Plug>(asterisk-z*)
 map #  <Plug>(asterisk-z#)
 map g* <Plug>(asterisk-gz*)
 map g# <Plug>(asterisk-gz#)
-let g:asterisk#keeppos = 1
 
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
@@ -77,7 +79,7 @@ Plug 'honza/vim-snippets'
 let g:snips_author = "sinon"
 let g:snips_email = "lidmuse@email.com"
 let g:snips_github = "https://github.com/xltan"
-Plug 'dawikur/algorithm-mnemonics.vim'
+" Plug 'dawikur/algorithm-mnemonics.vim'
 
 Plug 'majutsushi/tagbar'
 let g:tagbar_autofocus = 1
@@ -156,7 +158,7 @@ nnoremap <silent> <leader>ts :TagbarCurrentTag f<CR>
 Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
-  nnoremap <silent><buffer> gd :sort ,^.*[\/],<CR>
+  nnoremap <silent><buffer> gs :sort ,^.*[\/],<CR>
   nnoremap <silent><buffer> gr :noautocmd Dirvish %<CR>
   nnoremap <silent><buffer> gh :silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>
   nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
@@ -183,14 +185,6 @@ Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
 let g:lt_height = 9
 
-" Plug 'romainl/vim-qf'
-" nmap <leader>z <Plug>qf_qf_toggle
-" let g:qf_auto_open_quickfix = 1
-" let g:qf_auto_open_loclist = 1
-" let g:qf_auto_resize = 0
-" let g:qf_bufname_or_text = 0
-" let g:qf_mapping_ack_style = 1
-
 Plug 'junegunn/vim-easy-align'
 xmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
@@ -198,7 +192,8 @@ nmap ga <Plug>(EasyAlign)
 Plug 'junegunn/vim-emoji'
 
 if has('mac') || has('win32')
-  Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }
+  let g:ycm_min_num_of_chars_for_completion = 3
+  let g:ycm_max_num_identifier_candidates = 8
   let g:ycm_enable_diagnostic_highlighting = 0
   let g:ycm_confirm_extra_conf = 0
   let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
@@ -208,19 +203,35 @@ if has('mac') || has('win32')
   let g:ycm_always_populate_location_list = 1
   " let g:ycm_autoclose_preview_window_after_completion = 1
   let g:ycm_autoclose_preview_window_after_insertion = 1
-  nmap <silent> gd :YcmCompleter GoTo<CR>
-  imap <silent> <BS> <C-R>=YcmOnDeleteChar()<CR><Plug>delimitMateBS
   let g:ycm_error_symbol = '>>'
   let g:ycm_warning_symbol = '--'
+  Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }
+  nmap <silent> gd :YcmCompleter GoTo<CR>
+  nmap <silent> gz :YcmCompleter FixIt<CR>
 
   function! YcmOnDeleteChar()
     if pumvisible()
-      return "\<C-y>"
+      return "\<C-y>\<Plug>delimitMateBS"
     endif
-    return "" 
+    return "\<Plug>delimitMateBS"
   endfunction
+  imap <expr><BS> YcmOnDeleteChar()
 
   Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
+
+  let g:ycm_filetype_blacklist = {
+        \ 'tagbar' : 1,
+        \ 'qf' : 1,
+        \ 'notes' : 1,
+        \ 'markdown' : 1,
+        \ 'unite' : 1,
+        \ 'text' : 1,
+        \ 'vimwiki' : 1,
+        \ 'pandoc' : 1,
+        \ 'infolog' : 1,
+        \ 'ctrlsf' : 1,
+        \ 'mail' : 1
+        \}
 endif
 
 Plug 'w0rp/ale'
@@ -229,11 +240,13 @@ let g:ale_linters = {
 \   'go': ['golint'],
 \   'c': [], 'cpp': [], 'objcpp': [], 'objc': [],
 \}
+" let g:ale_sign_error = '>'
+" let g:ale_sign_warning = '-'
 " let g:ale_lint_on_text_changed = 'never'
 
 " Plug 'maralla/validator.vim'
-" let g:validator_error_symbol = '>>'
-" let g:validator_warning_symbol = '--'
+" let g:validator_error_symbol = '>'
+" let g:validator_warning_symbol = '-'
 " let g:validator_go_checkers = ['gometalinter']
 " let g:validator_ignore = ['c', 'cpp']
 
@@ -253,6 +266,12 @@ nmap <leader>fc <Plug>CtrlSFCwordPath client/script<CR>
 nmap <leader>fo :CtrlSFToggle<CR>
 nmap <leader>fr :CtrlSF -R 
 
+Plug 'lilydjwg/colorizer'
+let g:colorizer_startup = 0
+let g:colorizer_maxlines = 100
+let g:colorizer_nomap = 1
+nmap <Leader>co <Plug>Colorizer
+
 if executable("rg")
   set grepprg=rg\ --vimgrep\ --no-heading
   set grepformat=%f:%l:%c:%m,%f:%l:%m
@@ -262,17 +281,19 @@ Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
 let g:Lf_WindowPosition = 'bottom'
 let g:Lf_ShortcutF = '<C-P>'
 let g:Lf_WindowHeight = 0.25
-let g:Lf_CommandMap = {
-    \ '<ESC>': ['<C-I>'],
-    \ '<C-C>': ['<Esc>', '<C-C>'],
-    \ '<C-]>': ['<C-V>'],
-    \ '<C-X>': ['<C-S>'],
-    \ '<C-V>': ['<C-Q>'],
-    \ '<C-P>': ['<C-O>'],
-    \}
+if !exists('g:Lf_CommandMap')
+  let g:Lf_CommandMap = {
+      \ '<ESC>': ['<C-I>'],
+      \ '<C-C>': ['<Esc>', '<C-C>'],
+      \ '<C-]>': ['<C-V>'],
+      \ '<C-X>': ['<C-S>'],
+      \ '<C-V>': ['<C-Q>'],
+      \ '<C-P>': ['<C-O>'],
+      \}
+endif
 let g:Lf_StlSeparator = { 'left': '', 'right': '' }
 let g:Lf_WildIgnore = {
-    \ 'dir': ['.svn','.git','.hg'],
+    \ 'dir': ['.svn','.git','.hg','bin'],
     \ 'file': ['*.sw?','~$*','*.bak','*.exe','*.o','*.so','*.py[co]','tags']
     \}
 let g:Lf_PreviewResult = { 'BufTag': 0, 'Function': 0 }
@@ -282,44 +303,44 @@ let g:Lf_CursorBlink = 0
 let g:Lf_StlPalette = {
     \'stlName': {
     \    'gui': 'NONE',
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlCategory': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlNameOnlyMode': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlFullPathMode': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlFuzzyMode': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlRegexMode': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlCwd': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlBlank': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlLineInfo': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \},
     \'stlTotal': {
-    \    'guifg': '#c5c8c6',
-    \    'guibg': '#2d3c46',
+    \    'guifg': '#c6cace',
+    \    'guibg': '#232c31',
     \}
     \}
 
@@ -338,6 +359,8 @@ Plug 'junegunn/goyo.vim'
 let g:goyo_width = 150
 let g:goyo_linenr = 1
 
+" Plug 'editorconfig/editorconfig-vim'
+
 " language related
 " Plug 'rust-lang/rust.vim'
 " let g:rustfmt_autosave = 0
@@ -349,16 +372,24 @@ let g:python_highlight_space_errors = 0
 let g:python_highlight_operators = 0
 let g:python_highlight_all = 1
 let g:python_slow_sync = 0
+" a little bit slow
+Plug 'Vimjas/vim-python-pep8-indent'
+
+unlet c_comment_strings
+let c_no_curly_error = 1
+
+let g:cpp_no_function_highlight = 0
+let g:cpp_class_scope_highlight = 1
+let g:cpp_member_variable_highlight = 1
+let g:cpp_class_decl_highlight = 1
+Plug 'octol/vim-cpp-enhanced-highlight'
 
 Plug 'fatih/vim-go'
 let g:go_def_mode = 'godef'
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
 
-unlet c_comment_strings
-
 Plug 'pboettch/vim-cmake-syntax'
-Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'mattn/emmet-vim'
 let g:user_emmet_install_global = 0
 let g:user_emmet_leader_key='<C-j>'
@@ -416,7 +447,7 @@ endif
 
 let g:unstack_populate_quickfix=1
 let g:unstack_extractors = [
-    \ unstack#extractors#Regex('\v^ *File "[\/\\]([^"]+)", line ([0-9]+).*', '\1', '\2'),
+    \ unstack#extractors#Regex('\v^[^ ]?.* *File "([cC]:\\g4\\trunk)=[\/\\]([^"]+)", line ([0-9]+).*', '\2', '\3'),
     \ unstack#extractors#Regex('\v^ *File "([^"]+)", line ([0-9]+).*', '\1', '\2'),
     \ unstack#extractors#Regex('\v^[^ ]?.* *File "([^"]+)", line ([0-9]+).*', 'client/\1', '\2'),
     \ unstack#extractors#Regex('\v^[^ ]?.* ([^ ]+): ([0-9]+).+', 'client/\1', '\2'),
@@ -430,34 +461,27 @@ if has("termguicolors")
   set termguicolors
 endif
 
-augroup color
-  autocmd!
+aug colortheme
   autocmd ColorScheme * hi! link pythonFunction Normal
-  autocmd ColorScheme * hi Lf_hl_match gui=NONE guifg=SpringGreen
-  autocmd ColorScheme * hi Lf_hl_matchRefine gui=NONE guifg=Magenta
-augroup END
+aug END
 
-" colors onedark
 set background=dark
-let g:hybrid_custom_term_colors = 1
-let g:hybrid_reduced_contrast = 1
+let g:hybrid_less_color = 0
 colorscheme hybrid
 
 set guioptions=
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
+" set cursorline
 set nu
 set hlsearch
-set cursorline
 set nowrap
-
-set imi=1
 
 set listchars=tab:\|\ ,eol:¬
 
 set autoindent
 set expandtab smarttab
-set shiftwidth=2 tabstop=2 softtabstop=2
+set sw=2 ts=2
 
 set laststatus=2
 
@@ -468,7 +492,7 @@ set autoread
 set nobackup
 set backupdir=$HOME/.swap
 set directory=$HOME/.swap//
-set undodir=$HOME/.swap
+set undodir=$HOME/.undo
 set undofile
 
 set winwidth=100
@@ -524,42 +548,51 @@ endfunction
 command! A call s:a('e')
 command! AV call s:a('botright vertical split')
 
-augroup go
+aug go
   autocmd!
   autocmd FileType go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
   autocmd FileType go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
   autocmd FileType go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
-  autocmd FileType go setlocal tabstop=4 shiftwidth=4
-augroup END
+aug END
 
-augroup python
+aug python
   autocmd!
   autocmd FileType python let b:delimitMate_nesting_quotes = ['"']
-  autocmd filetype python setlocal noexpandtab tabstop=4 shiftwidth=4
-  autocmd filetype python nmap <silent><leader>a :call ToggleAlternateFile(expand('%:p'))<CR>
-  " autocmd filetype python setlocal equalprg=yapf
-augroup END
+  autocmd FileType python nmap <silent><leader>a :call ToggleAlternateFile(expand('%:p'))<CR>
+  " autocmd FileType python setlocal equalprg=yapf
+aug END
 
-augroup cpp
-  autocmd filetype c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
-  autocmd filetype c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
-  autocmd filetype c,cpp,objc,objcpp,cs,java,actionscript setlocal commentstring=//\ %s
-  autocmd filetype c,cpp,objc,objcpp,actionscript,go,python nmap <buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
-  autocmd BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
-augroup END
 
-aug vimrc_autocmd
+aug cpp
+  autocmd!
+  autocmd FileType c,cpp,objc,objcpp DetectIndent
+  autocmd FileType c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
+  autocmd FileType c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
+  autocmd FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl setlocal commentstring=//\ %s
+  autocmd FileType cmake setlocal commentstring=#\ %s
+  autocmd FileType c,cpp,objc,objcpp,actionscript,go,python nmap <buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
+  " autocmd BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
+aug END
+
+aug vimrc_tab
+  autocmd!
+  autocmd FileType python,go,actionscript setlocal noexpandtab ts=4 sw=4
+  autocmd FileType tex setlocal ts=2 sw=2
+  autocmd FileType make setlocal noexpandtab
+aug END
+
+aug vimrc_misc
   autocmd!
   autocmd FileType html,css EmmetInstall
-  autocmd filetype help wincmd L
-  autocmd filetype vim setlocal tabstop=2 shiftwidth=2
-  autocmd filetype actionscript setlocal noexpandtab tabstop=4 shiftwidth=4
-  autocmd filetype make set noexpandtab
-  autocmd filetype tex setlocal tabstop=2 shiftwidth=2
-  autocmd filetype git setlocal nonumber
-  autocmd WinLeave,InsertEnter * setlocal nocursorline
-  autocmd WinEnter,InsertLeave * setlocal cursorline
+  autocmd FileType help wincmd L
+  autocmd FileType git setlocal nonumber
+  autocmd BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=a-z,A-Z,48-57,_,.,-,>
+  autocmd BufRead .clang-format setlocal ft=yaml
   autocmd QuickFixCmdPost * botright cwindow 9
+  autocmd BufWritePost *.vim,*vimrc so %
+  autocmd InsertLeave * set iminsert=0
+  " autocmd WinLeave,InsertEnter * setlocal nocursorline
+  " autocmd WinEnter * setlocal cursorline
   " autocmd BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
 aug END
 
@@ -661,10 +694,8 @@ nnoremap ]W :tablast<CR>
 
 inoremap <M-o> <C-o>o
 inoremap <M-O> <C-o>O
-inoremap <C-h> <C-o>h
-inoremap <C-l> <C-o>l
-inoremap <C-j> <C-o>j
-inoremap <C-k> <C-o>k
+
+inoremap <C-l> <C-o>zz
 
 nnoremap Q @q
 xnoremap Q :normal @q<CR>
@@ -682,20 +713,23 @@ nnoremap <silent> <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"nam
     \ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
 
 if has("mac")
+  set linespace=1
   set guifont=SF\ Mono:h12
+  " set guifont=Fira\ Code:h12
   " set macligatures
   set macthinstrokes
   set macmeta
-  set linespace=1
 elseif has("win32")
-  set guifont=Monaco\ for\ Powerline:h9
+  set linespace=3
+  set guifont=Monaco:h9
   set gfw=Microsoft\ Yahei\ Mono:h9
-  set linespace=2
-  " set guifont=Fira\ Code:h9
-  " set renderoptions=type:directx,
-  "                   \gamma:1.4,contrast:1,geom:1,
-  "                   \renmode:5,taamode:1,level:1
-  nnoremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+  set rop=type:directx,gamma:1.6,scrlines:30
+  " nnoremap <F11> <Esc>:call libcallnr("gvimfullscreen.dll", "ToggleFullScreen", 0)<CR>
+	nnoremap <M-f> :simalt ~x<CR>
+  aug windows
+    autocmd!
+    autocmd GUIEnter * simalt ~x
+  aug END
 
   let s:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
   function! SvnCommand(cmd, path)
@@ -729,14 +763,15 @@ endfunction
 nnoremap <silent> <leader>q :bd<CR>
 nnoremap <silent> <leader>w :tabclose<CR>
 
-function! s:make_info(args)
+function! s:make_args(args)
   let cmd = ''
+  let bin = expand('%:p:r')
   if &filetype == 'python'
     let cmd = "python %"
   elseif &filetype == 'cpp'
-    let cmd = 'make CC="g++" CXXFLAGS="-g -std=c++11" %< && ./%<'
+    let cmd = 'make CC="g++" CXXFLAGS="-std=c++14" '. bin . ' && ' . bin
   elseif &filetype == 'c'
-    let cmd = 'make CC="gcc" CFLAGS="-g" %< && ./%<'
+    let cmd = 'make '. bin .' && '. bin
   else
     let cmd = "make %<"
   endif
@@ -744,11 +779,11 @@ function! s:make_info(args)
 endfunction
 
 function! s:run(args)
-  exe '!'.<SID>make_info(a:args)
+  exe '!'.<SID>make_args(a:args)
 endfunction
 
 function! s:async_run(args)
-  exe 'AsyncRun '.<SID>make_info(a:args)
+  exe 'AsyncRun '.<SID>make_args(a:args)
 endfunction
 
 command! -nargs=* -complete=command Run call s:run(<q-args>)
@@ -801,6 +836,7 @@ function! ToggleAlternateFile(filepath)
 endfunc
 
 nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
+nnoremap <leader>pj :%!python -m json.tool<CR>
 
 function! s:preserve(command)
   let _s=@/
