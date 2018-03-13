@@ -527,9 +527,9 @@ set autowrite
 set autoread
 
 set nobackup
-set backupdir=$HOME/.swap
-set directory=$HOME/.swap//
-set undodir=$HOME/.undo
+set backupdir=$vimfiles/.swap
+set directory=$vimfiles/.swap
+set undodir=$vimfiles/.undo
 set undofile
 
 set winwidth=100
