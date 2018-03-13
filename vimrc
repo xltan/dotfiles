@@ -729,11 +729,6 @@ nnoremap <C-k> <C-w>k
 nnoremap [<space> :put! =repeat(nr2char(10), v:count1)<cr>'[
 nnoremap ]<space> :put =repeat(nr2char(10), v:count1)<cr>
 
-nnoremap [w gT
-nnoremap ]w gt
-nnoremap [W :tabfirst<CR>
-nnoremap ]W :tablast<CR>
-
 inoremap <M-o> <C-o>o
 inoremap <M-O> <C-o>O
 
@@ -792,6 +787,10 @@ endif
 
 nnoremap <silent> <leader>q :bd<CR>
 nnoremap <silent> <leader>w :tabclose<CR>
+nnoremap [w gT
+nnoremap ]w gt
+nnoremap [W :tabfirst<CR>
+nnoremap ]W :tablast<CR>
 
 function! s:make_args(args)
   let cmd = ''
