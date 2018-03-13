@@ -177,13 +177,13 @@ aug dirvish
 aug END
 
 function! DirvishSetup()
-	let text = getline('.')
+  let text = getline('.')
   let xp = []
   for item in split(&wildignore, ',')
-		call add(xp, glob2regpat(item).'\=')
-	endfor
-	exec 'silent keeppatterns g/\('.join(xp, '\|').'\)/d'
-	exec 'sort ,^.*[\/],'
+    call add(xp, glob2regpat(item).'\=')
+  endfor
+  exec 'silent keeppatterns g/\('.join(xp, '\|').'\)/d'
+  exec 'sort ,^.*[\/],'
 endfunc
 let g:dirvish_mode = 'call DirvishSetup()'
 
@@ -397,7 +397,6 @@ let g:python_slow_sync = 0
 " a little bit slow
 Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'fisadev/vim-isort'
-nmap <silent><leader>i :update<CR>:Isort<CR>:ImportRemove<CR>
 
 let c_no_curly_error = 1
 
@@ -468,12 +467,12 @@ if has('nvim') || use_denite
         \ 'noremap'
         \)
 
-	" call denite#custom#alias('source', 'file_fuzzy', 'file_rec')
-	" call denite#custom#source('file_fuzzy', 'matchers', ['matcher_fuzzy'])
-	call denite#custom#source('file_rec', 'matchers', ['matcher_substring'])
-	call denite#custom#source('file_mru', 'matchers', ['matcher_substring'])
-	call denite#custom#var('file_rec', 'command', ['rg', '--files'])
-	call denite#custom#var('file_fuzzy', 'command', ['rg', '--files'])
+  " call denite#custom#alias('source', 'file_fuzzy', 'file_rec')
+  " call denite#custom#source('file_fuzzy', 'matchers', ['matcher_fuzzy'])
+  call denite#custom#source('file_rec', 'matchers', ['matcher_substring'])
+  call denite#custom#source('file_mru', 'matchers', ['matcher_substring'])
+  call denite#custom#var('file_rec', 'command', ['rg', '--files'])
+  call denite#custom#var('file_fuzzy', 'command', ['rg', '--files'])
   nnoremap <c-p> :Denite file_rec<CR>
   " nnoremap <leader>r :Denite file_fuzzy<CR>
   nnoremap <leader>h :Denite file_mru<CR>
@@ -545,26 +544,13 @@ set formatoptions+=j " Delete comment character when joining commented lines
 set cinoptions=:0,g0,(0,Ws,l1
 set viminfo^=!
 set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,
-			\*.vscode,*tags,*.vs,*.ycm_extra_conf.py,*compile_commands.json,
-			\*.pyproj,*.idea
+    \*.vscode,*tags,*.vs,*.ycm_extra_conf.py,*compile_commands.json,
+    \*.pyproj,*.idea
 set cpoptions+=>
 set belloff=all
 set history=1000
 
-function! s:super()
-  if &filetype == 'python'
-    let pattern = '^class [^(]*(\zs[^)]*\ze):'
-    let lineno = search(pattern, 'n')
-    let content = getline(lineno)
-    let m = matchstr(content, pattern)
-    let sm = split(m, '\.')
-    exe 'tag '.sm[len(sm)-1]
-    return
-  endif
-endfunction
-noremap <silent> ]s :call <SID>super()<CR>
-noremap <silent> [s <C-^>
-
+" for c-family files
 function! s:a(cmd)
   let name = expand('%:r')
   let ext = tolower(expand('%:e'))
@@ -586,28 +572,42 @@ function! s:a(cmd)
   endfor
 endfunction
 
-aug go
+function! s:super()
+  if &filetype == 'python'
+    let pattern = '^class [^(]*(\zs[^)]*\ze):'
+    let lineno = search(pattern, 'n')
+    let content = getline(lineno)
+    let m = matchstr(content, pattern)
+    let sm = split(m, '\.')
+    exe 'tag '.sm[len(sm)-1]
+    return
+  endif
+endfunction
+
+aug vimrc_go
   au!
   au FileType go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
   au FileType go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
   au FileType go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
 aug END
 
-aug python
+aug vimrc_python
   au!
   au FileType python let b:delimitMate_nesting_quotes = ['"']
-  au FileType python nmap <silent> gf :execute "tag " expand('<cword>').'.py'<CR>
+  au FileType python nmap <silent> <buffer> <leader>i :update<CR>:Isort<CR>:ImportRemove<CR>
+  au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
+  au FileType python nmap <silent> <buffer> [s <C-^>
   " au FileType python setlocal equalprg=yapf
 aug END
 
-aug cpp
+aug vimrc_cpp
   au!
   au FileType c,cpp,objc,objcpp,vim DetectIndent
   au FileType c,cpp,objc,objcpp command! A call s:a('e')
   au FileType c,cpp,objc,objcpp command! AV call s:a('botright vertical split')
   au FileType c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
-  au FileType c,cpp,objc,objcpp nmap <silent> [a :lprevious<CR>
-  au FileType c,cpp,objc,objcpp nmap <silent> ]a :lnext<CR>
+  au FileType c,cpp,objc,objcpp nmap <buffer> <silent> [a :lprevious<CR>
+  au FileType c,cpp,objc,objcpp nmap <buffer> <silent> ]a :lnext<CR>
   au FileType c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
   au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl setlocal commentstring=//\ %s
   au FileType cmake setlocal commentstring=#\ %s
@@ -630,7 +630,7 @@ aug vimrc_misc
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
   au QuickFixCmdPost * botright cwindow 9
-  au BufWritePost *vimrc,*.vim so %
+  au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
   au InsertLeave * set imi=0
   au FileType git,gitcommit setlocal foldmethod=syntax
   au FileType leaderf,denite setlocal nonumber | setlocal foldcolumn=1
@@ -640,10 +640,10 @@ aug vimrc_misc
 aug END
 
 nnoremap <silent> cos :if exists("g:syntax_on") <Bar>
-	\   syntax off <Bar>
-	\ else <Bar>
-	\   syntax on <Bar>
-	\ endif <CR>
+  \   syntax off <Bar>
+  \ else <Bar>
+  \   syntax on <Bar>
+  \ endif <CR>
 
 function! s:map_change_option(...)
   let [key, opt] = a:000[0:1]
