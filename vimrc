@@ -923,4 +923,4 @@ function! s:source_if_exists(file)
   endif
 endfunction
 
-call s:source_if_exists($HOME.'/.vimrc.local')
+call s:source_if_exists($VIMFILES.'/.localrc')
