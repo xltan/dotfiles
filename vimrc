@@ -12,6 +12,12 @@ let $vimfiles=split(&rtp, ",")[0]
 call plug#begin($vimfiles . '/bundle')
 Plug 'xltan/vim-hybrid'
 
+let delimitMate_expand_cr = 1
+let delimitMate_jump_expansion = 1
+let delimitMate_smart_matchpairs = '^\%(\w\|\"\|''\|\!\|[£$]\|[^[:space:][:punct:]]\)'
+Plug 'Raimondi/delimitMate'
+
+Plug 'tpope/vim-endwise' " some cases work only after delimitMate
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
@@ -19,17 +25,9 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-markdown'
 Plug 'tpope/vim-fugitive'
-" Plug 'tpope/vim-vinegar'
+Plug 'tpope/vim-markdown'
 let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh']
-
-let delimitMate_expand_cr = 1
-let delimitMate_jump_expansion = 1
-let delimitMate_smart_matchpairs = '^\%(\w\|\"\|''\|\!\|[£$]\|[^[:space:][:punct:]]\)'
-Plug 'Raimondi/delimitMate'
-
-Plug 'tpope/vim-endwise'
 
 let g:detectindent_preferred_when_mixed = 1
 let g:detectindent_max_lines_to_analyse = 128
@@ -505,7 +503,7 @@ aug colortheme
 aug END
 
 set background=dark
-let g:hybrid_less_color = 1
+let g:hybrid_less_color = 0
 colorscheme hybrid
 
 set guioptions=
@@ -604,7 +602,7 @@ aug END
 
 aug cpp
   au!
-  au FileType c,cpp,objc,objcpp DetectIndent
+  au FileType c,cpp,objc,objcpp,vim DetectIndent
   au FileType c,cpp,objc,objcpp command! A call s:a('e')
   au FileType c,cpp,objc,objcpp command! AV call s:a('botright vertical split')
   au FileType c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
