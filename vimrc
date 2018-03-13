@@ -197,6 +197,7 @@ map T <Plug>Sneak_T
 map <M-;> <Plug>Sneak_,
 
 Plug 'justinmk/vim-gtfo'
+let g:gtfo#terminals = { 'win': 'cmd.exe /k' }
 
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
@@ -208,9 +209,14 @@ nmap ga <Plug>(EasyAlign)
 
 " Plug 'natebosch/vim-lsc'
 " let g:lsc_server_commands = {'python': 'pyls'}
+if has('win32')
+  let error_symbol = '🔸'
+  let warning_symbol = '🔹'
+else
+  let error_symbol = '--'
+  let warning_symbol = '--'
+endif
 
-let error_symbol = '🔸'
-let warning_symbol = '🔹'
 if has('win32') || has('mac')
   let g:ycm_min_num_of_chars_for_completion = 3
   let g:ycm_max_num_identifier_candidates = 8
