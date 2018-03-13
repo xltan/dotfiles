@@ -8,8 +8,8 @@ let maplocalleader = ","
 set encoding=utf-8
 set fileencoding=utf-8
 
-let $vimfiles=split(&rtp, ",")[0]
-call plug#begin($vimfiles . '/bundle')
+let $VIMFILES=split(&rtp, ",")[0]
+call plug#begin($VIMFILES . '/bundle')
 Plug 'xltan/vim-hybrid'
 
 let delimitMate_expand_cr = 1
@@ -302,6 +302,7 @@ if !has('nvim') && !use_denite
   Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
   let g:Lf_ShortcutF = '<C-P>'
   let g:Lf_WindowHeight = 0.2
+  let g:Lf_CacheDiretory = $VIMFILES
   if !exists('g:Lf_CommandMap')
     let g:Lf_CommandMap = {
         \ '<ESC>': ['<C-I>'],
@@ -527,9 +528,9 @@ set autowrite
 set autoread
 
 set nobackup
-set backupdir=$vimfiles/.swap
-set directory=$vimfiles/.swap
-set undodir=$vimfiles/.undo
+set backupdir=$VIMFILES/.swap
+set directory=$VIMFILES/.swap
+set undodir=$VIMFILES/.undo
 set undofile
 
 set winwidth=100
@@ -840,7 +841,7 @@ cnoremap <C-p> <UP>
 cnoremap <C-n> <DOWN>
 
 nnoremap <leader>en :e ~/Dropbox/notes<CR>
-nnoremap <leader>es :e $vimfiles/UltiSnips<CR>
+nnoremap <leader>es :e $VIMFILES/UltiSnips<CR>
 
 cab ar AsyncRun
 cab GP GoProject
