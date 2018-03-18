@@ -68,7 +68,6 @@ map *  <Plug>(asterisk-z*)
 map #  <Plug>(asterisk-z#)
 map g* <Plug>(asterisk-gz*)
 map g# <Plug>(asterisk-gz#)
-let g:asterisk#keeppos = 1
 
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
@@ -79,6 +78,7 @@ Plug 'AndrewRadev/splitjoin.vim'
 Plug 'AndrewRadev/linediff.vim'
 
 Plug 'SirVer/ultisnips'
+Plug 'xltan/algorithm-mnemonics.vim'
 Plug 'honza/vim-snippets'
 let g:snips_author = "sinon"
 let g:snips_email = "lidmuse@email.com"
@@ -386,6 +386,10 @@ else
 endif
 
 Plug 'xltan/vim-project', { 'branch': 'jpmv27_master' }
+Plug 'aperezdc/vim-template'
+let g:email = "lidmuse@email.com"
+let g:username = "Sinon"
+let g:templates_directory = $VIMFILES . '/.templates'
 
 " Plug 'editorconfig/editorconfig-vim'
 
@@ -515,7 +519,7 @@ colorscheme hybrid
 set guioptions=
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
-" set cursorline
+set cursorline
 " set nu
 set foldcolumn=1
 set hlsearch
@@ -535,7 +539,7 @@ set autoread
 
 set nobackup
 set backupdir=$VIMFILES/.swap
-set directory=$VIMFILES/.swap
+set directory=$VIMFILES/.swap//
 set undodir=$VIMFILES/.undo
 set undofile
 
@@ -601,7 +605,7 @@ aug END
 aug vimrc_python
   au!
   au FileType python let b:delimitMate_nesting_quotes = ['"']
-  au FileType python nmap <silent> <buffer> <leader>i :update<CR>:Isort<CR>:ImportRemove<CR>
+  au FileType python nmap <silent> <buffer> <leader>i :update<CR>:Isort<CR>
   au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
   au FileType python nmap <silent> <buffer> [s <C-^>
   " au FileType python setlocal equalprg=yapf
@@ -614,7 +618,9 @@ aug vimrc_cpp
   au FileType c,cpp,objc,objcpp command! AV call s:a('botright vertical split')
   au FileType c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
   au FileType c,cpp,objc,objcpp nmap <buffer> <silent> [a :lprevious<CR>
-  au FileType c,cpp,objc,objcpp nmap <buffer> <silent> ]a :lnext<CR>
+        \ | nmap <buffer> <silent> ]a :lnext<CR>
+        \ | nmap <buffer> <silent> [A :lfirst<CR>
+        \ | nmap <buffer> <silent> ]A :llast<CR>
   au FileType c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
   au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl setlocal commentstring=//\ %s
   au FileType cmake setlocal commentstring=#\ %s
@@ -633,16 +639,17 @@ aug vimrc_misc
   au!
   au FileType html,css EmmetInstall
   au FileType help wincmd L
-  au FileType git setlocal nonumber
+  au FileType git,gitcommit setlocal foldmethod=syntax
+  au FileType leaderf,denite setlocal nonumber | setlocal foldcolumn=1
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
   au QuickFixCmdPost * botright cwindow 9
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
-  au InsertLeave * set imi=0
-  au FileType git,gitcommit setlocal foldmethod=syntax
-  au FileType leaderf,denite setlocal nonumber | setlocal foldcolumn=1
   au BufLeave * if &ft ==# 'qf' | cclose | lclose | endif
-  " au WinEnter * setlocal cursorline
+  au InsertLeave * set imi=0 | set cursorline
+  au InsertEnter * set nocursorline
+  au WinEnter * setlocal cursorline
+  au WinLeave * setlocal nocursorline
   " au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
 aug END
 
@@ -739,6 +746,8 @@ inoremap <M-o> <C-o>o
 inoremap <M-O> <C-o>O
 
 inoremap <C-l> <C-o>zz
+inoremap <C-k> <C-o>k
+inoremap <C-j> <C-o>j
 
 nnoremap Q @q
 xnoremap Q :normal @q<CR>
