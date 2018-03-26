@@ -43,7 +43,7 @@ export HISTTIMEFORMAT="%Y/%m/%d %H:%M:%S:   "
 ### Global
 export GOPATH="$HOME/go"
 if [ -z "$PATH_EXPANDED" ]; then
-  export PATH="$HOME/.cargo/bin:$GOPATH/bin:$HOME/.bin:HOME/Library/Android/sdk/platform-tools:/usr/local/opt/python/libexec/bin:/usr/local/bin:/usr/local/sbin:$PATH"
+  export PATH="$HOME/.cargo/bin:$GOPATH/bin:$HOME/.bin:HOME/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/sbin:$PATH"
   export PATH_EXPANDED=1
 fi
 export EDITOR=mvim
@@ -185,6 +185,20 @@ _yargs_completions()
 }
 complete -F _yargs_completions leetcode
 
-export CDPATH=.:$HOME/go/src
-
 alias cdpath="export CDPATH=.:$PWD"
+
+bind '\C-w:backward-kill-word'
+
+function ccat() {
+    local style="monokai"
+    if [ $# -eq 0 ]; then
+        pygmentize -P style=$style -P tabsize=4 -f terminal256 -g
+    else
+        for NAME in $@; do
+            pygmentize -P style=$style -P tabsize=4 -f terminal256 -g "$NAME"
+        done
+    fi
+}
+
+[ -f ~/.bashrc.local ] && source ~/.bashrc.local
+
