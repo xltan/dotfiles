@@ -13,7 +13,7 @@ BASE_FLAGS = [
     '-fexceptions',
     '-ferror-limit=10000',
     '-DNDEBUG',
-    '-std=c++1z',
+    '-std=c++14',
     '-xc++',
     '-I/usr/include/'
 ]
