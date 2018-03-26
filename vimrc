@@ -218,9 +218,12 @@ nmap ga <Plug>(EasyAlign)
 if has('win32')
   let s:error_symbol = '🔸'
   let s:warning_symbol = '🔹'
-else
+elseif has('mac')
   let s:error_symbol = '💥'
   let s:warning_symbol = '⚡'
+else
+  let s:error_symbol = '>>'
+  let s:warning_symbol = '--'
 endif
 
 Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }

@@ -1,4 +1,4 @@
---python-kinds=-Iv
+--python-kinds=-v
 --langdef=actionscript
 --langmap=actionscript:.as
 --regex-actionscript=/^[ \t]*[(private| public|static) ( \t)]*function[ \t]+([A-Za-z0-9_]+)[ \t]*\(/\1/f, function, functions/
