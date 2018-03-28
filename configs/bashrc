@@ -28,7 +28,7 @@ shopt -s checkwinsize
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 
 ### Disable CTRL-S and CTRL-Q
-stty -ixoff
+stty -ixon
 
 # Environment variables
 # --------------------------------------------------------------------
@@ -43,10 +43,10 @@ export HISTTIMEFORMAT="%Y/%m/%d %H:%M:%S:   "
 ### Global
 export GOPATH="$HOME/go"
 if [ -z "$PATH_EXPANDED" ]; then
-  export PATH="$HOME/.cargo/bin:$GOPATH/bin:$HOME/.bin:HOME/Library/Android/sdk/platform-tools:/usr/local/bin:/usr/local/sbin:$PATH"
+  export PATH="$HOME/.local/bin:$HOME/.bin:$HOME/.cargo/bin:$GOPATH/bin:/usr/local/bin:/usr/local/sbin:$PATH"
   export PATH_EXPANDED=1
 fi
-export EDITOR=mvim
+export EDITOR=vim
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
@@ -162,43 +162,12 @@ v() {
 }
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
-
-# leetcode completion
-_yargs_completions()
-{
-    local cur_word args type_list
-
-    cur_word="${COMP_WORDS[COMP_CWORD]}"
-    args=("${COMP_WORDS[@]}")
-
-    # ask yargs to generate completions.
-    type_list=$(leetcode --get-yargs-completions "${args[@]}")
-
-    COMPREPLY=( $(compgen -W "${type_list}" -- ${cur_word}) )
-
-    # if no match was found, fall back to filename completion
-    if [ ${#COMPREPLY[@]} -eq 0 ]; then
-      COMPREPLY=( $(compgen -f -- "${cur_word}" ) )
-    fi
-
-    return 0
-}
-complete -F _yargs_completions leetcode
+# fzf end
+# --------------------------------------------------------------------
 
 alias cdpath="export CDPATH=.:$PWD"
 
 bind '\C-w:backward-kill-word'
-
-function ccat() {
-    local style="monokai"
-    if [ $# -eq 0 ]; then
-        pygmentize -P style=$style -P tabsize=4 -f terminal256 -g
-    else
-        for NAME in $@; do
-            pygmentize -P style=$style -P tabsize=4 -f terminal256 -g "$NAME"
-        done
-    fi
-}
 
 [ -f ~/.bashrc.local ] && source ~/.bashrc.local
 
