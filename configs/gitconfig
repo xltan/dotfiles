@@ -1,22 +1,34 @@
-[filter "lfs"]
-	required = true
-	clean = git-lfs clean -- %f
-	smudge = git-lfs smudge -- %f
-	process = git-lfs filter-process
+[filter "media"]
+	clean = git-media-clean %f
+	smudge = git-media-smudge %f
 [user]
 	name = xltan
-[user]
 	email = lidmuse@gmail.com
-[core]
-	autocrlf = input
-[credential]
-	helper = manager
-[alias]
-	ci = commit
-	st = status
-	co = checkout
-	br = branch
-	last = log -1 HEAD
-	unstage = reset HEAD --
+[filter "hawser"]
+	clean = git hawser clean %f
+	smudge = git hawser smudge %f
+	required = true
+[filter "lfs"]
+	required = true
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	clean = git-lfs clean -- %f
 [push]
 	default = simple
+; [http]
+; 	proxy = socks5://localhost:1080
+; [https]
+; 	proxy = socks5://localhost:1080
+[diff]
+	tool = vimdiff
+[gc]
+	auto = 1
+[core]
+	excludesfile = ~/.gitignore
+[alias]
+    st = status
+    br = branch
+    co = checkout
+	ci = commit
+	last = log -1 HEAD
+	unstage = reset HEAD --
