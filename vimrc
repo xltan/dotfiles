@@ -90,79 +90,6 @@ Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags']
 
-" Plug 'majutsushi/tagbar'
-" let g:tagbar_compact = 1
-" let g:tagbar_hide_nonpublic = 1
-
-" if has('win32')
-"   let g:tagbar_iconchars = ['+', '-']
-" else
-"   let g:tagbar_iconchars = ['▸', '▾']
-" endif
-
-" let g:tagbar_type_go = {
-"     \ 'ctagstype' : 'go',
-"     \ 'kinds'     : [
-"         \ 'p:package',
-"         \ 'i:imports:1',
-"         \ 'c:constants',
-"         \ 'v:variables',
-"         \ 't:types',
-"         \ 'n:interfaces:1',
-"         \ 'w:fields',
-"         \ 'e:embedded',
-"         \ 'm:methods',
-"         \ 'r:constructor',
-"         \ 'f:functions'
-"     \ ],
-"     \ 'sro' : '.',
-"     \ 'kind2scope' : {
-"         \ 't' : 'ctype',
-"         \ 'n' : 'ntype'
-"     \ },
-"     \ 'scope2kind' : {
-"         \ 'ctype' : 't',
-"         \ 'ntype' : 'n'
-"     \ },
-"     \ 'ctagsbin'  : 'gotags',
-"     \ 'ctagsargs' : '-sort -silent'
-" \ }
-
-" let s:objc = {
-"     \ 'ctagstype' : 'ObjectiveC',
-"     \ 'kinds'     : [
-"         \ 'i:interface',
-"         \ 'I:implementation',
-"         \ 'm:Object_method',
-"         \ 'c:Class_method',
-"         \ 'v:Global_variable',
-"         \ 'F:Object field',
-"         \ 'f:function',
-"         \ 'p:property',
-"         \ 't:type_alias',
-"         \ 's:type_structure',
-"         \ 'e:enumeration',
-"         \ 'M:preprocessor_macro',
-"     \ ],
-"     \ 'sro'        : ' ',
-"     \ 'kind2scope' : {
-"         \ 'i' : 'interface',
-"         \ 'I' : 'implementation',
-"         \ 's' : 'type_structure',
-"         \ 'e' : 'enumeration'
-"     \ },
-"     \ 'scope2kind' : {
-"         \ 'interface'      : 'i',
-"         \ 'implementation' : 'I',
-"         \ 'type_structure' : 's',
-"         \ 'enumeration'    : 'e'
-"     \ }
-" \ }
-" let g:tagbar_type_objcpp = s:objc
-" let g:tagbar_type_objc = s:objc
-" nnoremap <silent> <leader>tt :Tagbar<CR>
-" nnoremap <silent> <leader>ts :TagbarCurrentTag f<CR>
-
 Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
@@ -472,7 +399,7 @@ function! s:option_map(...)
   execute printf("nnoremap co%s :%s<bar>set %s?<CR>", key, op, opt)
 endfunction
 call s:option_map('p', 'paste')
-call s:option_map('e', 'expandtab', 'set expandtab!<bar>retab')
+call s:option_map('e', 'expandtab', 'setlocal expandtab!<bar>retab')
 
 set synmaxcol=500
 
@@ -611,6 +538,7 @@ aug vimrc_tab
   au FileType python setlocal noexpandtab ts=4 sw=4
   au FileType tex setlocal ts=2 sw=2
   au FileType vim setlocal expandtab ts=2 sw=2
+  au FileType lua setlocal expandtab ts=2 sw=2
   au FileType make setlocal noexpandtab
 aug END
 
@@ -651,18 +579,6 @@ nmap <C-n> :sav %%
 
 nnoremap <silent> <S-L> :nohl<CR>
 
-tnoremap <Esc> <C-W>N
-tnoremap <C-^> <C-W>N<C-^>
-tnoremap <C-h> <C-W>h
-tnoremap <C-l> <C-W>l
-tnoremap <C-j> <C-W>j
-tnoremap <C-k> <C-W>k
-" tnoremap <C-\> <C-W>N:%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
-" nnoremap <C-\> :%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
-" inoremap <C-\> <Esc>:%y\|tabnew\|setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified\|normal P<CR>
-
-inoremap <C-^> <Esc><C-^>
-
 if has('gui_running')
   function! s:get_buffer_list()
     redir =>buflist
@@ -698,17 +614,24 @@ if has('gui_running')
   command! -nargs=0 -complete=command Restart execute g:prog_name . " %" | quitall
 endif
 
+inoremap <C-^> <Esc><C-^>
+inoremap <M-o> <C-o>o
+inoremap <M-O> <C-o>O
+inoremap <C-l> <C-o>zz
+inoremap <C-k> <C-o>k
+inoremap <C-j> <C-o>j
+
+tnoremap <Esc> <C-W>N
+tnoremap <C-^> <C-W>N<C-^>
+tnoremap <C-h> <C-w>h
+tnoremap <C-l> <C-w>l
+tnoremap <C-j> <C-w>j
+tnoremap <C-k> <C-w>k
+
 nnoremap <C-h> <C-w>h
 nnoremap <C-l> <C-w>l
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
-
-inoremap <M-o> <C-o>o
-inoremap <M-O> <C-o>O
-
-inoremap <C-l> <C-o>zz
-inoremap <C-k> <C-o>k
-inoremap <C-j> <C-o>j
 
 nnoremap <M-q> qq
 nnoremap Q @q
@@ -719,6 +642,9 @@ vnoremap < <gv
 vnoremap > >gv
 nnoremap gV `[v`]
 nnoremap Y y$
+
+nnoremap <C-e> 5<C-e>
+nnoremap <C-y> 5<C-y>
 
 nnoremap <silent> <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
     \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
@@ -739,7 +665,7 @@ elseif has("win32")
   set linespace=4
   set gfw=Microsoft\ Yahei\ Mono:h9
   if !has('nvim')
-    set rop=type:directx,gamma:1.6 ",scrlines:30
+    set rop=type:directx,gamma:1.2
   else
     let g:Guifont="Monaco:h9"
   endif
