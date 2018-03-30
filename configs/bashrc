@@ -169,7 +169,7 @@ alias cdpath="export CDPATH=.:$PWD"
 
 bind '\C-w:backward-kill-word'
 
-TMUX_SESSION=ssh-$USER
+TMUX_SESSION=$USER
 if [[ -n "$BASHRC_TMUX_SESSION" ]]; then
   TMUX_SESSION="$TMUX_SESSION-$BASHRC_TMUX_SESSION"
 fi

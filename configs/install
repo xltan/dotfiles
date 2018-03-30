@@ -6,3 +6,5 @@ for rc in $(ls); do
   [ -e ~/."$rc" ] && mv -v ~/."$rc" .bak/."$rc"
   ln -sfv "$BASE/$rc" ~/."$rc"
 done
+
+mkdir -pv ~/.vim/.swap ~/.vim/.undo
