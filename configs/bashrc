@@ -90,7 +90,11 @@ function mvim {
 # Prompt
 # --------------------------------------------------------------------
 
-PS1="\w> "
+if [ -n "$SSH_CONNECTION" ] ; then
+  PS1="\h:\w> "
+else
+  PS1="\w> "
+fi
 
 # Shortcut functions
 # --------------------------------------------------------------------
@@ -106,10 +110,6 @@ fd() {
   local dir
   dir=$(find . -maxdepth 1 -path './.*' -prune -o -type d -print | sed '1d;s#^./##' |
         fzf --height 20 --reverse --query "$1" --select-1 --exit-0) && cd "$dir"
-}
-
-fzf-down() {
-  fzf --height 50% "$@" --border
 }
 
 export FZF_DEFAULT_COMMAND='rg --files'
