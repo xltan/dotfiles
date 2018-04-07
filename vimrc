@@ -13,6 +13,7 @@ let $VIMFILES=split(&rtp, ",")[0]
 call plug#begin($VIMFILES . '/bundle')
 " Plug 'morhetz/gruvbox'
 Plug 'xltan/vim-hybrid'
+" Plug 'rakr/vim-one'
 
 let delimitMate_expand_cr = 1
 let delimitMate_jump_expansion = 1
@@ -29,7 +30,7 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-markdown'
-let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh']
+let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh', 'cpp']
 
 let g:detectindent_preferred_when_mixed = 1
 let g:detectindent_max_lines_to_analyse = 128
@@ -39,10 +40,13 @@ let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
 Plug 'wellle/targets.vim'
 
+Plug 'vim-utils/vim-man'
+map <leader>v <Plug>(Vman)
+
 if has('mac')
   Plug 'wookayin/vim-typora'
   Plug 'rizzatti/dash.vim'
-  nmap <silent> K <Plug>DashSearch
+  nmap <silent><buffer> K <Plug>DashSearch
   let g:dash_map = {
   \ 'java' : 'android',
   \ 'cpp' : 'gl4',
@@ -51,7 +55,7 @@ if has('mac')
   \ }
 else
   Plug 'rhysd/devdocs.vim'
-  nmap <silent> K <Plug>(devdocs-under-cursor)
+  nmap <silent><buffer> K <Plug>(devdocs-under-cursor)
   command! -nargs=0 -complete=command Typora execute 'silent! !start C:\\Program Files\\Typora\\Typora.exe '. expand('%:p')
 endif
 
@@ -89,6 +93,9 @@ let g:snips_github = "https://github.com/xltan"
 Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags']
+if !has('win32')
+  let g:gutentags_cache_dir = $VIMFILES . '/.cache'
+endif
 
 Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
@@ -145,9 +152,6 @@ nmap ga <Plug>(EasyAlign)
 if has('win32')
   let s:error_symbol = '🔸'
   let s:warning_symbol = '🔹'
-elseif has('mac')
-  let s:error_symbol = '💥'
-  let s:warning_symbol = '⚡'
 else
   let s:error_symbol = '>>'
   let s:warning_symbol = '--'
@@ -176,7 +180,7 @@ let g:ycm_filetype_blacklist = {
     \ 'pandoc' : 1,
     \ 'infolog' : 1,
     \ 'ctrlsf' : 1,
-    \ 'mail' : 1
+    \ 'mail' : 1,
     \}
 
 nmap <silent> gd :YcmCompleter GoTo<CR>
@@ -234,7 +238,7 @@ let g:colorizer_nomap = 1
 
 Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
 let g:Lf_ShortcutF = '<C-P>'
-let g:Lf_WindowHeight = 0.2
+let g:Lf_WindowHeight = 0.3
 let g:Lf_CacheDiretory = $VIMFILES
 if !exists('g:Lf_CommandMap')
   let g:Lf_CommandMap = {
@@ -309,7 +313,7 @@ nnoremap <leader>/ :LeaderfHistorySearch<CR>
 Plug 'xltan/LeaderF-tjump'
 aug vimrc_tjump
   au!
-  au FileType c,cpp,objc,objcpp,actionscript,go,python nmap <silent><buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
+  au FileType c,cpp,objc,objcpp,actionscript,python nmap <silent><buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
 aug END
 
 Plug 'xltan/vim-project', { 'branch': 'jpmv27_master' }
@@ -348,8 +352,11 @@ let g:go_list_type = "quickfix"
 Plug 'pboettch/vim-cmake-syntax'
 Plug 'mattn/emmet-vim'
 let g:user_emmet_install_global = 0
-let g:user_emmet_leader_key='<C-j>'
+let g:user_emmet_leader_key='<C-y>'
 
+Plug 'leafgarland/typescript-vim'
+" Plug 'HerringtonDarkholme/yats.vim'
+Plug 'Quramy/tsuquyomi'
 Plug 'milinnovations/vim-actionscript'
 Plug 'tikhomirov/vim-glsl'
 
@@ -417,7 +424,9 @@ aug END
 set background=dark
 let g:hybrid_less_color = 0
 colorscheme hybrid
-" let g:gruvbox_contrast_dark = "hard"
+" colorscheme one
+" set background=light
+" let g:gruvbox_contrast_dark = "medium"
 " let g:gruvbox_bold = 0
 " let g:gruvbox_italic = 0
 " colorscheme gruvbox
@@ -426,7 +435,7 @@ set guioptions=
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 " set cursorline
-" set nu
+set nu
 set foldcolumn=1
 set hlsearch
 set nowrap
@@ -461,7 +470,7 @@ set formatoptions+=j " Delete comment character when joining commented lines
 set cinoptions=:0,g0,(0,Ws,l1
 set viminfo^=!
 set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,
-    \*.vscode,tags,*.vs,*.ycm_extra_conf.py,*compile_commands.json,
+    \*.vscode,tags,*.vs,*compile_commands.json,
     \*.pyproj,*.idea
 set cpoptions+=>
 set belloff=all
@@ -528,8 +537,12 @@ aug vimrc_cpp
         \ | nmap <buffer> <silent> [A :lfirst<CR>
         \ | nmap <buffer> <silent> ]A :llast<CR>
   au FileType c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
-  au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl setlocal commentstring=//\ %s
+  au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl,dot setlocal commentstring=//\ %s
   au FileType cmake setlocal commentstring=#\ %s
+  au FileType c,vim silent! nunmap <buffer> K
+  au FileType c,cpp setlocal keywordprg=:Vman
+  au FileType cpp nmap <silent><buffer> K <Plug>DashSearch
+  " au FileType cpp setlocal keywordprg=cppman
   " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
 aug END
 
@@ -545,7 +558,7 @@ aug END
 aug vimrc_misc
   au!
   au FileType html,css EmmetInstall
-  au FileType help wincmd L
+  au FileType help wincmd L | nnoremap <buffer><silent> q :q
   au FileType git,gitcommit setlocal foldmethod=syntax
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
@@ -727,8 +740,8 @@ nnoremap <M-p> "0p
 cnoremap <C-p> <UP>
 cnoremap <C-n> <DOWN>
 
-nnoremap <leader>en :tabe ~/Dropbox/notes<CR>
-nnoremap <leader>es :tabe $VIMFILES/UltiSnips<CR>
+nnoremap <leader>en :tabe ~/Dropbox/notes<CR>:lcd %:h<CR>:pwd<CR>
+nnoremap <leader>es :tabe $VIMFILES/UltiSnips<CR>:lcd %:h<CR>:pwd<CR>
 
 cab ar AsyncRun
 cab GP GoProject
