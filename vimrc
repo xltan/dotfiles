@@ -416,6 +416,9 @@ if has("termguicolors")
   set termguicolors
 endif
 
+" http://www.shallowsky.com/linux/noaltscreen.html
+set t_ti= t_te=
+
 aug colortheme
   au ColorScheme * hi! link pythonFunction Normal
   au ColorScheme * hi link DirvishArg Const
