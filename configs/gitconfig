@@ -46,13 +46,6 @@
 	last = log -1 HEAD
 	unstage = reset HEAD --
 
-    # Divergence (commits we added and commits remote added)
-    div = divergence
-
-    # Goodness (summary of diff lines added/removed/total)
-    gn = goodness
-    gnc = goodness --cached
-
     # Fancy logging.
     #   h = head
     #   hp = head with patch

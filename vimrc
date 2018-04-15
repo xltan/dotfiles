@@ -20,7 +20,6 @@ let delimitMate_jump_expansion = 1
 let delimitMate_smart_matchpairs = '^\%(\w\|\"\|''\|\!\|[£$]\|[^[:space:][:punct:]]\)'
 Plug 'Raimondi/delimitMate'
 
-Plug 'tpope/vim-endwise' " some cases work only after delimitMate
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
@@ -29,22 +28,14 @@ Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-fugitive'
-Plug 'tpope/vim-markdown'
-let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh', 'cpp']
 
-let g:detectindent_preferred_when_mixed = 1
-let g:detectindent_max_lines_to_analyse = 128
-Plug 'ciaranm/detectindent'
+let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh', 'cpp']
 
 let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
 Plug 'wellle/targets.vim'
 
-Plug 'vim-utils/vim-man'
-map <leader>v <Plug>(Vman)
-
 if has('mac')
-  Plug 'wookayin/vim-typora'
   Plug 'rizzatti/dash.vim'
   nmap <silent><buffer> K <Plug>DashSearch
   let g:dash_map = {
@@ -56,7 +47,6 @@ if has('mac')
 else
   Plug 'rhysd/devdocs.vim'
   nmap <silent><buffer> K <Plug>(devdocs-under-cursor)
-  command! -nargs=0 -complete=command Typora execute 'silent! !start C:\\Program Files\\Typora\\Typora.exe '. expand('%:p')
 endif
 
 Plug 'mhinz/vim-signify'
@@ -69,11 +59,11 @@ xmap ac <plug>(signify-motion-inner-visual)
 nnoremap [r :SignifyRefresh<CR>
 nnoremap ]r :SignifyToggle<CR>
 
-Plug 'haya14busa/vim-asterisk'
-map *  <Plug>(asterisk-z*)
-map #  <Plug>(asterisk-z#)
-map g* <Plug>(asterisk-gz*)
-map g# <Plug>(asterisk-gz#)
+" Plug 'haya14busa/vim-asterisk'
+" map *  <Plug>(asterisk-z*)
+" map #  <Plug>(asterisk-z#)
+" map g* <Plug>(asterisk-gz*)
+" map g# <Plug>(asterisk-gz#)
 
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
@@ -95,7 +85,12 @@ let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags']
 if !has('win32')
   let g:gutentags_cache_dir = $VIMFILES . '/.cache'
+  Plug 'vim-utils/vim-man'
+  map <leader>v <Plug>(Vman)
 endif
+
+let g:loaded_netrw       = 1
+let g:loaded_netrwPlugin = 1
 
 Plug 'justinmk/vim-dirvish'
 fun! SetupDirvish()
@@ -119,8 +114,6 @@ function! DirvishSetup()
   for item in split(&wildignore, ',')
     call add(xp, glob2regpat(item).'\=')
   endfor
-  " exec 'silent keeppatterns g/\(' . join(xp, '\|'). 'tags\|'. '\)/d'
-  " exec 'silent keeppatterns g/\(' . join(xp, '\|'). '\/tags\|' . '\)/d'
   exec 'silent keeppatterns g/\(' . join(xp, '\|'). '\|[\/|\\]tags' . '\)/d'
   exec 'sort ,^.*[\/],'
 endfunc
@@ -141,10 +134,6 @@ let g:gtfo#terminals = { 'win': 'cmd.exe /k' }
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
 let g:lt_height = 9
-
-Plug 'junegunn/vim-easy-align'
-xmap ga <Plug>(EasyAlign)
-nmap ga <Plug>(EasyAlign)
 
 " Plug 'natebosch/vim-lsc'
 " let g:lsc_server_commands = {'python': 'pyls'}
@@ -321,9 +310,6 @@ Plug 'xltan/vim-project', { 'branch': 'jpmv27_master' }
 " Plug 'editorconfig/editorconfig-vim'
 
 " language related
-Plug 'rust-lang/rust.vim'
-let g:rustfmt_autosave = 0
-
 Plug 'vim-python/python-syntax'
 let g:python_version_2 = 1
 let g:python_highlight_class_vars = 0
@@ -344,21 +330,29 @@ let g:cpp_member_variable_highlight = 1
 let g:cpp_class_decl_highlight = 1
 Plug 'octol/vim-cpp-enhanced-highlight'
 
+Plug 'pboettch/vim-cmake-syntax'
+
+Plug 'milinnovations/vim-actionscript'
+Plug 'tikhomirov/vim-glsl'
+
+Plug 'rust-lang/rust.vim'
+let g:rustfmt_autosave = 0
+
 Plug 'fatih/vim-go'
 let g:go_def_mode = 'godef'
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
 
-Plug 'pboettch/vim-cmake-syntax'
 Plug 'mattn/emmet-vim'
 let g:user_emmet_install_global = 0
 let g:user_emmet_leader_key='<C-y>'
+aug vimrc_emmet
+  au!
+  au FileType html,css EmmetInstall
+aug END
 
 Plug 'leafgarland/typescript-vim'
-" Plug 'HerringtonDarkholme/yats.vim'
 Plug 'Quramy/tsuquyomi'
-Plug 'milinnovations/vim-actionscript'
-Plug 'tikhomirov/vim-glsl'
 
 call plug#end()
 
@@ -407,6 +401,8 @@ function! s:option_map(...)
 endfunction
 call s:option_map('p', 'paste')
 call s:option_map('e', 'expandtab', 'setlocal expandtab!<bar>retab')
+call s:option_map('t', 'ts',
+    \ 'let &ts = input("tabstop (". &ts ."): ")<bar>let &sw=&ts<bar>redraw')
 
 set synmaxcol=500
 
@@ -439,7 +435,7 @@ set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(
 
 " set cursorline
 set nu
-set foldcolumn=1
+" set foldcolumn=1
 set hlsearch
 set nowrap
 
@@ -531,7 +527,6 @@ aug END
 
 aug vimrc_cpp
   au!
-  au FileType c,cpp,objc,objcpp,vim DetectIndent
   au FileType c,cpp,objc,objcpp command! A call s:a('e')
   au FileType c,cpp,objc,objcpp command! AV call s:a('botright vertical split')
   au FileType c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
@@ -543,9 +538,7 @@ aug vimrc_cpp
   au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl,dot setlocal commentstring=//\ %s
   au FileType cmake setlocal commentstring=#\ %s
   au FileType c,vim silent! nunmap <buffer> K
-  au FileType c,cpp setlocal keywordprg=:Vman
-  au FileType cpp nmap <silent><buffer> K <Plug>DashSearch
-  " au FileType cpp setlocal keywordprg=cppman
+  au FileType c setlocal keywordprg=:Vman
   " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
 aug END
 
@@ -560,7 +553,6 @@ aug END
 
 aug vimrc_misc
   au!
-  au FileType html,css EmmetInstall
   au FileType help wincmd L | nnoremap <buffer><silent> q :q
   au FileType git,gitcommit setlocal foldmethod=syntax
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1

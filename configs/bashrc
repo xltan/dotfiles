@@ -44,6 +44,7 @@ export HISTTIMEFORMAT="%Y/%m/%d %H:%M:%S:   "
 export GOPATH="$HOME/go"
 if [ -z "$PATH_EXPANDED" ]; then
   export PATH="$HOME/.local/bin:$HOME/.bin:$HOME/.cargo/bin:$GOPATH/bin:/usr/local/bin:/usr/local/sbin:$PATH"
+  export LESS='-F -X -R '$LESS
   export PATH_EXPANDED=1
 fi
 export EDITOR=vim
