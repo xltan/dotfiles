@@ -64,6 +64,7 @@
     la = !git l --all
     b = "!. ~/.githelpers && pretty_git_branch"
     bs = "!. ~/.githelpers && pretty_git_branch_sorted"
+	abbr = config --get-regexp alias
 
 [merge]
 	tool = vimdiff
