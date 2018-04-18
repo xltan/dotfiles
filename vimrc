@@ -11,7 +11,7 @@ set fileencoding=utf-8
 
 let $VIMFILES=split(&rtp, ",")[0]
 call plug#begin($VIMFILES . '/bundle')
-" Plug 'morhetz/gruvbox'
+Plug 'morhetz/gruvbox'
 Plug 'xltan/vim-hybrid'
 " Plug 'rakr/vim-one'
 
@@ -29,7 +29,7 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-fugitive'
 
-let g:markdown_fenced_languages = ['cpp', 'go', 'python', 'sh', 'cpp']
+let g:markdown_fenced_languages = ['make', 'cpp', 'go', 'python', 'sh', 'cpp']
 
 let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
@@ -93,7 +93,7 @@ let g:loaded_netrw       = 1
 let g:loaded_netrwPlugin = 1
 
 Plug 'justinmk/vim-dirvish'
-fun! SetupDirvish()
+fun! s:setup_dirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
   silent! unmap <silent><buffer> <C-p>
   nnoremap <silent><buffer> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
@@ -105,7 +105,7 @@ endfun
 
 aug dirvish
   au!
-  au FileType dirvish call SetupDirvish()
+  au FileType dirvish call <SID>setup_dirvish()
 aug END
 
 function! DirvishSetup()
@@ -227,7 +227,7 @@ let g:colorizer_nomap = 1
 
 Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
 let g:Lf_ShortcutF = '<C-P>'
-let g:Lf_WindowHeight = 0.3
+let g:Lf_WindowHeight = 0.35
 let g:Lf_CacheDiretory = $VIMFILES
 if !exists('g:Lf_CommandMap')
   let g:Lf_CommandMap = {
@@ -247,49 +247,6 @@ if !exists('g:Lf_CommandMap')
   let g:Lf_UseCache = 1
   let g:Lf_NeedCacheTime = 0.3
   let g:Lf_CursorBlink = 0
-  let g:Lf_StlPalette = {
-      \'stlName': {
-      \    'gui': 'NONE',
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlCategory': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlNameOnlyMode': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlFullPathMode': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlFuzzyMode': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlRegexMode': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlCwd': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlBlank': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlLineInfo': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \},
-      \'stlTotal': {
-      \    'guifg': '#c6cace',
-      \    'guibg': '#232c31',
-      \}
-      \}
 endif
 
 nnoremap <leader>h :LeaderfMru<CR>
@@ -357,7 +314,6 @@ Plug 'Quramy/tsuquyomi'
 call plug#end()
 
 call project#rc()
-
 " Eager-load these plugins so we can override their settings. {{{
 runtime! plugin/unimpaired.vim
 runtime! plugin/rsi.vim
@@ -416,8 +372,8 @@ endif
 set t_ti= t_te=
 
 aug colortheme
+  au!
   au ColorScheme * hi! link pythonFunction Normal
-  au ColorScheme * hi link DirvishArg Const
 aug END
 
 set background=dark
@@ -426,6 +382,7 @@ colorscheme hybrid
 " colorscheme one
 " set background=light
 " let g:gruvbox_contrast_dark = "medium"
+" let g:gruvbox_invert_selection = 0
 " let g:gruvbox_bold = 0
 " let g:gruvbox_italic = 0
 " colorscheme gruvbox
@@ -434,7 +391,7 @@ set guioptions=
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 " set cursorline
-set nu
+" set nu
 " set foldcolumn=1
 set hlsearch
 set nowrap
@@ -444,6 +401,7 @@ set listchars=tab:\|\ ,eol:¬
 set autoindent
 set smarttab
 set sw=4 ts=4
+set timeoutlen=500 ttimeoutlen=0
 
 set laststatus=2
 
@@ -522,6 +480,7 @@ aug vimrc_python
   au FileType python nmap <silent> <buffer> <leader>i :update<CR>:Isort<CR>:ImportRemove<CR>
   au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
   au FileType python nmap <silent> <buffer> [s <C-^>
+  " au FileType python syn sync match pythonSync grouphere NONE '):$'
   " au FileType python setlocal equalprg=yapf
 aug END
 
@@ -555,7 +514,7 @@ aug vimrc_misc
   au!
   au FileType help wincmd L | nnoremap <buffer><silent> q :q
   au FileType git,gitcommit setlocal foldmethod=syntax
-  au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
+  au FileType leaderf setlocal nonumber
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
   au BufRead *.jsfl setlocal ft=actionscript
@@ -651,9 +610,8 @@ vnoremap > >gv
 nnoremap gV `[v`]
 nnoremap Y y$
 
-nnoremap <C-e> 5<C-e>
-nnoremap <C-y> 5<C-y>
-
+nnoremap <C-e> 10j
+nnoremap <C-y> 10k
 nnoremap <silent> <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
     \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
     \ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
@@ -673,25 +631,25 @@ elseif has("win32")
   set linespace=4
   set gfw=Microsoft\ Yahei\ Mono:h9
   if !has('nvim')
-    set rop=type:directx,gamma:1.2
+    set rop=type:directx,gamma:1.1
   else
     let g:Guifont="Monaco:h9"
   endif
 
   let s:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
-  function! SvnCommand(cmd, path)
+  function! s:svn_command(cmd, path)
     execute 'silent! !start '. s:tortoise_svn_path. ' /command:'. a:cmd. ' /path:"'. a:path. '"'
   endfunction
-  nnoremap <silent> <leader>tu :call SvnCommand('update /closeonend:3', expand('%:p'))<CR>
-  nnoremap <silent> <leader>tw :call SvnCommand('commit /closeonend:3', expand('%:p'))<CR>
-  nnoremap <silent> <leader>tc :call SvnCommand('commit /closeonend:3', getcwd())<CR>
-  nnoremap <silent> <leader>tx :call SvnCommand('cleanup /closeonend:3', expand('%:p:h'))<CR>
-  nnoremap <silent> <leader>tm :call SvnCommand('update /closeonend:3', getcwd())<CR>
-  nnoremap <silent> <leader>tb :call SvnCommand('blame /line:'. line('.'), expand('%:p'))<CR>
-  nnoremap <silent> <leader>tl :call SvnCommand('log', expand('%:p'))<CR>
-  nnoremap <silent> <leader>ta :call SvnCommand('add', expand('%:p'))<CR>
-  nnoremap <silent> <leader>td :call SvnCommand('diff', expand('%:p'))<CR>
-  nnoremap <silent> <leader>tr :call SvnCommand('revert', expand('%:p'))<CR>
+  nnoremap <silent> <leader>tu :call <SID>svn_command('update /closeonend:3', expand('%:p'))<CR>
+  nnoremap <silent> <leader>tw :call <SID>svn_command('commit /closeonend:3', expand('%:p'))<CR>
+  nnoremap <silent> <leader>tc :call <SID>svn_command('commit /closeonend:3', getcwd())<CR>
+  nnoremap <silent> <leader>tx :call <SID>svn_command('cleanup /closeonend:3', expand('%:p:h'))<CR>
+  nnoremap <silent> <leader>tm :call <SID>svn_command('update /closeonend:3', getcwd())<CR>
+  nnoremap <silent> <leader>tb :call <SID>svn_command('blame /line:'. line('.'), expand('%:p'))<CR>
+  nnoremap <silent> <leader>tl :call <SID>svn_command('log', expand('%:p'))<CR>
+  nnoremap <silent> <leader>ta :call <SID>svn_command('add', expand('%:p'))<CR>
+  nnoremap <silent> <leader>td :call <SID>svn_command('diff', expand('%:p'))<CR>
+  nnoremap <silent> <leader>tr :call <SID>svn_command('revert', expand('%:p'))<CR>
 endif
 
 nmap <silent> <leader>q :bd<CR>
