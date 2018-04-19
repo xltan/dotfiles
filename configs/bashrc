@@ -9,8 +9,6 @@
 export PLATFORM=$(uname -s)
 [ -f /etc/bashrc ] && . /etc/bashrc
 
-BASE=$(dirname $(readlink $BASH_SOURCE))
-
 # Options
 # --------------------------------------------------------------------
 
@@ -28,7 +26,9 @@ shopt -s checkwinsize
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 
 ### Disable CTRL-S and CTRL-Q
-[[ $- == *i* ]] && stty -ixon && bind '\C-w:backward-kill-word'
+[[ $- != *i* ]] && return
+
+stty -ixon && bind '\C-w:backward-kill-word'
 
 # Environment variables
 # --------------------------------------------------------------------
@@ -59,15 +59,11 @@ export COPYFILE_DISABLE=true
 
 alias ..='cd ..'
 alias ...='cd ../..'
-alias ....='cd ../../..'
-alias .....='cd ../../../..'
-alias ......='cd ../../../../..'
-alias cd.='cd ..'
-alias cd..='cd ..'
 alias l='ls -alF'
 alias ll='ls -l'
-alias vi='vim'
 alias hc="history -c"
+alias cdpath="export CDPATH=.:$PWD"
+
 
 ### Colored ls
 if [ -x /usr/bin/dircolors ]; then
@@ -107,51 +103,8 @@ viw() {
 # fzf (https://github.com/junegunn/fzf)
 # --------------------------------------------------------------------
 
-fd() {
-  local dir
-  dir=$(find . -maxdepth 1 -path './.*' -prune -o -type d -print | sed '1d;s#^./##' |
-        fzf --height 20 --reverse --query "$1" --select-1 --exit-0) && cd "$dir"
-}
-
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview' --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort' --header 'Press CTRL-Y to copy command into clipboard' --border"
-
-# ftags - search ctags
-ftags() {
-  local line
-  [ -e tags ] &&
-  line=$(
-    awk 'BEGIN { FS="\t" } !/^!/ {print toupper($4)"\t"$1"\t"$2"\t"$3}' tags |
-    cut -c1-$COLUMNS | fzf --nth=2 --tiebreak=begin
-  ) && $EDITOR $(cut -f3 <<< "$line") -c "set nocst" \
-                                      -c "silent tag $(cut -f2 <<< "$line")"
-}
-
-# fe [FUZZY PATTERN] - Open the selected file with the default editor
-#   - Bypass fuzzy finder if there's only one match (--select-1)
-#   - Exit if there's no match (--exit-0)
-fe() {
-  local file
-  file=$(fzf-tmux --query="$1" --select-1 --exit-0)
-  [ -n "$file" ] && ${EDITOR:-vim} "$file"
-}
-
-# Modified version where you can press
-#   - CTRL-O to open with `open` command,
-#   - CTRL-E or Enter key to open with the $EDITOR
-fo() {
-  local out file key
-  IFS=$'\n' read -d '' -r -a out < <(fzf-tmux --query="$1" --exit-0 --expect=ctrl-o,ctrl-e)
-  key=${out[0]}
-  file=${out[1]}
-  if [ -n "$file" ]; then
-    if [ "$key" = ctrl-o ]; then
-      open "$file"
-    else
-      ${EDITOR:-vim} "$file"
-    fi
-  fi
-}
 
 # v - open files in ~/.viminfo
 v() {
@@ -165,8 +118,6 @@ v() {
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 # fzf end
 # --------------------------------------------------------------------
-
-alias cdpath="export CDPATH=.:$PWD"
 
 TMUX_SESSION=$USER
 if [[ -n "$BASHRC_TMUX_SESSION" ]]; then
