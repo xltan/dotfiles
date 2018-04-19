@@ -1,33 +1,25 @@
 # .bashrc for OS X and Ubuntu
 # ====================================================================
-# - https://github.com/junegunn/dotfiles
-# - junegunn.c@gmail.com
 
 # System default
 # --------------------------------------------------------------------
+[[ $- != *i* ]] && return
 
 export PLATFORM=$(uname -s)
 [ -f /etc/bashrc ] && . /etc/bashrc
 
+BASE=$(dirname $(readlink $BASH_SOURCE))
 # Options
 # --------------------------------------------------------------------
 
 ### Append to the history file
 shopt -s histappend
 
-### Check the window size after each command ($LINES, $COLUMNS)
-shopt -s checkwinsize
-
-### Better-looking less for binary files
-[ -x /usr/bin/lesspipe    ] && eval "$(SHELL=/bin/sh lesspipe)"
-
 ### Bash completion
 [ -f /etc/bash_completion ] && . /etc/bash_completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
 
 ### Disable CTRL-S and CTRL-Q
-[[ $- != *i* ]] && return
-
 stty -ixon && bind '\C-w:backward-kill-word'
 
 # Environment variables
@@ -38,7 +30,6 @@ export HISTCONTROL=ignoreboth:erasedups
 export HISTSIZE=
 export HISTFILESIZE=
 export HISTTIMEFORMAT="%Y/%m/%d %H:%M:%S:   "
-[ -z "$TMPDIR" ] && TMPDIR=/tmp
 
 ### Global
 export GOPATH="$HOME/go"
@@ -54,18 +45,6 @@ export LC_ALL=en_US.UTF-8
 ### OS X
 export COPYFILE_DISABLE=true
 
-# Aliases
-# --------------------------------------------------------------------
-
-alias ..='cd ..'
-alias ...='cd ../..'
-alias l='ls -alF'
-alias ll='ls -l'
-alias hc="history -c"
-alias cdpath="export CDPATH=.:$PWD"
-
-
-### Colored ls
 if [ -x /usr/bin/dircolors ]; then
   eval "`dircolors -b`"
   alias ls='ls --color=auto'
@@ -74,19 +53,13 @@ elif [ "$PLATFORM" = Darwin ]; then
   alias ls='ls -G'
 fi
 
-function mvim {
-  if [ -n "$1" ] ; then
-    command mvim --remote-silent "$@"
-  elif [ -n "$( command mvim --serverlist )" ] ; then
-    command mvim --remote-send ":call foreground()<CR>:enew<CR>:<BS>"
-  else
-    command mvim
-  fi
-}
+alias ..='cd ..'
+alias l='ls -alF'
+alias ll='ls -l'
+alias cdpath="export CDPATH=.:$PWD"
 
 # Prompt
 # --------------------------------------------------------------------
-
 if [ -n "$SSH_CONNECTION" ] ; then
   PS1="\h:\w> "
 else
@@ -96,13 +69,22 @@ fi
 # Shortcut functions
 # --------------------------------------------------------------------
 
+mvim() {
+  if [ -n "$1" ] ; then
+    command mvim --remote-silent "$@"
+  elif [ -n "$( command mvim --serverlist )" ] ; then
+    command mvim --remote-send ":call foreground()<CR>:enew<CR>:<BS>"
+  else
+    command mvim
+  fi
+}
+
 viw() {
   vim "$(which "$1")"
 }
 
 # fzf (https://github.com/junegunn/fzf)
 # --------------------------------------------------------------------
-
 export FZF_DEFAULT_COMMAND='rg --files'
 export FZF_CTRL_R_OPTS="--preview 'echo {}' --preview-window down:3:hidden:wrap --bind '?:toggle-preview' --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort' --header 'Press CTRL-Y to copy command into clipboard' --border"
 
