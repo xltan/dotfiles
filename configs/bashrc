@@ -54,6 +54,7 @@ elif [ "$PLATFORM" = Darwin ]; then
 fi
 
 alias ..='cd ..'
+alias ...='cd ../..'
 alias l='ls -alF'
 alias ll='ls -l'
 alias cdpath="export CDPATH=.:$PWD"
