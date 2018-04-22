@@ -11,9 +11,7 @@ set fileencoding=utf-8
 
 let $VIMFILES=split(&rtp, ",")[0]
 call plug#begin($VIMFILES . '/bundle')
-Plug 'morhetz/gruvbox'
-Plug 'xltan/vim-hybrid'
-" Plug 'rakr/vim-one'
+Plug 'arcticicestudio/nord-vim'
 
 let delimitMate_expand_cr = 1
 let delimitMate_jump_expansion = 1
@@ -24,10 +22,10 @@ Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
 Plug 'tpope/vim-commentary'
-Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
-Plug 'tpope/vim-fugitive'
+" Plug 'tpope/vim-eunuch'
+" Plug 'tpope/vim-fugitive'
 
 let g:markdown_fenced_languages = ['make', 'cpp', 'go', 'python', 'sh', 'cpp']
 
@@ -120,12 +118,7 @@ endfunc
 let g:dirvish_mode = 'call DirvishSetup()'
 
 Plug 'justinmk/vim-sneak'
-let g:sneak#use_ic_scs = 1
 let g:sneak#label = 1
-map f <Plug>Sneak_f
-map F <Plug>Sneak_F
-map t <Plug>Sneak_t
-map T <Plug>Sneak_T
 map <M-;> <Plug>Sneak_,
 
 Plug 'justinmk/vim-gtfo'
@@ -147,7 +140,7 @@ else
 endif
 
 Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }
-let g:ycm_min_num_of_chars_for_completion = 2
+let g:ycm_min_num_of_chars_for_completion = 3
 let g:ycm_max_num_identifier_candidates = 8
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
@@ -220,10 +213,10 @@ if executable("rg")
   set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
 
-Plug 'lilydjwg/colorizer'
-let g:colorizer_startup = 0
-let g:colorizer_maxlines = 100
-let g:colorizer_nomap = 1
+" Plug 'lilydjwg/colorizer'
+" let g:colorizer_startup = 0
+" let g:colorizer_maxlines = 100
+" let g:colorizer_nomap = 1
 
 Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
 let g:Lf_ShortcutF = '<C-P>'
@@ -282,8 +275,8 @@ Plug 'fisadev/vim-isort'
 let c_no_curly_error = 1
 
 let g:cpp_no_function_highlight = 0
-let g:cpp_class_scope_highlight = 1
-let g:cpp_member_variable_highlight = 1
+let g:cpp_class_scope_highlight = 0
+let g:cpp_member_variable_highlight = 0
 let g:cpp_class_decl_highlight = 1
 Plug 'octol/vim-cpp-enhanced-highlight'
 
@@ -292,24 +285,24 @@ Plug 'pboettch/vim-cmake-syntax'
 Plug 'milinnovations/vim-actionscript'
 Plug 'tikhomirov/vim-glsl'
 
-Plug 'rust-lang/rust.vim'
-let g:rustfmt_autosave = 0
+" Plug 'rust-lang/rust.vim'
+" let g:rustfmt_autosave = 0
 
-Plug 'fatih/vim-go'
-let g:go_def_mode = 'godef'
-let g:go_fmt_command = "goimports"
-let g:go_list_type = "quickfix"
+" Plug 'fatih/vim-go'
+" let g:go_def_mode = 'godef'
+" let g:go_fmt_command = "goimports"
+" let g:go_list_type = "quickfix"
 
-Plug 'mattn/emmet-vim'
-let g:user_emmet_install_global = 0
-let g:user_emmet_leader_key='<C-y>'
-aug vimrc_emmet
-  au!
-  au FileType html,css EmmetInstall
-aug END
+" Plug 'mattn/emmet-vim'
+" let g:user_emmet_install_global = 0
+" let g:user_emmet_leader_key='<C-y>'
+" aug vimrc_emmet
+"   au!
+"   au FileType html,css EmmetInstall
+" aug END
 
-Plug 'leafgarland/typescript-vim'
-Plug 'Quramy/tsuquyomi'
+" Plug 'leafgarland/typescript-vim'
+" Plug 'Quramy/tsuquyomi'
 
 call plug#end()
 
@@ -377,15 +370,10 @@ aug colortheme
 aug END
 
 set background=dark
-let g:hybrid_less_color = 0
-colorscheme hybrid
-" colorscheme one
-" set background=light
-" let g:gruvbox_contrast_dark = "medium"
-" let g:gruvbox_invert_selection = 0
-" let g:gruvbox_bold = 0
-" let g:gruvbox_italic = 0
-" colorscheme gruvbox
+" let g:hybrid_less_color = 0
+" colorscheme hybrid
+let g:nord_comment_brightness = 15
+colorscheme nord
 
 set guioptions=
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
@@ -778,3 +766,4 @@ function! s:source_if_exists(file)
 endfunction
 
 call s:source_if_exists($VIMFILES.'/.localrc')
+
