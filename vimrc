@@ -149,9 +149,9 @@ let g:ycm_key_list_select_completion = ['<C-N>', '<DOWN>']
 let g:ycm_collect_identifiers_from_comments_and_strings = 1
 let g:ycm_complete_in_comments = 1
 let g:ycm_always_populate_location_list = 1
-let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_error_symbol = s:error_symbol
 let g:ycm_warning_symbol = s:warning_symbol
+" let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_filetype_blacklist = {
     \ 'tagbar' : 1,
     \ 'qf' : 1,
@@ -164,6 +164,7 @@ let g:ycm_filetype_blacklist = {
     \ 'infolog' : 1,
     \ 'ctrlsf' : 1,
     \ 'mail' : 1,
+    \ 'project' : 1,
     \}
 nmap <silent> gd :YcmCompleter GoTo<CR>
 nmap <silent> gz :YcmCompleter FixIt<CR>
@@ -369,6 +370,7 @@ set t_ti= t_te=
 aug colortheme
   au!
   au ColorScheme * hi! link pythonFunction Normal
+  au ColorScheme * hi! link YcmErrorSign ALEErrorSign
   au ColorScheme * hi Statement gui=NONE
 aug END
 
