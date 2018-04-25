@@ -80,7 +80,7 @@ let g:snips_github = "https://github.com/xltan"
 
 Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_add_default_project_roots = 0
-let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags']
+let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags', '.clang-format', '.ignore', '.ycm_extra_conf.py']
 if !has('win32')
   let g:gutentags_cache_dir = $VIMFILES . '/.cache'
   Plug 'vim-utils/vim-man'
@@ -142,7 +142,8 @@ endif
 Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }
 let g:ycm_enable_diagnostic_highlighting = 0
 let g:ycm_min_num_of_chars_for_completion = 3
-let g:ycm_max_num_identifier_candidates = 8
+let g:ycm_max_num_candidates = 18
+let g:ycm_max_num_identifier_candidates = 6
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 let g:ycm_key_list_select_completion = ['<C-N>', '<DOWN>']
@@ -195,7 +196,7 @@ let g:ale_linters = {
 \}
 let g:ale_sign_error = s:error_symbol
 let g:ale_sign_warning = s:warning_symbol
-" let g:ale_lint_on_text_changed = 'never'
+let g:ale_lint_on_text_changed = 'never'
 
 Plug 'skywind3000/asyncrun.vim'
 command! -bang -nargs=* -complete=file Make AsyncRun! -program=make @ <args>
@@ -356,8 +357,6 @@ call s:option_map('e', 'expandtab', 'setlocal expandtab!<bar>retab')
 call s:option_map('t', 'ts',
     \ 'let &ts = input("tabstop (". &ts ."): ")<bar>let &sw=&ts<bar>redraw')
 
-set synmaxcol=500
-
 if has("termguicolors")
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
   let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
@@ -367,18 +366,20 @@ endif
 " http://www.shallowsky.com/linux/noaltscreen.html
 set t_ti= t_te=
 
-aug colortheme
-  au!
-  au ColorScheme * hi! link pythonFunction Normal
-  au ColorScheme * hi! link YcmErrorSign ALEErrorSign
-  au ColorScheme * hi Statement gui=NONE
-aug END
-
 set background=dark
 " let g:hybrid_less_color = 0
 " colorscheme hybrid
 let g:nord_comment_brightness = 15
 colorscheme nord
+
+hi! link pythonFunction Normal
+hi! link Error ALEErrorSign
+hi! link WarningMsg SpecialChar
+hi! link Constant Number
+hi! link Special SpecialChar
+hi! link pythonBytesEscape SpecialChar
+hi! link DirvishSuffix Normal
+hi Statement gui=none
 
 set guioptions=
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
