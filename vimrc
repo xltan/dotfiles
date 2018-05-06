@@ -11,7 +11,7 @@ set fileencoding=utf-8
 
 let $VIMFILES=split(&rtp, ",")[0]
 call plug#begin($VIMFILES . '/bundle')
-Plug 'arcticicestudio/nord-vim'
+Plug 'arcticicestudio/nord-vim', {'branch': 'develop'}
 
 let delimitMate_expand_cr = 1
 let delimitMate_jump_expansion = 1
@@ -24,7 +24,7 @@ Plug 'tpope/vim-rsi'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
-" Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-eunuch'
 " Plug 'tpope/vim-fugitive'
 
 let g:markdown_fenced_languages = ['make', 'cpp', 'go', 'python', 'sh', 'cpp']
@@ -80,7 +80,9 @@ let g:snips_github = "https://github.com/xltan"
 
 Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_add_default_project_roots = 0
-let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags']
+let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags', '.clang-format', '.ignore', '.ycm_extra_conf.py']
+let g:gutentags_exclude_project_root = ['/usr/local', $HOME]
+
 if !has('win32')
   let g:gutentags_cache_dir = $VIMFILES . '/.cache'
   Plug 'vim-utils/vim-man'
@@ -91,7 +93,7 @@ let g:loaded_netrw       = 1
 let g:loaded_netrwPlugin = 1
 
 Plug 'justinmk/vim-dirvish'
-fun! s:setup_dirvish()
+func! s:setup_dirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
   silent! unmap <silent><buffer> <C-p>
   nnoremap <silent><buffer> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
@@ -106,7 +108,7 @@ aug dirvish
   au FileType dirvish call <SID>setup_dirvish()
 aug END
 
-function! DirvishSetup()
+func! DirvishSetup()
   let text = getline('.')
   let xp = []
   for item in split(&wildignore, ',')
@@ -140,17 +142,19 @@ else
 endif
 
 Plug 'Valloric/YouCompleteMe' " , { 'frozen' : 1 }
+let g:ycm_enable_diagnostic_highlighting = 0
 let g:ycm_min_num_of_chars_for_completion = 3
-let g:ycm_max_num_identifier_candidates = 8
+let g:ycm_max_num_candidates = 18
+let g:ycm_max_num_identifier_candidates = 6
 let g:ycm_confirm_extra_conf = 0
 let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
 let g:ycm_key_list_select_completion = ['<C-N>', '<DOWN>']
 let g:ycm_collect_identifiers_from_comments_and_strings = 1
 let g:ycm_complete_in_comments = 1
 let g:ycm_always_populate_location_list = 1
-let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_error_symbol = s:error_symbol
 let g:ycm_warning_symbol = s:warning_symbol
+" let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_filetype_blacklist = {
     \ 'tagbar' : 1,
     \ 'qf' : 1,
@@ -163,17 +167,16 @@ let g:ycm_filetype_blacklist = {
     \ 'infolog' : 1,
     \ 'ctrlsf' : 1,
     \ 'mail' : 1,
+    \ 'project' : 1,
     \}
-
 nmap <silent> gd :YcmCompleter GoTo<CR>
 nmap <silent> gz :YcmCompleter FixIt<CR>
-
-function! YcmOnDeleteChar()
+func! YcmOnDeleteChar()
   if pumvisible()
     return "\<C-y>\<Plug>delimitMateBS"
   endif
   return "\<Plug>delimitMateBS"
-endfunction
+endfunc
 imap <expr><BS> YcmOnDeleteChar()
 
 if has('win32')
@@ -183,6 +186,10 @@ else
   command! -nargs=? -complete=file_in_path -bang YcmGen YcmGenerateConfig -f
 endif
 
+Plug 'Shougo/echodoc.vim'
+set noshowmode
+let g:echodoc_enable_at_startup = 1
+
 Plug 'w0rp/ale'
 let g:ale_linters = {
 \   'python': ['flake8'],
@@ -191,7 +198,7 @@ let g:ale_linters = {
 \}
 let g:ale_sign_error = s:error_symbol
 let g:ale_sign_warning = s:warning_symbol
-" let g:ale_lint_on_text_changed = 'never'
+let g:ale_lint_on_text_changed = 'never'
 
 Plug 'skywind3000/asyncrun.vim'
 command! -bang -nargs=* -complete=file Make AsyncRun! -program=make @ <args>
@@ -220,11 +227,13 @@ endif
 
 Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
 let g:Lf_ShortcutF = '<C-P>'
-let g:Lf_WindowHeight = 0.35
+let g:Lf_WindowHeight = 0.4
 let g:Lf_CacheDiretory = $VIMFILES
+let g:Lf_HideHelp = 0
+
 if !exists('g:Lf_CommandMap')
   let g:Lf_CommandMap = {
-      \ '<ESC>': ['<C-I>'],
+      \ '<Tab>': ['<C-I>'],
       \ '<C-C>': ['<Esc>', '<C-C>'],
       \ '<C-]>': ['<C-V>'],
       \ '<C-X>': ['<C-S>'],
@@ -243,7 +252,7 @@ if !exists('g:Lf_CommandMap')
 endif
 
 nnoremap <leader>h :LeaderfMru<CR>
-nnoremap <leader>b :LeaderfBuffer<CR>
+nnoremap <leader>b :LeaderfFunction!<CR>
 nnoremap <leader>j :LeaderfBufTag<CR>
 nnoremap <leader>tg :LeaderfTag<CR>
 nnoremap <leader>: :LeaderfHistoryCmd<CR>
@@ -272,13 +281,12 @@ let g:python_slow_sync = 0
 Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'fisadev/vim-isort'
 
-let c_no_curly_error = 1
-
-let g:cpp_no_function_highlight = 0
-let g:cpp_class_scope_highlight = 0
-let g:cpp_member_variable_highlight = 0
-let g:cpp_class_decl_highlight = 1
-Plug 'octol/vim-cpp-enhanced-highlight'
+" let c_no_curly_error = 1
+" let g:cpp_no_func_highlight = 0
+" let g:cpp_class_scope_highlight = 0
+" let g:cpp_member_variable_highlight = 0
+" let g:cpp_class_decl_highlight = 1
+" Plug 'octol/vim-cpp-enhanced-highlight'
 
 Plug 'pboettch/vim-cmake-syntax'
 
@@ -320,6 +328,7 @@ if !has("gui_running") " from tpope/vim-rsi
   set mouse=
 endif
  
+set mps+=<:>
 if !has('nvim')
   packadd! matchit
   unlet c_comment_strings
@@ -343,17 +352,16 @@ nnoremap <silent> cos :if exists("g:syntax_on") <Bar>
   \ else <Bar>
   \   syntax on <Bar>
   \ endif <CR>
-function! s:option_map(...)
+func! s:option_map(...)
   let [key, opt] = a:000[0:1]
   let op = get(a:, 3, 'set '.opt.'!')
   execute printf("nnoremap co%s :%s<bar>set %s?<CR>", key, op, opt)
-endfunction
+endfunc
+call s:option_map('w', 'wrap')
 call s:option_map('p', 'paste')
 call s:option_map('e', 'expandtab', 'setlocal expandtab!<bar>retab')
 call s:option_map('t', 'ts',
     \ 'let &ts = input("tabstop (". &ts ."): ")<bar>let &sw=&ts<bar>redraw')
-
-set synmaxcol=500
 
 if has("termguicolors")
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -364,16 +372,20 @@ endif
 " http://www.shallowsky.com/linux/noaltscreen.html
 set t_ti= t_te=
 
-aug colortheme
-  au!
-  au ColorScheme * hi! link pythonFunction Normal
-aug END
-
 set background=dark
 " let g:hybrid_less_color = 0
 " colorscheme hybrid
 let g:nord_comment_brightness = 15
 colorscheme nord
+
+hi! link pythonFunction Normal
+hi! link Error ALEErrorSign
+hi! link WarningMsg SpecialChar
+hi! link Constant Number
+hi! link Special SpecialChar
+hi! link pythonBytesEscape SpecialChar
+hi! link DirvishSuffix Normal
+hi Statement gui=none
 
 set guioptions=
 set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
@@ -405,7 +417,7 @@ set undofile
 
 set winwidth=100
 set winminwidth=10
-set completeopt=menuone,preview
+set completeopt=menuone
 
 set ignorecase smartcase
 set lazyredraw
@@ -422,7 +434,7 @@ set belloff=all
 set history=1000
 
 " for c-family files
-function! s:a(cmd)
+func! s:a(cmd)
   let name = expand('%:r')
   let ext = tolower(expand('%:e'))
   let sources = ['c', 'cc', 'cpp', 'm', 'mm']
@@ -441,9 +453,9 @@ function! s:a(cmd)
       endfor
     endif
   endfor
-endfunction
+endfunc
 
-function! s:super()
+func! s:super()
   if &filetype == 'python'
     let pattern = '^class [^(]*(\zs[^)]*\ze):'
     let lineno = search(pattern, 'n')
@@ -453,7 +465,7 @@ function! s:super()
     exe 'tag '.sm[len(sm)-1]
     return
   endif
-endfunction
+endfunc
 
 aug vimrc_go
   au!
@@ -535,14 +547,14 @@ nmap <C-n> :sav %%
 nnoremap <silent> <S-L> :nohl<CR>
 
 if has('gui_running')
-  function! s:get_buffer_list()
+  func! s:get_buffer_list()
     redir =>buflist
     silent! ls
     redir END
     return buflist
-  endfunction
+  endfunc
 
-  function! s:toggle_term()
+  func! s:toggle_term()
     let buflist = <SID>get_buffer_list()
     for bufnum in map(filter(split(buflist, '\n'), 'v:val =~# "Terminal"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
       if bufwinnr(bufnum) == -1
@@ -554,7 +566,7 @@ if has('gui_running')
       return
     endfor
     term ++curwin ++close
-  endfunction
+  endfunc
 
   nnoremap <silent> <C-z> :call <SID>toggle_term()<CR>
   tnoremap <C-z> <C-w>N<C-^>
@@ -625,9 +637,9 @@ elseif has("win32")
   endif
 
   let s:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
-  function! s:svn_command(cmd, path)
+  func! s:svn_command(cmd, path)
     execute 'silent! !start '. s:tortoise_svn_path. ' /command:'. a:cmd. ' /path:"'. a:path. '"'
-  endfunction
+  endfunc
   nnoremap <silent> <leader>tu :call <SID>svn_command('update /closeonend:3', expand('%:p'))<CR>
   nnoremap <silent> <leader>tw :call <SID>svn_command('commit /closeonend:3', expand('%:p'))<CR>
   nnoremap <silent> <leader>tc :call <SID>svn_command('commit /closeonend:3', getcwd())<CR>
@@ -643,7 +655,7 @@ endif
 nmap <silent> <leader>q :bd<CR>
 nmap <silent> <leader>w :tabclose<CR>
 
-function! s:make_args(args)
+func! s:make_args(args)
   let cmd = ''
   let bin = expand('%:p:r')
   if &filetype == 'python'
@@ -656,18 +668,18 @@ function! s:make_args(args)
     let cmd = "make %<"
   endif
   return cmd.' '.a:args
-endfunction
+endfunc
 
-function! s:run(args)
+func! s:run(args)
   exe '!'.<SID>make_args(a:args)
-endfunction
+endfunc
 
-function! s:async_run(args)
+func! s:async_run(args)
   exe 'AsyncRun '.<SID>make_args(a:args)
-endfunction
+endfunc
 
 nnoremap <silent> <leader>xm :update<CR>:call <SID>async_run('')<CR>
-nnoremap <silent> <leader>xx :AsyncStop<CR>
+nnoremap <silent> <leader>xx :AsyncStop!<CR>
 
 command! -nargs=* -complete=command Run call s:run(<q-args>)
 command! -nargs=0 -complete=command ImportRemove update | AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
@@ -690,7 +702,7 @@ cab Gp GoProject
 
 nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
 
-function! s:preserve(command)
+func! s:preserve(command)
   let _s=@/
   let l:winview = winsaveview()
   execute 'silent '.a:command
@@ -701,11 +713,11 @@ endfunc
 nmap _$ :call <SID>preserve("%s/\\s\\+$//e")<CR>
 nmap _= :call <SID>preserve("normal! gg=G")<CR>
 
-function! s:indent_len(str)
+func! s:indent_len(str)
   return type(a:str) == 1 ? len(matchstr(a:str, '^\s*')) : 0
-endfunction
+endfunc
 
-function! s:indent_object(op, skip_blank, b, e, bd, ed)
+func! s:indent_object(op, skip_blank, b, e, bd, ed)
   let i = min([s:indent_len(getline(a:b)), s:indent_len(getline(a:e))])
   let x = line('$')
   let d = [a:b, a:e]
@@ -735,7 +747,7 @@ function! s:indent_object(op, skip_blank, b, e, bd, ed)
     endwhile
   endfor
   execute printf('normal! %dGV%dG', max([1, d[0] + a:bd]), min([x, d[1] + a:ed]))
-endfunction
+endfunc
 xnoremap <silent> ii :<C-u>call <SID>indent_object('>=', 1, line("'<"), line("'>"), 0, 0)<CR>
 onoremap <silent> ii :<C-u>call <SID>indent_object('>=', 1, line('.'), line('.'), 0, 0)<CR>
 xnoremap <silent> ai :<C-u>call <SID>indent_object('>=', 1, line("'<"), line("'>"), -1, 0)<CR>
@@ -745,7 +757,7 @@ onoremap <silent> io :<C-u>call <SID>indent_object('==', 0, line('.'), line('.')
 xnoremap <silent> ao :<C-u>call <SID>indent_object('>=', 1, line("'<"), line("'>"), -1, 1)<CR>
 onoremap <silent> ao :<C-u>call <SID>indent_object('>=', 1, line('.'), line('.'), -1, 1)<CR>
 
-function! s:tab_message(cmd)
+func! s:tab_message(cmd)
   redir => message
   silent execute a:cmd
   redir END
@@ -756,14 +768,14 @@ function! s:tab_message(cmd)
     setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified
     silent put=message
   endif
-endfunction
+endfunc
 command! -nargs=+ -complete=command TabMessage call s:tab_message(<q-args>)
 
-function! s:source_if_exists(file)
+func! s:source_if_exists(file)
   if filereadable(expand(a:file))
     exe 'source' a:file
   endif
-endfunction
+endfunc
 
 call s:source_if_exists($VIMFILES.'/.localrc')
 
