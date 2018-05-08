@@ -27,6 +27,7 @@ stty -ixon && bind '\C-w:backward-kill-word'
 
 ### man bash
 export HISTCONTROL=ignoreboth:erasedups
+export HISTIGNORE='fg'
 export HISTSIZE=
 export HISTFILESIZE=
 export HISTTIMEFORMAT="%Y/%m/%d %H:%M:%S:   "

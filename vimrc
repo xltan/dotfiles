@@ -44,6 +44,9 @@ if has('mac')
   \ }
 else
   Plug 'rhysd/devdocs.vim'
+  if has('unix')
+    let g:devdocs_open_cmd ='"/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe"'
+  endif
   nmap <silent><buffer> K <Plug>(devdocs-under-cursor)
 endif
 
