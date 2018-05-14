@@ -30,7 +30,6 @@ export HISTCONTROL=ignoreboth:erasedups
 export HISTIGNORE='fg'
 export HISTSIZE=
 export HISTFILESIZE=
-export HISTTIMEFORMAT="%Y/%m/%d %H:%M:%S:   "
 
 ### Global
 export GOPATH="$HOME/go"

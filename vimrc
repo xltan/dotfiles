@@ -15,6 +15,7 @@ Plug 'arcticicestudio/nord-vim', {'branch': 'develop'}
 
 let delimitMate_expand_cr = 1
 let delimitMate_jump_expansion = 1
+let delimitMate_matchpairs = "(:),[:],{:}"
 let delimitMate_smart_matchpairs = '^\%(\w\|\"\|''\|\!\|[£$]\|[^[:space:][:punct:]]\)'
 Plug 'Raimondi/delimitMate'
 
@@ -50,6 +51,17 @@ else
   nmap <silent><buffer> K <Plug>(devdocs-under-cursor)
 endif
 
+let g:scratch_horizontal = 0
+let g:scratch_autohide = 0
+let g:scratch_height = 100
+let g:scratch_no_mappings = 0
+let g:scratch_filetype = 'scratch'
+Plug 'mtth/scratch.vim'
+
+nmap gs :ScratchPreview<CR>
+nmap gS :Scratch<CR>
+xmap gs <plug>(scratch-selection-reuse)
+
 Plug 'mhinz/vim-signify'
 let g:signify_vcs_list = ['svn', 'git']
 
@@ -72,6 +84,11 @@ nnoremap <silent> <leader>u :UndotreeToggle<CR>
 Plug 'kana/vim-niceblock'
 
 Plug 'AndrewRadev/splitjoin.vim'
+let g:splitjoin_split_mapping = ''
+let g:splitjoin_join_mapping = ''
+nmap gj :SplitjoinJoin<cr>
+nmap gJ :SplitjoinSplit<cr>
+
 Plug 'AndrewRadev/linediff.vim'
 
 Plug 'SirVer/ultisnips'
@@ -171,6 +188,7 @@ let g:ycm_filetype_blacklist = {
     \ 'ctrlsf' : 1,
     \ 'mail' : 1,
     \ 'project' : 1,
+    \ 'scratch' : 1,
     \}
 nmap <silent> gd :YcmCompleter GoTo<CR>
 nmap <silent> gz :YcmCompleter FixIt<CR>
@@ -334,7 +352,6 @@ endif
 set mps+=<:>
 if !has('nvim')
   packadd! matchit
-  unlet c_comment_strings
 endif
 
 nmap <silent> [a <Plug>(ale_previous_wrap)
@@ -373,12 +390,12 @@ if has("termguicolors")
 endif
 
 " http://www.shallowsky.com/linux/noaltscreen.html
-set t_ti= t_te=
+" set t_ti= t_te=
 
 set background=dark
 " let g:hybrid_less_color = 0
 " colorscheme hybrid
-let g:nord_comment_brightness = 15
+let g:nord_comment_brightness = 20
 colorscheme nord
 
 hi! link pythonFunction Normal
@@ -499,8 +516,6 @@ aug vimrc_cpp
   au FileType c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
   au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl,dot setlocal commentstring=//\ %s
   au FileType cmake setlocal commentstring=#\ %s
-  au FileType c,vim silent! nunmap <buffer> K
-  au FileType c setlocal keywordprg=:Vman
   " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
 aug END
 
@@ -529,6 +544,7 @@ aug vimrc_misc
   " au WinEnter * setlocal cursorline
   " au WinLeave * setlocal nocursorline
   " au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
+  au filetype scratch nnoremap <buffer> <leader>q :q<CR>
 aug END
 
 vnoremap <C-C> "+y
@@ -664,7 +680,7 @@ func! s:make_args(args)
   if &filetype == 'python'
     let cmd = "python %"
   elseif &filetype == 'cpp'
-    let cmd = 'make CC="g++" CXXFLAGS="-std=c++14" '. bin . ' && ' . bin
+    let cmd = 'make CC="g++" CXXFLAGS="-std=c++17" '. bin . ' && ' . bin
   elseif &filetype == 'c'
     let cmd = 'make '. bin .' && '. bin
   else
@@ -698,10 +714,6 @@ cnoremap <C-n> <DOWN>
 
 nnoremap <leader>en :tabe ~/Dropbox/notes<CR>:lcd %:h<CR>:pwd<CR>
 nnoremap <leader>es :tabe $VIMFILES/UltiSnips<CR>:lcd %:h<CR>:pwd<CR>
-
-cab ar AsyncRun
-cab GP GoProject
-cab Gp GoProject
 
 nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
 
