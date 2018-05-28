@@ -15,6 +15,7 @@ Plug 'arcticicestudio/nord-vim', {'branch': 'develop'}
 
 let delimitMate_expand_cr = 1
 let delimitMate_jump_expansion = 1
+let delimitMate_matchpairs = "(:),[:],{:}"
 let delimitMate_smart_matchpairs = '^\%(\w\|\"\|''\|\!\|[£$]\|[^[:space:][:punct:]]\)'
 Plug 'Raimondi/delimitMate'
 
@@ -25,7 +26,7 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-eunuch'
-" Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-fugitive'
 
 let g:markdown_fenced_languages = ['make', 'cpp', 'go', 'python', 'sh', 'cpp']
 
@@ -35,7 +36,7 @@ Plug 'wellle/targets.vim'
 
 if has('mac')
   Plug 'rizzatti/dash.vim'
-  nmap <silent><buffer> K <Plug>DashSearch
+  nmap <silent> K <Plug>DashSearch
   let g:dash_map = {
   \ 'java' : 'android',
   \ 'cpp' : 'gl4',
@@ -44,8 +45,21 @@ if has('mac')
   \ }
 else
   Plug 'rhysd/devdocs.vim'
-  nmap <silent><buffer> K <Plug>(devdocs-under-cursor)
+  if has('unix')
+    let g:devdocs_open_cmd ='"/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe"'
+  endif
+  nmap <silent> K <Plug>(devdocs-under-cursor)
 endif
+
+let g:scratch_horizontal = 0
+let g:scratch_autohide = 0
+let g:scratch_height = 100
+let g:scratch_no_mappings = 0
+let g:scratch_filetype = 'scratch'
+Plug 'mtth/scratch.vim'
+
+nmap gs :Scratch<CR>
+xmap gs <plug>(scratch-selection-reuse)
 
 Plug 'mhinz/vim-signify'
 let g:signify_vcs_list = ['svn', 'git']
@@ -57,18 +71,11 @@ xmap ac <plug>(signify-motion-inner-visual)
 nnoremap [r :SignifyRefresh<CR>
 nnoremap ]r :SignifyToggle<CR>
 
-" Plug 'haya14busa/vim-asterisk'
-" map *  <Plug>(asterisk-z*)
-" map #  <Plug>(asterisk-z#)
-" map g* <Plug>(asterisk-gz*)
-" map g# <Plug>(asterisk-gz#)
-
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
 
 Plug 'kana/vim-niceblock'
 
-Plug 'AndrewRadev/splitjoin.vim'
 Plug 'AndrewRadev/linediff.vim'
 
 Plug 'SirVer/ultisnips'
@@ -81,6 +88,8 @@ let g:snips_github = "https://github.com/xltan"
 Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags', '.clang-format', '.ignore', '.ycm_extra_conf.py']
+let g:gutentags_exclude_project_root = ['/usr/local', $HOME]
+
 if !has('win32')
   let g:gutentags_cache_dir = $VIMFILES . '/.cache'
   Plug 'vim-utils/vim-man'
@@ -112,7 +121,7 @@ func! DirvishSetup()
   for item in split(&wildignore, ',')
     call add(xp, glob2regpat(item).'\=')
   endfor
-  exec 'silent keeppatterns g/\(' . join(xp, '\|'). '\|[\/|\\]tags' . '\)/d'
+  exec 'silent keeppatterns g/\(' . join(xp, '\|'). '\|[\/|\\]tags' . '\)/d _'
   exec 'sort ,^.*[\/],'
 endfunc
 let g:dirvish_mode = 'call DirvishSetup()'
@@ -123,6 +132,11 @@ map <M-;> <Plug>Sneak_,
 
 Plug 'justinmk/vim-gtfo'
 let g:gtfo#terminals = { 'win': 'cmd.exe /k' }
+if has('win32')
+  nmap gox :silent !start %<CR>
+else
+  nmap gox :silent !open %<CR>
+endif
 
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
@@ -166,6 +180,7 @@ let g:ycm_filetype_blacklist = {
     \ 'ctrlsf' : 1,
     \ 'mail' : 1,
     \ 'project' : 1,
+    \ 'scratch' : 1,
     \}
 nmap <silent> gd :YcmCompleter GoTo<CR>
 nmap <silent> gz :YcmCompleter FixIt<CR>
@@ -225,11 +240,13 @@ endif
 
 Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
 let g:Lf_ShortcutF = '<C-P>'
-let g:Lf_WindowHeight = 0.35
+let g:Lf_WindowHeight = 0.4
 let g:Lf_CacheDiretory = $VIMFILES
+let g:Lf_HideHelp = 0
+
 if !exists('g:Lf_CommandMap')
   let g:Lf_CommandMap = {
-      \ '<ESC>': ['<C-I>'],
+      \ '<Tab>': ['<C-I>'],
       \ '<C-C>': ['<Esc>', '<C-C>'],
       \ '<C-]>': ['<C-V>'],
       \ '<C-X>': ['<C-S>'],
@@ -248,7 +265,7 @@ if !exists('g:Lf_CommandMap')
 endif
 
 nnoremap <leader>h :LeaderfMru<CR>
-nnoremap <leader>b :LeaderfFunction<CR>
+nnoremap <leader>b :LeaderfFunction!<CR>
 nnoremap <leader>j :LeaderfBufTag<CR>
 nnoremap <leader>tg :LeaderfTag<CR>
 nnoremap <leader>: :LeaderfHistoryCmd<CR>
@@ -276,13 +293,14 @@ let g:python_slow_sync = 0
 " a little bit slow
 Plug 'Vimjas/vim-python-pep8-indent'
 Plug 'fisadev/vim-isort'
+command! -nargs=0 -complete=command ImportRemove update | AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
 
-" let c_no_curly_error = 1
-" let g:cpp_no_func_highlight = 0
-" let g:cpp_class_scope_highlight = 0
-" let g:cpp_member_variable_highlight = 0
-" let g:cpp_class_decl_highlight = 1
-" Plug 'octol/vim-cpp-enhanced-highlight'
+let c_no_curly_error = 1
+let g:cpp_no_func_highlight = 0
+let g:cpp_class_scope_highlight = 0
+let g:cpp_member_variable_highlight = 0
+let g:cpp_class_decl_highlight = 1
+Plug 'octol/vim-cpp-enhanced-highlight'
 
 Plug 'pboettch/vim-cmake-syntax'
 
@@ -324,9 +342,9 @@ if !has("gui_running") " from tpope/vim-rsi
   set mouse=
 endif
  
+set mps+=<:>
 if !has('nvim')
   packadd! matchit
-  unlet c_comment_strings
 endif
 
 nmap <silent> [a <Plug>(ale_previous_wrap)
@@ -352,6 +370,7 @@ func! s:option_map(...)
   let op = get(a:, 3, 'set '.opt.'!')
   execute printf("nnoremap co%s :%s<bar>set %s?<CR>", key, op, opt)
 endfunc
+call s:option_map('w', 'wrap')
 call s:option_map('p', 'paste')
 call s:option_map('e', 'expandtab', 'setlocal expandtab!<bar>retab')
 call s:option_map('t', 'ts',
@@ -364,12 +383,12 @@ if has("termguicolors")
 endif
 
 " http://www.shallowsky.com/linux/noaltscreen.html
-set t_ti= t_te=
+" set t_ti= t_te=
 
 set background=dark
 " let g:hybrid_less_color = 0
 " colorscheme hybrid
-let g:nord_comment_brightness = 15
+let g:nord_comment_brightness = 20
 colorscheme nord
 
 hi! link pythonFunction Normal
@@ -490,8 +509,6 @@ aug vimrc_cpp
   au FileType c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
   au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl,dot setlocal commentstring=//\ %s
   au FileType cmake setlocal commentstring=#\ %s
-  au FileType c,vim silent! nunmap <buffer> K
-  au FileType c setlocal keywordprg=:Vman
   " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
 aug END
 
@@ -520,6 +537,7 @@ aug vimrc_misc
   " au WinEnter * setlocal cursorline
   " au WinLeave * setlocal nocursorline
   " au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
+  au filetype scratch nnoremap <buffer> <leader>q :q<CR>
 aug END
 
 vnoremap <C-C> "+y
@@ -535,10 +553,22 @@ nnoremap <silent> <C-S> :update<CR>
 vnoremap <silent> <C-S> <C-C>:update<CR>
 inoremap <silent> <C-S> <Esc>:update<CR>
 
-cnoremap %% <C-R>=fnameescape(expand('%:h')).'/'<CR>
-nmap <C-n> :sav %%
+cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>
+nmap <C-n> :sav %%/
 
 nnoremap <silent> <S-L> :nohl<CR>
+
+" Search for selected text, forwards or backwards.
+vnoremap <silent> * :<C-U>
+  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
+  \gvy/<C-R><C-R>=substitute(
+  \escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
+  \gV:call setreg('"', old_reg, old_regtype)<CR>
+vnoremap <silent> # :<C-U>
+  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
+  \gvy?<C-R><C-R>=substitute(
+  \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
+  \gV:call setreg('"', old_reg, old_regtype)<CR>
 
 if has('gui_running')
   func! s:get_buffer_list()
@@ -655,7 +685,7 @@ func! s:make_args(args)
   if &filetype == 'python'
     let cmd = "python %"
   elseif &filetype == 'cpp'
-    let cmd = 'make CC="g++" CXXFLAGS="-std=c++14" '. bin . ' && ' . bin
+    let cmd = 'make CC="g++" CXXFLAGS="-std=c++17" '. bin . ' && ' . bin
   elseif &filetype == 'c'
     let cmd = 'make '. bin .' && '. bin
   else
@@ -673,10 +703,9 @@ func! s:async_run(args)
 endfunc
 
 nnoremap <silent> <leader>xm :update<CR>:call <SID>async_run('')<CR>
-nnoremap <silent> <leader>xx :AsyncStop<CR>
+nnoremap <silent> <leader>xx :AsyncStop!<CR>
 
 command! -nargs=* -complete=command Run call s:run(<q-args>)
-command! -nargs=0 -complete=command ImportRemove update | AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
 
 command! Only %bd|e#
 command! JsonPrettier %!python -m json.tool
@@ -689,10 +718,6 @@ cnoremap <C-n> <DOWN>
 
 nnoremap <leader>en :tabe ~/Dropbox/notes<CR>:lcd %:h<CR>:pwd<CR>
 nnoremap <leader>es :tabe $VIMFILES/UltiSnips<CR>:lcd %:h<CR>:pwd<CR>
-
-cab ar AsyncRun
-cab GP GoProject
-cab Gp GoProject
 
 nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
 
