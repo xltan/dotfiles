@@ -815,7 +815,9 @@ func! s:init()
 endfunc
 
 func! s:change_dir()
-  call s:source_if_exists(getcwd() . '/.vimrc')
+  if getcwd() != $HOME
+    call s:source_if_exists(getcwd() . '/.vimrc')
+  endif
 endfunc
 
 let dllpath = $vimfiles . "/gvimfullscreen.dll"

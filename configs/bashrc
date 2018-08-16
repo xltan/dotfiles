@@ -12,9 +12,6 @@ BASE=$(dirname $(readlink $BASH_SOURCE))
 # Options
 # --------------------------------------------------------------------
 
-### Append to the history file
-shopt -s histappend
-
 ### Bash completion
 [ -f /etc/bash_completion ] && . /etc/bash_completion
 [ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion
@@ -24,6 +21,9 @@ stty -ixon && bind '\C-w:backward-kill-word'
 
 # Environment variables
 # --------------------------------------------------------------------
+
+### Append to the history file
+shopt -s histappend
 
 ### man bash
 export HISTCONTROL=ignoreboth:erasedups
