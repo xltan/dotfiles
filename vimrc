@@ -1,7 +1,11 @@
+if has('python3')
+  silent! python3 1
+endif
 if !has('nvim')
   source $VIMRUNTIME/defaults.vim
 endif
 
+set exrc
 let mapleader = ","
 let maplocalleader = ","
 let s:username = "Sinon"
@@ -26,7 +30,12 @@ Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-projectionist'
+
+Plug 'junegunn/vim-easy-align'
+Plug 'metakirby5/codi.vim'
 
 let g:markdown_fenced_languages = ['make', 'cpp', 'go', 'python', 'sh', 'cpp']
 
@@ -80,6 +89,8 @@ Plug 'AndrewRadev/linediff.vim'
 
 Plug 'SirVer/ultisnips'
 Plug 'xltan/algorithm-mnemonics.vim'
+let g:algorithm_mnemonics_lambda_parameter = ""
+
 Plug 'honza/vim-snippets'
 let g:snips_author = s:username
 let g:snips_email = "lidmuse@email.com"
@@ -199,10 +210,6 @@ else
   command! -nargs=? -complete=file_in_path -bang YcmGen YcmGenerateConfig -f
 endif
 
-Plug 'Shougo/echodoc.vim'
-set noshowmode
-let g:echodoc_enable_at_startup = 1
-
 Plug 'w0rp/ale'
 let g:ale_linters = {
 \   'python': ['flake8'],
@@ -214,17 +221,20 @@ let g:ale_sign_warning = s:warning_symbol
 let g:ale_lint_on_text_changed = 'never'
 
 Plug 'skywind3000/asyncrun.vim'
-command! -bang -nargs=* -complete=file Make AsyncRun! -program=make @ <args>
-command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
+" command! -bang -nargs=* -complete=file Make AsyncRun! -program=make @ <args>
+" command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
 
 Plug 'dyng/ctrlsf.vim'
 let g:ctrlsf_ackprg="rg"
 let g:ctrlsf_context = '-C 2'
+let g:ctrlsf_search_mode = 'sync'
+" let g:ctrlsf_auto_focus = {
+"     \ "at" : "done",
+"     \ "duration_less_than": 1000
+"     \ }
 vmap <leader>f <Plug>CtrlSFVwordPath
 nmap <leader>ff <Plug>CtrlSFCwordPath
 nmap <leader>fw <Plug>CtrlSFCwordPath<CR>
-nmap <leader>fs <Plug>CtrlSFCwordPath server<CR>
-nmap <leader>fc <Plug>CtrlSFCwordPath client/script<CR>
 nmap <leader>fo :CtrlSFToggle<CR>
 nmap <leader>fr :CtrlSF -R 
 
@@ -242,7 +252,7 @@ Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
 let g:Lf_ShortcutF = '<C-P>'
 let g:Lf_WindowHeight = 0.4
 let g:Lf_CacheDiretory = $VIMFILES
-let g:Lf_HideHelp = 0
+let g:Lf_HideHelp = 1
 
 if !exists('g:Lf_CommandMap')
   let g:Lf_CommandMap = {
@@ -257,6 +267,10 @@ if !exists('g:Lf_CommandMap')
   let g:Lf_WildIgnore = {
       \ 'dir': ['.svn','.git','.hg','bin'],
       \ 'file': ['*.sw?','~$*','*.bak','*.exe','*.o','*.so','*.py[co]','tags']
+      \}
+  let g:Lf_MruWildIgnore = {
+      \ 'dir': [],
+      \ 'file': ['*.fugitiveblame'],
       \}
   let g:Lf_PreviewResult = { 'BufTag': 0, 'Function': 0 }
   let g:Lf_UseCache = 1
@@ -292,20 +306,23 @@ let g:python_highlight_all = 1
 let g:python_slow_sync = 0
 " a little bit slow
 Plug 'Vimjas/vim-python-pep8-indent'
+Plug 'mgedmin/pythonhelper.vim'
 Plug 'fisadev/vim-isort'
 command! -nargs=0 -complete=command ImportRemove update | AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
 
 let c_no_curly_error = 1
-let g:cpp_no_func_highlight = 0
-let g:cpp_class_scope_highlight = 0
-let g:cpp_member_variable_highlight = 0
-let g:cpp_class_decl_highlight = 1
+" let g:cpp_no_func_highlight = 0
+" let g:cpp_class_scope_highlight = 0
+" let g:cpp_member_variable_highlight = 0
+" let g:cpp_class_decl_highlight = 1
 Plug 'octol/vim-cpp-enhanced-highlight'
 
 Plug 'pboettch/vim-cmake-syntax'
 
 Plug 'milinnovations/vim-actionscript'
 Plug 'tikhomirov/vim-glsl'
+
+Plug 'dart-lang/dart-vim-plugin'
 
 " Plug 'rust-lang/rust.vim'
 " let g:rustfmt_autosave = 0
@@ -329,6 +346,13 @@ Plug 'tikhomirov/vim-glsl'
 call plug#end()
 
 call project#rc()
+
+if has("termguicolors")
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+endif
+
 " Eager-load these plugins so we can override their settings. {{{
 runtime! plugin/unimpaired.vim
 runtime! plugin/rsi.vim
@@ -341,26 +365,13 @@ if !has("gui_running") " from tpope/vim-rsi
 
   set mouse=
 endif
- 
+
 set mps+=<:>
 if !has('nvim')
   packadd! matchit
 endif
 
-nmap <silent> [a <Plug>(ale_previous_wrap)
-nmap <silent> ]a <Plug>(ale_next_wrap)
-nmap <silent> [x :cpf<CR>
-nmap <silent> ]x :cnf<CR>
-nmap <silent> [X :lpf<CR>
-nmap <silent> ]X :lnf<CR>
-nmap <silent> [w gT
-nmap <silent> ]w gt
-nmap <silent> [W :tabfirst<CR>
-nmap <silent> ]W :tablast<CR>
-nmap <silent> [<space> :put! =repeat(nr2char(10), v:count1)<cr>'[
-nmap <silent> ]<space> :put =repeat(nr2char(10), v:count1)<cr>
-
-nnoremap <silent> cos :if exists("g:syntax_on") <Bar>
+nnoremap cos :if exists("g:syntax_on") <Bar>
   \   syntax off <Bar>
   \ else <Bar>
   \   syntax on <Bar>
@@ -375,12 +386,6 @@ call s:option_map('p', 'paste')
 call s:option_map('e', 'expandtab', 'setlocal expandtab!<bar>retab')
 call s:option_map('t', 'ts',
     \ 'let &ts = input("tabstop (". &ts ."): ")<bar>let &sw=&ts<bar>redraw')
-
-if has("termguicolors")
-  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
-  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
-  set termguicolors
-endif
 
 " http://www.shallowsky.com/linux/noaltscreen.html
 " set t_ti= t_te=
@@ -401,7 +406,8 @@ hi! link DirvishSuffix Normal
 hi Statement gui=none
 
 set guioptions=
-set statusline=%<%f\ %h%m%r%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
+" set statusline=%<%f\ %h%m%r\ %{TagInStatusLine()}%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
+set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 " set cursorline
 " set nu
@@ -506,7 +512,7 @@ aug vimrc_cpp
         \ | nmap <buffer> <silent> ]a :lnext<CR>
         \ | nmap <buffer> <silent> [A :lfirst<CR>
         \ | nmap <buffer> <silent> ]A :llast<CR>
-  au FileType c,cpp,objc,objcpp,go nmap <buffer> <silent> <leader>a :A<CR>
+  au FileType c,cpp,objc,objcpp,go,python nmap <buffer> <silent> <leader>a :A<CR>
   au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl,dot setlocal commentstring=//\ %s
   au FileType cmake setlocal commentstring=#\ %s
   " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
@@ -523,12 +529,14 @@ aug END
 
 aug vimrc_misc
   au!
+  au VimEnter * call s:init()
   au FileType help wincmd L | nnoremap <buffer><silent> q :q
   au FileType git,gitcommit setlocal foldmethod=syntax
   au FileType leaderf setlocal nonumber
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
   au BufRead *.jsfl setlocal ft=actionscript
+  au BufRead *.mangle setlocal equalprg=c++filt
   au QuickFixCmdPost * botright cwindow 9
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
   au InsertLeave * set imi=0
@@ -538,6 +546,7 @@ aug vimrc_misc
   " au WinLeave * setlocal nocursorline
   " au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
   au filetype scratch nnoremap <buffer> <leader>q :q<CR>
+  au DirChanged * call s:change_dir()
 aug END
 
 vnoremap <C-C> "+y
@@ -556,9 +565,9 @@ inoremap <silent> <C-S> <Esc>:update<CR>
 cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>
 nmap <C-n> :sav %%/
 
-nnoremap <silent> <S-L> :nohl<CR>
+nnoremap <silent> L :nohl<CR>
 
-" Search for selected text, forwards or backwards.
+" Search -> for selected text, forwards or backwards.
 vnoremap <silent> * :<C-U>
   \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
   \gvy/<C-R><C-R>=substitute(
@@ -612,8 +621,8 @@ inoremap <C-l> <C-o>zz
 inoremap <C-k> <C-o>k
 inoremap <C-j> <C-o>j
 
-tnoremap <Esc> <C-W>N
-tnoremap <C-^> <C-W>N<C-^>
+tnoremap <Esc> <C-w>N
+tnoremap <C-^> <C-w>N<C-^>
 tnoremap <C-h> <C-w>h
 tnoremap <C-l> <C-w>l
 tnoremap <C-j> <C-w>j
@@ -640,25 +649,17 @@ nnoremap <silent> <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"nam
     \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
     \ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
 
-if has("mac")
+if has("mac") && has("gui_running") && !has('nvim')
   set linespace=4
-  if !has('nvim')
-    set guifont=SF\ Mono:h12
-    " set macligatures
-    " set guifont=Fira\ Code:h12
-    set macthinstrokes
-    set macmeta
-  endif
+  set guifont=Fira\ Code:h12
+  set macligatures
+  set macmeta
+  set macthinstrokes
 elseif has("win32")
   set path=,,.
-  set guifont=Monaco:h9
   set linespace=4
+  set guifont=Monaco:h9
   set gfw=Microsoft\ Yahei\ Mono:h9
-  if !has('nvim')
-    set rop=type:directx,gamma:1.1
-  else
-    let g:Guifont="Monaco:h9"
-  endif
 
   let s:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
   func! s:svn_command(cmd, path)
@@ -797,4 +798,26 @@ func! s:source_if_exists(file)
 endfunc
 
 call s:source_if_exists($VIMFILES.'/.localrc')
+
+func! s:init()
+  nmap [a <Plug>(ale_previous_wrap)
+  nmap ]a <Plug>(ale_next_wrap)
+  nmap [x :cpf<CR>
+  nmap ]x :cnf<CR>
+  nmap [X :lpf<CR>
+  nmap ]X :lnf<CR>
+  nmap [w gT
+  nmap ]w gt
+  nmap [W :tabfirst<CR>
+  nmap ]W :tablast<CR>
+  nmap ]<space> gg}
+  nmap [<space> gg
+endfunc
+
+func! s:change_dir()
+  call s:source_if_exists(getcwd() . '/.vimrc')
+endfunc
+
+let dllpath = $vimfiles . "/gvimfullscreen.dll"
+nnoremap <M-f> <Esc>:call libcallnr(dllpath, "ToggleFullScreen", 0)<CR>
 
