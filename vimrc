@@ -35,7 +35,8 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-projectionist'
 
 Plug 'junegunn/vim-easy-align'
-Plug 'metakirby5/codi.vim'
+vmap ga <Plug>(EasyAlign)
+nmap ga <Plug>(EasyAlign)
 
 let g:markdown_fenced_languages = ['make', 'cpp', 'go', 'python', 'sh', 'cpp']
 
@@ -306,7 +307,7 @@ let g:python_highlight_all = 1
 let g:python_slow_sync = 0
 " a little bit slow
 Plug 'Vimjas/vim-python-pep8-indent'
-Plug 'mgedmin/pythonhelper.vim'
+Plug 'xltan/pythonhelper.vim'
 Plug 'fisadev/vim-isort'
 command! -nargs=0 -complete=command ImportRemove update | AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
 
@@ -319,11 +320,9 @@ Plug 'octol/vim-cpp-enhanced-highlight'
 
 Plug 'pboettch/vim-cmake-syntax'
 
-Plug 'milinnovations/vim-actionscript'
-Plug 'tikhomirov/vim-glsl'
-
-Plug 'dart-lang/dart-vim-plugin'
-
+" Plug 'tikhomirov/vim-glsl'
+" Plug 'milinnovations/vim-actionscript'
+" Plug 'dart-lang/dart-vim-plugin'
 " Plug 'rust-lang/rust.vim'
 " let g:rustfmt_autosave = 0
 
@@ -404,6 +403,8 @@ hi! link Special SpecialChar
 hi! link pythonBytesEscape SpecialChar
 hi! link DirvishSuffix Normal
 hi Statement gui=none
+hi! link StatusLineNC Comment
+hi TabLine guifg=#7b88a1
 
 set guioptions=
 " set statusline=%<%f\ %h%m%r\ %{TagInStatusLine()}%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
@@ -477,7 +478,7 @@ endfunc
 func! s:super()
   if &filetype == 'python'
     let pattern = '^class [^(]*(\zs[^)]*\ze):'
-    let lineno = search(pattern, 'n')
+    let lineno = search(pattern, 'bn')
     let content = getline(lineno)
     let m = matchstr(content, pattern)
     let sm = split(m, '\.')
@@ -810,12 +811,12 @@ func! s:init()
   nmap ]w gt
   nmap [W :tabfirst<CR>
   nmap ]W :tablast<CR>
-  nmap ]<space> gg}
-  nmap [<space> gg
 endfunc
 
 func! s:change_dir()
-  call s:source_if_exists(getcwd() . '/.vimrc')
+  if getcwd() != $HOME
+    call s:source_if_exists(getcwd() . '/.vimrc')
+  endif
 endfunc
 
 let dllpath = $vimfiles . "/gvimfullscreen.dll"
