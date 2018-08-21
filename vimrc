@@ -5,7 +5,6 @@ if !has('nvim')
   source $VIMRUNTIME/defaults.vim
 endif
 
-set exrc
 let mapleader = ","
 let maplocalleader = ","
 let s:username = "Sinon"
