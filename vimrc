@@ -17,7 +17,6 @@ call plug#begin($VIMFILES . '/bundle')
 Plug 'arcticicestudio/nord-vim', {'branch': 'develop'}
 
 let delimitMate_expand_cr = 1
-let delimitMate_jump_expansion = 1
 let delimitMate_matchpairs = "(:),[:],{:}"
 let delimitMate_smart_matchpairs = '^\%(\w\|\"\|''\|\!\|[£$]\|[^[:space:][:punct:]]\)'
 Plug 'Raimondi/delimitMate'
@@ -222,7 +221,7 @@ let g:ale_lint_on_text_changed = 'never'
 
 Plug 'skywind3000/asyncrun.vim'
 " command! -bang -nargs=* -complete=file Make AsyncRun! -program=make @ <args>
-" command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
+command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
 
 Plug 'dyng/ctrlsf.vim'
 let g:ctrlsf_ackprg="rg"
