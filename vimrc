@@ -1,10 +1,8 @@
-if has('python3')
-  silent! python3 1
-endif
 if !has('nvim')
   source $VIMRUNTIME/defaults.vim
 endif
 
+set exrc
 let mapleader = ","
 let maplocalleader = ","
 let s:username = "Sinon"
@@ -32,6 +30,7 @@ Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-projectionist'
 
+Plug 'christoomey/vim-tmux-navigator'
 Plug 'junegunn/vim-easy-align'
 vmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
@@ -626,11 +625,6 @@ tnoremap <C-h> <C-w>h
 tnoremap <C-l> <C-w>l
 tnoremap <C-j> <C-w>j
 tnoremap <C-k> <C-w>k
-
-nnoremap <C-h> <C-w>h
-nnoremap <C-l> <C-w>l
-nnoremap <C-j> <C-w>j
-nnoremap <C-k> <C-w>k
 
 nnoremap <M-q> qq
 nnoremap Q @q
