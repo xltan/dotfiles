@@ -230,11 +230,15 @@ let g:ctrlsf_search_mode = 'sync'
 "     \ "at" : "done",
 "     \ "duration_less_than": 1000
 "     \ }
-vmap <leader>f <Plug>CtrlSFVwordPath
-nmap <leader>ff <Plug>CtrlSFCwordPath
-nmap <leader>fw <Plug>CtrlSFCwordPath<CR>
-nmap <leader>fo :CtrlSFToggle<CR>
-nmap <leader>fr :CtrlSF -R 
+let g:ctrlsf_mapping = {
+    \ "open": ["<CR>", "o", "<C-O>"],
+    \ "next": "<C-N>",
+    \ "prev": "<C-P>",
+    \ }
+vmap <leader>g <Plug>CtrlSFVwordPath<CR>
+nmap <leader>gw <Plug>CtrlSFCwordPath
+nmap <leader>gg <Plug>CtrlSFCwordPath<CR>
+nmap <leader>go :CtrlSFToggle<CR>
 
 if executable("rg")
   set grepprg=rg\ --vimgrep\ --no-heading
@@ -247,7 +251,6 @@ endif
 " let g:colorizer_nomap = 1
 
 Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
-let g:Lf_ShortcutF = '<C-P>'
 let g:Lf_WindowHeight = 0.4
 let g:Lf_CacheDiretory = $VIMFILES
 let g:Lf_HideHelp = 1
@@ -259,7 +262,9 @@ if !exists('g:Lf_CommandMap')
       \ '<C-]>': ['<C-V>'],
       \ '<C-X>': ['<C-S>'],
       \ '<C-V>': ['<C-Q>'],
-      \ '<C-P>': ['<C-O>'],
+      \ '<CR>': ['<C-O>', '<CR>'],
+      \ '<C-J>': ['<C-N>'],
+      \ '<C-K>': ['<C-P>'],
       \}
   let g:Lf_StlSeparator = { 'left': '', 'right': '' }
   let g:Lf_WildIgnore = {
@@ -561,7 +566,7 @@ vnoremap <silent> <C-S> <C-C>:update<CR>
 inoremap <silent> <C-S> <Esc>:update<CR>
 
 cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>
-nmap <C-n> :sav %%/
+nmap <C-N> :sav %%/
 
 nnoremap <silent> L :nohl<CR>
 
@@ -813,4 +818,3 @@ endfunc
 
 let dllpath = $vimfiles . "/gvimfullscreen.dll"
 nnoremap <M-f> <Esc>:call libcallnr(dllpath, "ToggleFullScreen", 0)<CR>
-
