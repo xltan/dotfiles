@@ -24,12 +24,14 @@ stty -ixon && bind '\C-w:backward-kill-word'
 
 ### Append to the history file
 shopt -s histappend
+export HISTCONTROL=ignoreboth:erasedups
+export PROMPT_COMMAND="history -n; history -w; history -c; history -r; $PROMPT_COMMAND"
+export HISTSIZE=1000
+export HISTFILESIZE=
 
 ### man bash
-export HISTCONTROL=ignoreboth:erasedups
 export HISTIGNORE='fg'
-export HISTSIZE=
-export HISTFILESIZE=
+
 
 ### Global
 export GOPATH="$HOME/go"
