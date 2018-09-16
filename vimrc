@@ -27,8 +27,9 @@ Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-dispatch'
-Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-projectionist'
+Plug 'tpope/vim-fugitive'
+Plug 'junegunn/gv.vim'
 
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'junegunn/vim-easy-align'
@@ -631,7 +632,6 @@ tnoremap <C-l> <C-w>l
 tnoremap <C-j> <C-w>j
 tnoremap <C-k> <C-w>k
 
-nnoremap <M-q> qq
 nnoremap Q @q
 xnoremap Q :normal @q<CR>
 xnoremap . :normal .<CR>
