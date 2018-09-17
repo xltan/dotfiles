@@ -31,12 +31,13 @@ Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-fugitive'
 Plug 'junegunn/gv.vim'
 
-Plug 'christoomey/vim-tmux-navigator'
 Plug 'junegunn/vim-easy-align'
 vmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
-let g:markdown_fenced_languages = ['make', 'cpp', 'go', 'python', 'sh', 'cpp']
+Plug 'christoomey/vim-tmux-navigator'
+Plug 'plasticboy/vim-markdown'
+let g:vim_markdown_folding_disabled = 1
 
 let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
@@ -684,7 +685,7 @@ func! s:make_args(args)
   if &filetype == 'python'
     let cmd = "python %"
   elseif &filetype == 'cpp'
-    let cmd = 'make CC="g++" CXXFLAGS="-std=c++17" '. bin . ' && ' . bin
+    let cmd = 'make CC="g++" CXXFLAGS="-std=c++14" '. bin . ' && ' . bin
   elseif &filetype == 'c'
     let cmd = 'make '. bin .' && '. bin
   else
