@@ -29,6 +29,7 @@ Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-rhubarb'
 Plug 'junegunn/gv.vim'
 
 Plug 'junegunn/vim-easy-align'
@@ -38,6 +39,9 @@ nmap ga <Plug>(EasyAlign)
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'plasticboy/vim-markdown'
 let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_follow_anchor = 1
+let g:vim_markdown_math = 1
+let g:tex_conceal = 0
 
 let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
@@ -106,9 +110,6 @@ if !has('win32')
   Plug 'vim-utils/vim-man'
   map <leader>v <Plug>(Vman)
 endif
-
-let g:loaded_netrw       = 1
-let g:loaded_netrwPlugin = 1
 
 Plug 'justinmk/vim-dirvish'
 func! s:setup_dirvish()
@@ -214,7 +215,7 @@ Plug 'w0rp/ale'
 let g:ale_linters = {
 \   'python': ['flake8'],
 \   'go': ['golint'],
-\   'c': [], 'cpp': [], 'objcpp': [], 'objc': [],
+\   'c': [], 'cpp': [], 'objcpp': [], 'objc': [], 'markdown': []
 \}
 let g:ale_sign_error = s:error_symbol
 let g:ale_sign_warning = s:warning_symbol
@@ -284,9 +285,10 @@ if !exists('g:Lf_CommandMap')
 endif
 
 nnoremap <leader>h :LeaderfMru<CR>
-nnoremap <leader>b :LeaderfFunction!<CR>
+nnoremap <leader>b :LeaderfBuffer<CR>
 nnoremap <leader>j :LeaderfBufTag<CR>
 nnoremap <leader>tg :LeaderfTag<CR>
+nnoremap <leader>tt :LeaderfFunction!<CR>
 nnoremap <leader>: :LeaderfHistoryCmd<CR>
 nnoremap <leader>/ :LeaderfHistorySearch<CR>
 
@@ -316,11 +318,9 @@ Plug 'fisadev/vim-isort'
 command! -nargs=0 -complete=command ImportRemove update | AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
 
 let c_no_curly_error = 1
-" let g:cpp_no_func_highlight = 0
-" let g:cpp_class_scope_highlight = 0
-" let g:cpp_member_variable_highlight = 0
-" let g:cpp_class_decl_highlight = 1
-Plug 'octol/vim-cpp-enhanced-highlight'
+let g:cpp_no_function_highlight = 1
+" let g:cpp_simple_highlight = 1
+Plug 'bfrg/vim-cpp-modern'
 
 Plug 'pboettch/vim-cmake-syntax'
 
@@ -396,8 +396,14 @@ call s:option_map('t', 'ts',
 set background=dark
 " let g:hybrid_less_color = 0
 " colorscheme hybrid
+let g:nord_uniform_diff_background = 1
 let g:nord_comment_brightness = 20
 colorscheme nord
+
+let g:terminal_ansi_colors = [
+  \ "#3B4252", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#88C0D0", "#E5E9F0", 
+  \ "#4C566A", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#8FBCBB", "#ECEFF4", 
+\]
 
 hi! link pythonFunction Normal
 hi! link Error ALEErrorSign
@@ -419,6 +425,7 @@ set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14
 " set foldcolumn=1
 set hlsearch
 set nowrap
+set nofoldenable
 
 set listchars=tab:\|\ ,eol:¬
 
@@ -552,6 +559,10 @@ aug vimrc_misc
   " au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
   au filetype scratch nnoremap <buffer> <leader>q :q<CR>
   au DirChanged * call s:change_dir()
+
+  au filetype markdown setlocal conceallevel=2
+  au filetype markdown nnoremap <silent><buffer> gn o<Esc>C- [ ] 
+  au filetype markdown noremap <silent><buffer> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
 aug END
 
 vnoremap <C-C> "+y
@@ -709,13 +720,14 @@ command! -nargs=* -complete=command Run call s:run(<q-args>)
 
 command! Only %bd|e#
 command! JsonPrettier %!python -m json.tool
-command! Todo exec "Grep 'TODO: " . s:username . "'"
+command! Todo exec "Grep 'XFIXME'"
 
 nnoremap <M-p> "0p
 
 cnoremap <C-p> <UP>
 cnoremap <C-n> <DOWN>
 
+nnoremap <leader>et :tabe ~/Dropbox/notes/todo.md<CR>
 nnoremap <leader>en :tabe ~/Dropbox/notes<CR>:lcd %:h<CR>:pwd<CR>
 nnoremap <leader>es :tabe $VIMFILES/UltiSnips<CR>:lcd %:h<CR>:pwd<CR>
 
