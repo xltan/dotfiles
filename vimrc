@@ -37,6 +37,8 @@ vmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
 Plug 'christoomey/vim-tmux-navigator'
+Plug 'jpalardy/vim-slime'
+let g:slime_target = "vimterminal"
 Plug 'plasticboy/vim-markdown'
 let g:vim_markdown_folding_disabled = 1
 let g:vim_markdown_follow_anchor = 1
@@ -118,6 +120,11 @@ func! s:setup_dirvish()
   nnoremap <silent><buffer> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
   nnoremap <silent><buffer> gr :noau Dirvish %<CR>
   nnoremap <silent><buffer> gh :silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>:set conceallevel=3<CR>
+  if has('win32')
+    nnoremap <silent><buffer> gx :silent !start <C-R><C-L><CR>
+  else
+    nnoremap <silent><buffer> gx :silent !open <C-R><C-L><CR>
+  endif
   nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
   xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
 endfun
@@ -215,7 +222,7 @@ Plug 'w0rp/ale'
 let g:ale_linters = {
 \   'python': ['flake8'],
 \   'go': ['golint'],
-\   'c': [], 'cpp': [], 'objcpp': [], 'objc': [], 'markdown': []
+\   'c': [], 'cpp': [], 'objcpp': [], 'objc': [], 'markdown': [], 'java': []
 \}
 let g:ale_sign_error = s:error_symbol
 let g:ale_sign_warning = s:warning_symbol
@@ -238,9 +245,9 @@ let g:ctrlsf_mapping = {
     \ "next": "<C-N>",
     \ "prev": "<C-P>",
     \ }
+
 vmap <leader>g <Plug>CtrlSFVwordPath<CR>
-nmap <leader>gw <Plug>CtrlSFCwordPath
-nmap <leader>gg <Plug>CtrlSFCwordPath<CR>
+nmap <leader>gw <Plug>CtrlSFCwordPath<CR>
 nmap <leader>go :CtrlSFToggle<CR>
 
 if executable("rg")
@@ -257,6 +264,7 @@ Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
 let g:Lf_WindowHeight = 0.4
 let g:Lf_CacheDiretory = $VIMFILES
 let g:Lf_HideHelp = 1
+let g:Lf_DefaultMode = 'NameOnly'
 
 if !exists('g:Lf_CommandMap')
   let g:Lf_CommandMap = {
@@ -269,6 +277,10 @@ if !exists('g:Lf_CommandMap')
       \ '<C-J>': ['<C-N>'],
       \ '<C-K>': ['<C-P>'],
       \}
+  let g:Lf_PreviewResult = {
+      \ 'BufTag': 0,
+      \ 'Function': 0,
+      \}
   let g:Lf_StlSeparator = { 'left': '', 'right': '' }
   let g:Lf_WildIgnore = {
       \ 'dir': ['.svn','.git','.hg','bin'],
@@ -276,16 +288,15 @@ if !exists('g:Lf_CommandMap')
       \}
   let g:Lf_MruWildIgnore = {
       \ 'dir': [],
-      \ 'file': ['*.fugitiveblame'],
+      \ 'file': ['*.fugitiveblame', '*.so'],
       \}
-  let g:Lf_PreviewResult = { 'BufTag': 0, 'Function': 0 }
   let g:Lf_UseCache = 1
   let g:Lf_NeedCacheTime = 0.3
   let g:Lf_CursorBlink = 0
 endif
 
-nnoremap <leader>h :LeaderfMru<CR>
-nnoremap <leader>b :LeaderfBuffer<CR>
+nnoremap <leader>h :LeaderfMruCwd<CR>
+nnoremap <leader>gh :LeaderfMru<CR>
 nnoremap <leader>j :LeaderfBufTag<CR>
 nnoremap <leader>tg :LeaderfTag<CR>
 nnoremap <leader>tt :LeaderfFunction!<CR>
@@ -329,7 +340,6 @@ Plug 'pboettch/vim-cmake-syntax'
 " Plug 'dart-lang/dart-vim-plugin'
 " Plug 'rust-lang/rust.vim'
 " let g:rustfmt_autosave = 0
-
 " Plug 'fatih/vim-go'
 " let g:go_def_mode = 'godef'
 " let g:go_fmt_command = "goimports"
@@ -343,7 +353,7 @@ Plug 'pboettch/vim-cmake-syntax'
 "   au FileType html,css EmmetInstall
 " aug END
 
-" Plug 'leafgarland/typescript-vim'
+Plug 'leafgarland/typescript-vim'
 " Plug 'Quramy/tsuquyomi'
 
 call plug#end()
@@ -412,15 +422,15 @@ hi! link Constant Number
 hi! link Special SpecialChar
 hi! link pythonBytesEscape SpecialChar
 hi! link DirvishSuffix Normal
-hi Statement gui=none
 hi! link StatusLineNC Comment
+hi Statement gui=none
 hi TabLine guifg=#7b88a1
 
 set guioptions=
 " set statusline=%<%f\ %h%m%r\ %{TagInStatusLine()}%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
-" set cursorline
+set cursorline
 " set nu
 " set foldcolumn=1
 set hlsearch
@@ -530,6 +540,14 @@ aug vimrc_cpp
   " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
 aug END
 
+aug vimrc_markdown
+  au!
+  au filetype markdown setlocal conceallevel=2
+  au filetype markdown nnoremap <silent><buffer> gN O<Esc>C- [ ] 
+  au filetype markdown nnoremap <silent><buffer> gn o<Esc>C- [ ] 
+  au filetype markdown noremap <silent><buffer> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
+aug END
+
 aug vimrc_tab
   au!
   au FileType python setlocal noexpandtab ts=4 sw=4
@@ -551,18 +569,13 @@ aug vimrc_misc
   au BufRead *.mangle setlocal equalprg=c++filt
   au QuickFixCmdPost * botright cwindow 9
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
-  au InsertLeave * set imi=0
-        " \ | set cursorline
-  " au InsertEnter * set nocursorline
-  " au WinEnter * setlocal cursorline
-  " au WinLeave * setlocal nocursorline
+  au InsertLeave * set imi=0 | set cursorline
+  au InsertEnter * set nocursorline
+  au WinEnter * set cursorline
+  au WinLeave * set nocursorline
   " au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
   au filetype scratch nnoremap <buffer> <leader>q :q<CR>
   au DirChanged * call s:change_dir()
-
-  au filetype markdown setlocal conceallevel=2
-  au filetype markdown nnoremap <silent><buffer> gn o<Esc>C- [ ] 
-  au filetype markdown noremap <silent><buffer> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
 aug END
 
 vnoremap <C-C> "+y
@@ -802,6 +815,13 @@ func! s:tab_message(cmd)
 endfunc
 command! -nargs=+ -complete=command TabMessage call s:tab_message(<q-args>)
 
+func! s:command_abbr(abbreviation, expansion)
+  execute 'cabbr ' . a:abbreviation . ' <c-r>=getcmdpos() == 1 && getcmdtype() == ":" ? "' . a:expansion . '" : "' . a:abbreviation . '"<CR>'
+endfunc
+command! -nargs=+ Cabbr call s:command_abbr(<f-args>)
+Cabbr sf CtrlSF
+Cabbr gr Grep
+
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
     exe 'source' a:file
@@ -831,3 +851,4 @@ endfunc
 
 let dllpath = $vimfiles . "/gvimfullscreen.dll"
 nnoremap <M-f> <Esc>:call libcallnr(dllpath, "ToggleFullScreen", 0)<CR>
+
