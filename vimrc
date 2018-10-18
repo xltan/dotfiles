@@ -36,6 +36,15 @@ Plug 'junegunn/vim-easy-align'
 vmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
+" Plug 'itchyny/lightline.vim'
+" let g:lightline = {
+"       \ 'colorscheme': 'nord',
+"       \ 'active': {
+"       \   'left': [ [ 'mode', 'paste' ],
+"       \             [ 'readonly', 'filename', 'modified' ] ]
+"       \ },
+"       \ }
+
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'jpalardy/vim-slime'
 let g:slime_target = "vimterminal"
@@ -51,7 +60,7 @@ Plug 'wellle/targets.vim'
 
 if has('mac')
   Plug 'rizzatti/dash.vim'
-  nmap <silent> K <Plug>DashSearch
+  " nmap <silent> K <Plug>DashSearch
   let g:dash_map = {
   \ 'java' : 'android',
   \ 'cpp' : 'gl4',
@@ -63,7 +72,7 @@ else
   if has('unix')
     let g:devdocs_open_cmd ='"/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe"'
   endif
-  nmap <silent> K <Plug>(devdocs-under-cursor)
+  " nmap <silent> K <Plug>(devdocs-under-cursor)
 endif
 
 let g:scratch_horizontal = 0
@@ -105,7 +114,7 @@ let g:snips_github = "https://github.com/xltan"
 Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = ['.git', '.svn', '.gutctags', 'tags', '.clang-format', '.ignore', '.ycm_extra_conf.py']
-let g:gutentags_exclude_project_root = ['/usr/local', $HOME]
+let g:gutentags_exclude_project_root = ['/usr/local', $HOME, $HOME.'/Dropbox']
 
 if !has('win32')
   let g:gutentags_cache_dir = $VIMFILES . '/.cache'
@@ -276,11 +285,12 @@ if !exists('g:Lf_CommandMap')
       \ '<CR>': ['<C-O>', '<CR>'],
       \ '<C-J>': ['<C-N>'],
       \ '<C-K>': ['<C-P>'],
+      \ '<C-U>': ['<C-W>'],
       \}
-  let g:Lf_PreviewResult = {
-      \ 'BufTag': 0,
-      \ 'Function': 0,
-      \}
+  " let g:Lf_PreviewResult = {
+  "     \ 'BufTag': 0,
+  "     \ 'Function': 0,
+  "     \}
   let g:Lf_StlSeparator = { 'left': '', 'right': '' }
   let g:Lf_WildIgnore = {
       \ 'dir': ['.svn','.git','.hg','bin'],
@@ -338,12 +348,12 @@ Plug 'pboettch/vim-cmake-syntax'
 " Plug 'tikhomirov/vim-glsl'
 " Plug 'milinnovations/vim-actionscript'
 " Plug 'dart-lang/dart-vim-plugin'
-" Plug 'rust-lang/rust.vim'
-" let g:rustfmt_autosave = 0
-" Plug 'fatih/vim-go'
-" let g:go_def_mode = 'godef'
-" let g:go_fmt_command = "goimports"
-" let g:go_list_type = "quickfix"
+Plug 'rust-lang/rust.vim'
+
+Plug 'fatih/vim-go'
+let g:go_def_mode = 'godef'
+let g:go_fmt_command = "goimports"
+let g:go_list_type = "quickfix"
 
 " Plug 'mattn/emmet-vim'
 " let g:user_emmet_install_global = 0
@@ -542,6 +552,7 @@ aug END
 
 aug vimrc_markdown
   au!
+  au FileType markdown let b:delimitMate_nesting_quotes = ['`']
   au filetype markdown setlocal conceallevel=2
   au filetype markdown nnoremap <silent><buffer> gN O<Esc>C- [ ] 
   au filetype markdown nnoremap <silent><buffer> gn o<Esc>C- [ ] 
@@ -562,17 +573,17 @@ aug vimrc_misc
   au VimEnter * call s:init()
   au FileType help wincmd L | nnoremap <buffer><silent> q :q
   au FileType git,gitcommit setlocal foldmethod=syntax
-  au FileType leaderf setlocal nonumber
+  au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
-  au BufRead *.jsfl setlocal ft=actionscript
   au BufRead *.mangle setlocal equalprg=c++filt
   au QuickFixCmdPost * botright cwindow 9
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
   au InsertLeave * set imi=0 | set cursorline
   au InsertEnter * set nocursorline
   au WinEnter * set cursorline
-  au WinLeave * set nocursorline
+  au BufEnter * set cursorline
+  au BufLeave * set nocursorline
   " au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
   au filetype scratch nnoremap <buffer> <leader>q :q<CR>
   au DirChanged * call s:change_dir()
@@ -665,6 +676,7 @@ vnoremap < <gv
 vnoremap > >gv
 nnoremap gV `[v`]
 nnoremap Y y$
+vnoremap P yP`<
 
 nnoremap <C-e> 10j
 nnoremap <C-y> 10k
