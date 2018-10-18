@@ -60,7 +60,7 @@ Plug 'wellle/targets.vim'
 
 if has('mac')
   Plug 'rizzatti/dash.vim'
-  " nmap <silent> K <Plug>DashSearch
+  nmap <silent> <leader>k <Plug>DashSearch
   let g:dash_map = {
   \ 'java' : 'android',
   \ 'cpp' : 'gl4',
@@ -72,7 +72,7 @@ else
   if has('unix')
     let g:devdocs_open_cmd ='"/mnt/c/Program Files (x86)/Google/Chrome/Application/chrome.exe"'
   endif
-  " nmap <silent> K <Plug>(devdocs-under-cursor)
+  nmap <silent> <leader>k <Plug>(devdocs-under-cursor)
 endif
 
 let g:scratch_horizontal = 0
@@ -546,6 +546,8 @@ aug vimrc_cpp
         \ | nmap <buffer> <silent> ]A :llast<CR>
   au FileType c,cpp,objc,objcpp,go,python nmap <buffer> <silent> <leader>a :A<CR>
   au FileType c,cpp,objc,objcpp,cs,java,actionscript,glsl,dot setlocal commentstring=//\ %s
+  au FileType c setlocal keywordprg=:Vman
+  au FileType cpp setlocal keywordprg=cppman
   au FileType cmake setlocal commentstring=#\ %s
   " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
 aug END
