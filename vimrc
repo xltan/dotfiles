@@ -36,14 +36,31 @@ Plug 'junegunn/vim-easy-align'
 vmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
 
-" Plug 'itchyny/lightline.vim'
-" let g:lightline = {
-"       \ 'colorscheme': 'nord',
-"       \ 'active': {
-"       \   'left': [ [ 'mode', 'paste' ],
-"       \             [ 'readonly', 'filename', 'modified' ] ]
-"       \ },
-"       \ }
+Plug 'xltan/lightline-colors.vim'
+Plug 'itchyny/lightline.vim'
+let g:lightline = {
+      \ 'colorscheme': 'nord2',
+      \ 'active': {
+		  \   'left': [ [ 'mode', 'paste' ],
+		  \           [ 'readonly', 'relativepath', 'modified' ] ],
+      \ },
+      \ 'inactive': {
+		  \   'left': [ [ 'relativepath' ] ],
+      \ },
+      \ 'mode_map': {
+		  \    'n':      'N',
+		  \    'i':      'I',
+		  \    'R':      'R',
+		  \    'v':      'V',
+		  \    'V':      'L',
+		  \    "\<C-v>": 'B',
+		  \    'c':      'C',
+		  \    's':      'S',
+		  \    'S':      'S',
+		  \    "\<C-s>": 'S',
+		  \    't':      'T',
+		  \ },
+      \ }
 
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'jpalardy/vim-slime'
@@ -52,6 +69,7 @@ if has('win32')
 else
 	let g:slime_target = "tmux"
 endif
+
 Plug 'plasticboy/vim-markdown'
 let g:vim_markdown_folding_disabled = 1
 let g:vim_markdown_follow_anchor = 1
@@ -430,19 +448,19 @@ let g:terminal_ansi_colors = [
 \]
 
 hi! link pythonFunction Normal
+hi! link pythonBytesEscape SpecialChar
 hi! link Error ALEErrorSign
 hi! link WarningMsg SpecialChar
-hi! link Constant Number
+" hi! link Constant Number
 hi! link Special SpecialChar
-hi! link pythonBytesEscape SpecialChar
 hi! link DirvishSuffix Normal
-hi! link StatusLineNC Comment
-hi Statement gui=none
-hi TabLine guifg=#7b88a1
+hi! link Statement Function
+" hi Statement gui=none
+" hi! link StatusLineNC Comment
+" hi TabLine guifg=#7b88a1
 
 set guioptions=
-" set statusline=%<%f\ %h%m%r\ %{TagInStatusLine()}%=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
-set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
+" set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 set cursorline
 " set nu
@@ -450,6 +468,7 @@ set cursorline
 set hlsearch
 set nowrap
 set nofoldenable
+set noshowmode
 
 set listchars=tab:\|\ ,eol:¬
 
