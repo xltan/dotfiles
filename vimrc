@@ -47,7 +47,11 @@ nmap ga <Plug>(EasyAlign)
 
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'jpalardy/vim-slime'
-let g:slime_target = "vimterminal"
+if has('win32')
+  let g:slime_target = "vimterminal"
+else
+	let g:slime_target = "tmux"
+endif
 Plug 'plasticboy/vim-markdown'
 let g:vim_markdown_folding_disabled = 1
 let g:vim_markdown_follow_anchor = 1
