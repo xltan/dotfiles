@@ -26,7 +26,7 @@ function fish_prompt --description 'Write out the prompt'
             set suffix '>'
     end
 
-    echo -n -s "$USER" @ (prompt_hostname) ' ' (set_color $color_cwd) (prompt_pwd) (set_color normal) "$suffix "
+    echo -n -s (set_color $color_cwd) (prompt_pwd) (set_color normal) "$suffix "
 end
 
 if status is-login
