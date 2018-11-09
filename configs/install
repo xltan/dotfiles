@@ -3,7 +3,7 @@
 BASE=$(pwd)
 mkdir -pv .bak
 for rc in $(ls); do
-  [ -e ~/."$rc" ] && mv -v ~/."$rc" .bak/."$rc"
+  [ -e ~/."$rc" ] && rm -rf .bak/."$rc" && mv -v ~/."$rc" .bak/."$rc"
   ln -sfv "$BASE/$rc" ~/."$rc"
 done
 

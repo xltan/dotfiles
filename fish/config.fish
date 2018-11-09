@@ -11,6 +11,14 @@ if not functions -q fisher
     fish -c fisher
 end
 
+if status is-login
+    if test -n "$SSH_CONNECTION"
+		and not test -n "$TMUX"
+        tmux has-session -t o; and tmux attach-session -t o; or tmux new-session -s o; and kill %self
+        echo "tmux failed to start; using plain fish shell"
+    end
+end
+
 function fish_prompt --description 'Write out the prompt'
 	set -l color_cwd
     set -l suffix
@@ -30,10 +38,12 @@ function fish_prompt --description 'Write out the prompt'
     echo -n -s (set_color $color_cwd) (prompt_pwd) (set_color normal) "$suffix "
 end
 
-if status is-login
-    if test -n "$SSH_CONNECTION"
-		and not test -n "$TMUX"
-        tmux has-session -t o; and tmux attach-session -t o; or tmux new-session -s o; and kill %self
-        echo "tmux failed to start; using plain fish shell"
-    end
+function mcd
+	mkdir -pv "$argv"
+	and cd "$argv"
+end
+
+function con
+	cp -r ~/.template/conan "$argv"
+	and cd "$argv"
 end
