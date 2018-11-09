@@ -122,6 +122,16 @@ nnoremap <silent> <leader>u :UndotreeToggle<CR>
 
 Plug 'kana/vim-niceblock'
 
+Plug 'haya14busa/vim-asterisk'
+map *   <Plug>(asterisk-*)
+map #   <Plug>(asterisk-#)
+map g*  <Plug>(asterisk-g*)
+map g#  <Plug>(asterisk-g#)
+map z*  <Plug>(asterisk-z*)
+map gz* <Plug>(asterisk-gz*)
+map z#  <Plug>(asterisk-z#)
+map gz# <Plug>(asterisk-gz#)
+
 Plug 'AndrewRadev/linediff.vim'
 
 Plug 'SirVer/ultisnips'
@@ -187,6 +197,8 @@ if has('win32')
 else
   nmap gox :silent !open %<CR>
 endif
+cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>
+nmap gon :sav %%/
 
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
@@ -291,7 +303,7 @@ endif
 " let g:colorizer_maxlines = 100
 " let g:colorizer_nomap = 1
 
-Plug 'Yggdroot/LeaderF' ", { 'branch': 'dev'}
+Plug 'Yggdroot/LeaderF'
 let g:Lf_WindowHeight = 0.4
 let g:Lf_CacheDiretory = $VIMFILES
 let g:Lf_HideHelp = 1
@@ -309,10 +321,10 @@ if !exists('g:Lf_CommandMap')
       \ '<C-K>': ['<C-P>'],
       \ '<C-U>': ['<C-W>'],
       \}
-  " let g:Lf_PreviewResult = {
-  "     \ 'BufTag': 0,
-  "     \ 'Function': 0,
-  "     \}
+  let g:Lf_PreviewResult = {
+      \ 'BufTag': 0,
+      \ 'Function': 0,
+      \}
   let g:Lf_StlSeparator = { 'left': '', 'right': '' }
   let g:Lf_WildIgnore = {
       \ 'dir': ['.svn','.git','.hg','bin'],
@@ -370,6 +382,7 @@ Plug 'pboettch/vim-cmake-syntax'
 " Plug 'tikhomirov/vim-glsl'
 " Plug 'milinnovations/vim-actionscript'
 " Plug 'dart-lang/dart-vim-plugin'
+Plug 'dag/vim-fish'
 Plug 'rust-lang/rust.vim'
 
 Plug 'fatih/vim-go'
@@ -436,8 +449,6 @@ call s:option_map('t', 'ts',
 " set t_ti= t_te=
 
 set background=dark
-" let g:hybrid_less_color = 0
-" colorscheme hybrid
 let g:nord_uniform_diff_background = 1
 let g:nord_comment_brightness = 20
 colorscheme nord
@@ -451,11 +462,12 @@ hi! link pythonFunction Normal
 hi! link pythonBytesEscape SpecialChar
 hi! link Error ALEErrorSign
 hi! link WarningMsg SpecialChar
-" hi! link Constant Number
 hi! link Special SpecialChar
 hi! link DirvishSuffix Normal
 hi! link Statement Function
-" hi Statement gui=none
+hi! link QuickFixLine WildMenu
+hi! link Constant Number
+hi! link Boolean Number
 " hi! link StatusLineNC Comment
 " hi TabLine guifg=#7b88a1
 
@@ -555,7 +567,7 @@ aug vimrc_python
   au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
   au FileType python nmap <silent> <buffer> [s <C-^>
   " au FileType python syn sync match pythonSync grouphere NONE '):$'
-  " au FileType python setlocal equalprg=yapf
+  au FileType python setlocal equalprg=yapf
 aug END
 
 aug vimrc_cpp
@@ -627,22 +639,7 @@ nnoremap <silent> <C-S> :update<CR>
 vnoremap <silent> <C-S> <C-C>:update<CR>
 inoremap <silent> <C-S> <Esc>:update<CR>
 
-cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>
-nmap <C-N> :sav %%/
-
 nnoremap <silent> L :nohl<CR>
-
-" Search -> for selected text, forwards or backwards.
-vnoremap <silent> * :<C-U>
-  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
-  \gvy/<C-R><C-R>=substitute(
-  \escape(@", '/\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
-  \gV:call setreg('"', old_reg, old_regtype)<CR>
-vnoremap <silent> # :<C-U>
-  \let old_reg=getreg('"')<Bar>let old_regtype=getregtype('"')<CR>
-  \gvy?<C-R><C-R>=substitute(
-  \escape(@", '?\.*$^~['), '\_s\+', '\\_s\\+', 'g')<CR><CR>
-  \gV:call setreg('"', old_reg, old_regtype)<CR>
 
 if has('gui_running')
   func! s:get_buffer_list()
@@ -746,7 +743,7 @@ func! s:make_args(args)
   if &filetype == 'python'
     let cmd = "python %"
   elseif &filetype == 'cpp'
-    let cmd = 'make CC="g++" CXXFLAGS="-std=c++14" '. bin . ' && ' . bin
+    let cmd = 'make CC="g++" CXXFLAGS="-std=c++17" '. bin . ' && ' . bin
   elseif &filetype == 'c'
     let cmd = 'make '. bin .' && '. bin
   else
