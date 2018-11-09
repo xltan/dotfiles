@@ -30,9 +30,9 @@ function fish_prompt --description 'Write out the prompt'
 end
 
 if status is-login
-    set PPID (echo (ps --pid %self -o ppid --no-headers) | xargs)
-    if ps --pid $PPID | grep ssh
-        tmux has-session -t remote; and tmux attach-session -t remote; or tmux new-session -s remote; and kill %self
+    if test -n "$SSH_CONNECTION"
+		and not test -n "$TMUX"
+        tmux has-session -t o; and tmux attach-session -t o; or tmux new-session -s o; and kill %self
         echo "tmux failed to start; using plain fish shell"
     end
 end
