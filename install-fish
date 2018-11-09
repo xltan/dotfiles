@@ -1,0 +1,11 @@
+#!/bin/sh
+
+FISH_CONF=$(pwd)/fish
+FISH_INSTALL_DIR=$HOME/.config/fish
+
+mkdir -pv .bak
+for f in conf.d fishfile fish_variables config.fish; do
+	mv -vfT $FISH_INSTALL_DIR/$f .bak/$f 2> /dev/null
+	ln -sfv $FISH_CONF/$f $FISH_INSTALL_DIR/$f
+done
+
