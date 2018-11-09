@@ -2,7 +2,8 @@ if not status is-interactive
 	exit
 end
 
-set -gx PATH $HOME/.local/bin $HOME/.bin $HOME/.cargo/bin $GOPATH/bin /usr/local/bin /usr/local/sbin $PATH
+set -gx GOPATH $HOME/go
+set -gx PATH $HOME/.local/bin $HOME/.cargo/bin $GOPATH/bin /usr/local/bin /usr/local/sbin $PATH
 
 if not functions -q fisher
     set -q XDG_CONFIG_HOME; or set XDG_CONFIG_HOME ~/.config
