@@ -7,13 +7,10 @@ import ycm_core
 BASE_FLAGS = [
     '-Wall',
     '-Wextra',
-    '-Wno-long-long',
-    '-Wno-variadic-macros',
     '-fexceptions',
     '-ferror-limit=10000',
     '-DNDEBUG',
     '-std=c++17',
-    '-xc++',
 ]
 
 SOURCE_EXTENSIONS = [
@@ -179,7 +176,7 @@ def FlagsForFile(filename):
         include_flags = FlagsForInclude(root)
         if include_flags:
             final_flags = final_flags + include_flags
-        final_flags.append("-I" + os.path.realpath(os.getcwd()))
+        # final_flags.append("-I" + os.path.realpath(os.getcwd()))
     return {
         'flags': final_flags,
         'do_cache': True
