@@ -29,12 +29,12 @@ function fish_prompt --description 'Write out the prompt'
     end
 
 	if [ $status -eq 0 ]
-		set suffix $suffix
+		set suffix (prompt_pwd) $suffix
 	else
-		set suffix (set_color $fish_color_error) $suffix
+		set suffix (set_color $fish_color_error) (prompt_pwd) $suffix
 	end
 
-    echo -n -s (prompt_pwd) $suffix
+    echo -n -s $suffix
 end
 
 function mcd
