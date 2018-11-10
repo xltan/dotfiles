@@ -43,7 +43,12 @@ function mcd
 	and cd "$argv"
 end
 
-function con
+function tc
 	cp -r ~/.template/conan "$argv"
+	and cd "$argv"
+end
+
+function tm
+	cp -r ~/.template/make "$argv"
 	and cd "$argv"
 end
