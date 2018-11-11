@@ -53,6 +53,10 @@ function tm
 end
 
 function ls --description 'List contents of directory'
-	set -l param --color=auto
-	command ls $param $argv
+	switch (uname)
+		case Darwin
+			command ls -G $argv
+		case '*'
+			command ls --color=auto $argv
+	end
 end
