@@ -2,5 +2,4 @@
 boost/1.68.0@conan/stable
 
 [generators]
-virtualrunenv
 cmake
