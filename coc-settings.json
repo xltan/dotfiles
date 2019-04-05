@@ -1,0 +1,32 @@
+{
+	"suggest.maxCompleteItemCount": 10,
+	// "suggest.noselect": false,
+	"suggest.minTriggerInputLength": 3,
+	"imselect.enableStatusItem": false,
+	"list.insertMappings": {
+		"<C-d>": "feedkeys:\\<C-f>",
+		"<C-u>": "feedkeys:\\<C-b>",
+		"<C-n>": "normal:j",
+		"<C-p>": "normal:k"
+	},
+	"typescript.suggest.completeFunctionCalls": true,
+	"coc.preferences.colorSupport": false,
+	"languageserver": {
+		"ccls": {
+		  "command": "ccls",
+		  "filetypes": ["c", "cpp", "objc", "objcpp"],
+		  "rootPatterns": [".ccls", "compile_commands.json", ".vim/", ".git/", ".hg/"],
+		  "initializationOptions": {
+			 "cache": {
+			   "directory": "/tmp/ccls"
+			 }
+		   }
+		},
+		"golang": {
+		  "command": "gopls",
+		  // "args": ["--diagnostics-style=instant"],
+		  "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
+		  "filetypes": ["go"]
+		}
+  	}
+}
