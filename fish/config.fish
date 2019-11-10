@@ -3,8 +3,10 @@ if not status is-interactive
 end
 
 set -gx GOPATH $HOME/go
-set -gx PATH $HOME/.local/bin $HOME/.cargo/bin $GOPATH/bin /usr/local/bin /usr/local/sbin $PATH
-set -gx PATH $HOME/work/flutter/bin /usr/local/opt/python/libexec/bin $PATH
+set -gx PATH $fish_user_paths /usr/local/bin /usr/bin /bin /usr/sbin /sbin /Library/Apple/usr/bin /Library/Apple/bin /Library/TeX/texbin
+set -gx PATH $HOME/.local/bin $HOME/.cargo/bin $GOPATH/bin /usr/local/sbin $PATH
+set -gx PATH $HOME/work/vcpkg $HOME/work/flutter/bin /usr/local/opt/python/libexec/bin $PATH
+
 set -gx FZF_DEFAULT_COMMAND 'fd --type f --color=never'
 set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND
 set -gx FZF_ALT_C_COMMAND 'fd --type d . --color=never'
@@ -53,6 +55,11 @@ end
 
 function tm
 	cp -r ~/.template/make "$argv"
+	and cd "$argv"
+end
+
+function tv
+	cp -r ~/.template/vcpkg "$argv"
 	and cd "$argv"
 end
 

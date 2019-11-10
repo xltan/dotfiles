@@ -1,6 +1,14 @@
 {
 	"suggest.maxCompleteItemCount": 10,
 	// "suggest.noselect": false,
+	"tabnine.priority": 100,
+	"diagnostic.errorSign": ">",
+	"diagnostic.warningSign": "-",
+	"diagnostic.virtualText": true,
+	"diagnostic.virtualTextPrefix": "▶ ",
+	"diagnostic.checkCurrentLine": true,
+	"diagnostic.enableMessage": "jump",
+	// "codeLens.enable": true,
 	"suggest.minTriggerInputLength": 3,
 	"imselect.enableStatusItem": false,
 	"list.insertMappings": {
@@ -12,15 +20,33 @@
 	"typescript.suggest.completeFunctionCalls": true,
 	"coc.preferences.colorSupport": false,
 	"languageserver": {
-		"ccls": {
-		  "command": "ccls",
+		// "ccls": {
+		//   // "trace.server": "verbose",
+		//   "command": "ccls",
+		//   "filetypes": ["c", "cpp", "objc", "objcpp"],
+		//   "rootPatterns": [".ccls", "compile_commands.json", ".git/"],
+		//   "initializationOptions": {
+		// 	 "cache": {
+		// 	   "directory": "/tmp/ccls"
+		// 	 }
+		//    }
+		// },
+		// "ccls-debug": {
+		//   "trace.server": "verbose",
+		//   "command": "ccls-debug",
+		//   "filetypes": ["c", "cpp", "objc", "objcpp"],
+		//   "rootPatterns": [".ccls", "compile_commands.json", ".git/"],
+		//   "initializationOptions": {
+		// 	 "cache": {
+		// 	   "directory": "/tmp/ccls"
+		// 	 }
+		//    }
+		// },
+		"clangd": {
+		  "trace.server": "verbose",
+		  "command": "clangd",
 		  "filetypes": ["c", "cpp", "objc", "objcpp"],
-		  "rootPatterns": [".ccls", "compile_commands.json", ".vim/", ".git/", ".hg/"],
-		  "initializationOptions": {
-			 "cache": {
-			   "directory": "/tmp/ccls"
-			 }
-		   }
+		  "rootPatterns": ["compile_commands.json", ".git/"]
 		},
 		"golang": {
 		  "command": "gopls",
@@ -28,5 +54,5 @@
 		  "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
 		  "filetypes": ["go"]
 		}
-  	}
+	}
 }

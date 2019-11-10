@@ -9,6 +9,10 @@ all: $(OBJ)
 	$(CXX) $(CXXFLAGS) -o $(BIN) $^
 	./$(BIN)
 
+%: %.o
+	$(CXX) $(CXXFLAGS) -o $(BIN) $^
+	./$(BIN)
+
 %.o: %.cc
 	$(CXX) $(CXXFLAGS) -o $@ -c $< -g
 

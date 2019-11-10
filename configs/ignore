@@ -22,8 +22,13 @@ tags
 *.avi
 *.wmv
 *.mp4
+*.bin
+*.rlib
+*.rmeta
+*.lock
 *.pbxproj
 .hg/
 .svn/
 .git/
 .vscode/
+*.dSYM/
