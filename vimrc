@@ -39,7 +39,7 @@ let $VIMFILES=split(&rtp, ",")[0]
 set rtp+=/usr/local/opt/fzf
 call plug#begin($VIMFILES . '/bundle')
 Plug 'arcticicestudio/nord-vim'
-Plug 'morhetz/gruvbox'
+Plug 'chriskempson/base16-vim'
 
 " Plug 'Raimondi/delimitMate'
 " let delimitMate_expand_cr = 1
@@ -56,6 +56,7 @@ Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-rhubarb'
+Plug 'tpope/vim-obsession'
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/fzf.vim'
 nnoremap <leader>f :Files<CR>
@@ -64,14 +65,13 @@ nnoremap <leader>h :History<CR>
 " nnoremap <leader>gh :LeaderfMru<CR>
 nnoremap <leader>gj :BTags<CR>
 nnoremap <leader>gt :Tags<CR>
-nnoremap <leader>tt :LeaderfFunction!<CR>
 nnoremap <leader>: :History:<CR>
 nnoremap <leader>/ :History/<CR>
 
-let fzf_use_floating_window = has('nvim')
+let fzf_use_floating_window = 1
 
-if fzf_use_floating_window
-  let s:fzf_floating_window_height = min([15, &lines])
+let s:fzf_floating_window_height = min([15, &lines])
+if has('nvim')
   function! FloatingFZF()
     let buf = nvim_create_buf(v:false, v:true)
     " call setbufvar(buf, '&signcolumn', 'no')
@@ -89,14 +89,41 @@ if fzf_use_floating_window
           \ }
     call nvim_open_win(buf, v:true, opts)
   endfunction
-
-  let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse'
-  "\ --preview "head -' . string(s:fzf_floating_window_height - 2) . ' {}"'
-  let g:fzf_layout = { 'window': 'call FloatingFZF()' }
+  Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
+  let g:nvimgdb_config_override = {
+  \ 'key_next': 'n',
+  \ 'key_step': 's',
+  \ 'key_finish': 'f',
+  \ 'key_continue': 'c',
+  \ 'key_until': '<space>',
+  \ 'key_breakpoint': 'b',
+  \ 'set_tkeymaps': "NvimGdbNoTKeymaps",
+  \ }
+else
+  " function! FloatingFZF()
+  "   let height = s:fzf_floating_window_height
+  "   let width = min([120, float2nr(&columns - (&columns * 2 / 10))])
+  "   " let col = float2nr((&columns - width) / 2)
+  "   " let row = float2nr((&lines - height) / 2)
+  "   let opts = {
+  "         \ 'maxwidth': width,
+  "         \ 'maxheight': height
+  "         \ }
+  "   call popup_dialog("fzf", opts)
+  " endfunction
 endif
+
+let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse'
+"\ --preview "head -' . string(s:fzf_floating_window_height - 2) . ' {}"'
+let g:fzf_layout = { 'window': 'call FloatingFZF()' }
+
 aug fzf
   au!
   au FileType fzf tnoremap <silent><buffer> <Esc> <C-c>
+        \| tnoremap <silent><buffer> <C-j> <C-n>
+        \| tnoremap <silent><buffer> <C-k> <C-p>
+        \| tnoremap <silent><buffer> <C-h> <BS>
+        \| tnoremap <silent><buffer> <C-l> <C-c>
   if !fzf_use_floating_window
     au FileType fzf set laststatus=0 noshowmode noruler
     \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
@@ -141,11 +168,25 @@ nmap ga <Plug>(EasyAlign)
 
 Plug 'xltan/lightline-colors.vim'
 Plug 'itchyny/lightline.vim'
+function! StatusDiagnostic() abort
+  let info = get(b:, 'coc_diagnostic_info', {})
+  if empty(info) | return '' | endif
+  let msgs = []
+  if get(info, 'error', 0)
+    call add(msgs, 'E' . info['error'])
+  endif
+  if get(info, 'warning', 0)
+    call add(msgs, 'W' . info['warning'])
+  endif
+  let coc_status = get(g:, 'coc_status', '')
+  if empty(msgs) | return coc_status | endif
+  return join(msgs, ' ') . ' ' . coc_status
+endfunction
 let g:lightline = {
-      \ 'colorscheme': 'nord2',
+      \ 'colorscheme': 'tomorrow2',
       \ 'active': {
 		  \   'left': [ [ 'paste' ],
-		  \           [ 'readonly', 'relativepath', 'modified', 'cocstatus' ] ],
+		  \           [ 'readonly', 'relativepath', 'modified', 'cocstatus', 'method' ] ],
       \  'right': [ [ 'percentwin' ],
       \            [ 'lineinfo' ],
       \            [ 'mode' ]]
@@ -167,7 +208,8 @@ let g:lightline = {
 		  \    't':      'T',
 		  \ },
       \ 'component_function': {
-      \   'cocstatus': 'coc#status'
+      \   'cocstatus': 'StatusDiagnostic',
+      \   'method': 'NearestMethodOrFunction',
       \ },
       \ }
 
@@ -177,6 +219,8 @@ if has('win32')
   let g:slime_target = "vimterminal"
 else
 	let g:slime_target = "tmux"
+  let g:slime_default_config = {"socket_name": "default", "target_pane": "{right-of}"}
+  let g:slime_dont_ask_default = 1
 endif
 
 Plug 'plasticboy/vim-markdown'
@@ -187,6 +231,7 @@ let g:tex_conceal = 0
 
 Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install' }
 Plug 'dhruvasagar/vim-table-mode'
+let g:table_mode_map_prefix = '<Leader>y'
 let g:table_mode_corner='|'
 function! s:isAtStartOfLine(mapping)
   let text_before_cursor = getline('.')[0 : col('.')-1]
@@ -198,6 +243,42 @@ endfunction
 inoreabbrev <expr> <bar><bar>
           \ <SID>isAtStartOfLine('\|\|') ?
           \ '<c-o>:TableModeEnable<cr><bar><space><bar><left><left>' : '<bar><bar>'
+
+function! s:get_current_word(pattern)
+  let line = getline('.')
+  let npos = col('.') - 1
+  let ppos = npos
+  let pattern = printf('[0-9A-Za-z_%s]', a:pattern)
+  while ppos >= 0
+    if match(line[ppos], pattern) == -1
+      break
+    endif
+    let ppos -= 1
+  endwhile
+  while npos < len(line)
+    if match(line[npos], pattern) == -1
+      break
+    endif
+    let npos += 1
+  endwhile
+  return line[ppos+1:npos-1]
+endfunction
+
+function! s:std_get_commands(args)
+  if len(a:args) > 0
+    let word = a:args
+  else
+    let word = s:get_current_word(':')
+  endif
+  if word =~ "^std"
+    return 'silent !rustup doc '. word
+  endif
+
+  return 'OpenBrowserSearch -std '. word
+endfunction
+
+command! -bang -nargs=* -complete=command Rd execute <SID>std_get_commands(<q-args>)
+command! -bang -nargs=* -complete=command Doc execute 'OpenBrowserSearch -doc ' . <SID>get_current_word(':')
 
 let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
@@ -243,6 +324,7 @@ omap ic <plug>(signify-motion-inner-pending)
 xmap ic <plug>(signify-motion-inner-visual)
 omap ac <plug>(signify-motion-inner-pending)
 xmap ac <plug>(signify-motion-inner-visual)
+
 nnoremap [r :SignifyRefresh<CR>
 nnoremap ]r :SignifyToggle<CR>
 
@@ -257,14 +339,14 @@ map #   <Plug>(asterisk-#)
 map g*  <Plug>(asterisk-g*)
 map g#  <Plug>(asterisk-g#)
 map z*  <Plug>(asterisk-z*)
-map gz* <Plug>(asterisk-gz*)
 map z#  <Plug>(asterisk-z#)
-map gz# <Plug>(asterisk-gz#)
+" map gz* <Plug>(asterisk-gz*)
+" map gz# <Plug>(asterisk-gz#)
 
 Plug 'AndrewRadev/linediff.vim'
 
 Plug 'SirVer/ultisnips'
-let g:UltiSnipsUsePythonVersion = 3
+" let g:UltiSnipsUsePythonVersion = 3
 " let g:UltiSnipsExpandTrigger = '<C-j>'
 Plug 'xltan/algorithm-mnemonics.vim'
 let g:algorithm_mnemonics_lambda_parameter = ""
@@ -276,19 +358,18 @@ let g:snips_github = "https://github.com/xltan"
 
 Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_add_default_project_roots = 0
-let g:gutentags_project_root = ['.git', '.svn', '.gutctags', '.clang-format', '.ignore']
-let g:gutentags_exclude_project_root = ['/usr/local', $HOME, $HOME.'/Dropbox']
+let g:gutentags_project_root = [ 'tags' ]
+" '.git', '.svn', '.gutctags', '.clang-format', '.ignore']
+let g:gutentags_exclude_project_root = ['/usr/local', $HOME, $HOME.'/Documents']
 
 if !has('win32')
-  let g:gutentags_cache_dir = $VIMFILES . '/.cache'
+  " let g:gutentags_cache_dir = $VIMFILES . '/.cache'
   if !has('nvim')
     Plug 'vim-utils/vim-man'
   endif
-  map <leader>v <Plug>(Man)
 endif
 
-let g:loaded_netrw = 1
-let g:loaded_netrwPlugin = 1
+map <leader>v :Man <C-r><C-w><CR>
 
 Plug 'justinmk/vim-dirvish'
 func! s:setup_dirvish()
@@ -324,7 +405,7 @@ func! DirvishSetup()
 endfunc
 let g:dirvish_mode = 'call DirvishSetup()'
 
-nnoremap <silent><C-e> :<C-U>exe 'vsplit +Dirvish\ %:p'.repeat(':h',v:count1)<CR>
+" nnoremap <silent><C-e> :<C-U>exe 'vsplit +Dirvish\ %:p'.repeat(':h',v:count1)<CR>
 
 Plug 'justinmk/vim-sneak'
 let g:sneak#label = 1
@@ -344,13 +425,8 @@ Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
 let g:lt_height = 9
 
-if has('win32')
-  let s:error_symbol = '🔸'
-  let s:warning_symbol = '🔹'
-else
-  let s:error_symbol = '>>'
-  let s:warning_symbol = '--'
-endif
+let s:error_symbol = '>'
+let s:warning_symbol = '-'
 
 " Plug 'Valloric/YouCompleteMe', { 'frozen' : 1 }
 " let g:ycm_enable_diagnostic_highlighting = 0
@@ -415,9 +491,20 @@ endif
 " let g:ale_lint_on_save = 1
 " let g:ale_fix_on_save = 1
 
-" Plug 'liuchengxu/vista.vim'
-" let g:vista_icon_indent = ["▸ ", ""]
-" let g:vista_default_executive = 'coc'
+Plug 'liuchengxu/vista.vim'
+let g:vista_icon_indent = ["▸ ", ""]
+let g:vista_default_executive = 'ctags'
+let g:vista_executive_for = {
+    \ 'markdown': 'toc',
+    \ }
+
+" let g:vista_echo_cursor_strategy = 'floating_win'
+nnoremap <leader>j :Vista finder<CR>
+nnoremap <leader>tt :Vista!!<CR>
+
+function! NearestMethodOrFunction() abort
+  return get(b:, 'vista_nearest_method_or_function', '')
+endfunction
 
 Plug 'neoclide/coc.nvim', {'do': { -> coc#util#install()}}
 nmap <silent> ]v :CocNext<CR>
@@ -436,19 +523,44 @@ function! s:show_documentation()
     call CocAction('doHover')
   endif
 endfunction
-vmap <leader>r  <Plug>(coc-codeaction-selected)
-nmap <leader>r  <Plug>(coc-codeaction-selected)
-nmap <leader>rc  <Plug>(coc-codeaction)
+nmap <leader>r  <Plug>(coc-codelens-action)
 inoremap <silent><expr> <C-n>
       \ pumvisible() ? "\<C-n>" :
       \ coc#refresh()
+inoremap <silent><expr> <cr>
+      \ pumvisible() ? "\<C-y>\<cr>" :
+      \ "\<cr>"
 vmap <silent>= <Plug>(coc-format-selected)
 map <silent>_= <Plug>(coc-format)
 command! -nargs=0 Format :call CocAction('format')
+omap if <Plug>(coc-funcobj-i)
+xmap if <Plug>(coc-funcobj-i)
+omap af <Plug>(coc-funcobj-a)
+xmap af <Plug>(coc-funcobj-a)
+
+Plug 'tyru/open-browser.vim'
+let g:openbrowser_search_engines = {
+\   'std': 'https://doc.rust-lang.org/std/index.html?search={query}',
+\   'doc': 'https://docs.rs/releases/search?query={query}',
+\   'baidu': 'http://www.baidu.com/s?wd={query}&rsv_bp=0&rsv_spt=3&inputT=2478',
+\   'cpan': 'http://search.cpan.org/search?query={query}',
+\   'devdocs': 'http://devdocs.io/#q={query}',
+\   'duckduckgo': 'http://duckduckgo.com/?q={query}',
+\   'github': 'http://github.com/search?q={query}',
+\   'google': 'http://google.com/search?q={query}',
+\   'php': 'http://php.net/{query}',
+\   'python': 'http://docs.python.org/dev/search.html?q={query}&check_keywords=yes&area=default',
+\   'twitter-search': 'http://twitter.com/search/{query}',
+\   'twitter-user': 'http://twitter.com/{query}',
+\   'wiki': 'http://en.wikipedia.org/wiki/{query}',
+\}
+
+Plug 'rhysd/devdocs.vim'
+nmap gK <Plug>(devdocs-under-cursor)
 
 Plug 'skywind3000/asyncrun.vim'
 let g:asyncrun_open = 9
-" command! -bang -nargs=* -complete=file Make AsyncRun! -program=make @ <args>
+command! -bang -nargs=* -complete=file AsyncMake AsyncRun! -program=make @ <args>
 command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
 
 Plug 'dyng/ctrlsf.vim'
@@ -518,8 +630,6 @@ endif
 " nnoremap <leader>: :LeaderfHistoryCmd<CR>
 " nnoremap <leader>/ :LeaderfHistorySearch<CR>
 
-nnoremap <leader>j :CocList outline<CR>
-nnoremap <leader>tg :CocList --interactive symbols<CR>
 nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
 
 " Plug 'xltan/LeaderF-tjump'
@@ -534,7 +644,7 @@ Plug 'editorconfig/editorconfig-vim'
 
 " language related
 Plug 'vim-python/python-syntax'
-let g:python_version_2 = 1
+let g:python_version_3 = 1
 let g:python_highlight_class_vars = 0
 let g:python_highlight_indent_errors = 0
 let g:python_highlight_space_errors = 0
@@ -562,13 +672,15 @@ Plug 'dag/vim-fish'
 Plug 'rust-lang/rust.vim'
 
 Plug 'fatih/vim-go'
+let g:go_def_mapping_enabled = 0
 let g:go_def_mode = 'godef'
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
 
 Plug 'leafgarland/typescript-vim'
 " Plug 'Quramy/tsuquyomi'
-
+"
+Plug 'cespare/vim-toml'
 call plug#end()
 
 call project#rc()
@@ -620,30 +732,50 @@ call s:option_map('t', 'ts',
 " let &t_EI = "\e[2 q"
 
 set background=dark
-let g:nord_uniform_diff_background = 1
-
-let g:terminal_ansi_colors = [
-  \ "#3B4252", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#88C0D0", "#E5E9F0", 
-  \ "#4C566A", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#8FBCBB", "#ECEFF4", 
-\]
-
-aug color
+aug color_tomorrow
   au!
-  au ColorScheme * hi! link pythonFunction Normal
-    \| hi! link pythonBytesEscape SpecialChar
-    \| hi! link Error ALEErrorSign
-    \| hi! link WarningMsg SpecialChar
-    \| hi! link Special SpecialChar
+  au ColorScheme * hi ErrorMsg guibg=NONE
+    \| hi! DiffDelete gui=NONE
+    \| hi! Statement gui=NONE
     \| hi! link DirvishSuffix Normal
-    \| hi! link Statement Function
     \| hi! link QuickFixLine WildMenu
-    \| hi! link Constant Number
-    \| hi! link Boolean Number
-    \| hi! link CocErrorSign ALEErrorSign
-    \| hi! link CocHighlightText CursorLine
+    \| hi! link CocErrorSign DiffDelete 
+    \| hi! link CocWarningSign Todo 
+    " \| hi Statement gui=NONE
+    " \| hi! link Special SpecialChar
+    " \| hi! link Constant Number
+    " \| hi! link Boolean Number
+    " \| hi! link CocHighlightText CursorLine
+    " \| hi! link pythonFunction Normal
+    " \| hi! link pythonBytesEscape SpecialChar
+    " \| hi! link WarningMsg SpecialChar
+    " \| hi! link Error ALEErrorSign
 aug END
+color base16-tomorrow-night
+" hi! link CocErrorSign ErrorMsg 
 
-colorscheme nord
+" let g:nord_uniform_diff_background = 1
+" let g:terminal_ansi_colors = [
+"   \ "#3B4252", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#88C0D0", "#E5E9F0", 
+"   \ "#4C566A", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#8FBCBB", "#ECEFF4", 
+" \]
+" aug color
+"   au!
+"   au ColorScheme * hi! link pythonFunction Normal
+"     \| hi! link pythonBytesEscape SpecialChar
+"     \| hi! link Error ALEErrorSign
+"     \| hi! link WarningMsg SpecialChar
+"     \| hi! link Special SpecialChar
+"     \| hi! link DirvishSuffix Normal
+"     \| hi! link Statement Function
+"     \| hi! link QuickFixLine WildMenu
+"     \| hi! link Constant Number
+"     \| hi! link Boolean Number
+"     \| hi! link CocErrorSign ALEErrorSign
+"     \| hi! link CocHighlightText CursorLine
+" aug END
+" colorscheme nord
+"
 " hi! link StatusLineNC Comment
 " hi TabLine guifg=#7b88a1
 
@@ -688,9 +820,9 @@ set nofixeol
 set formatoptions+=j " Delete comment character when joining commented lines
 set cinoptions=:0,g0,(0,Ws,l1
 set viminfo^=!
-set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,
-    \*.vscode,tags,*.vs,*compile_commands.json,
-    \*.pyproj,*.idea
+set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
+    \*.vscode,tags,*.vs,*.pyproj,*.idea,*.clangd,*__pycache__,
+    \*.bin,*.rlib,*.rmeta
 set cpoptions+=>
 set belloff=all
 set history=1000
@@ -756,7 +888,7 @@ aug END
 aug vimrc_cpp
   au!
   " au CursorHold * silent call CocAction('doHover')
-  au CursorHold * silent call CocActionAsync('highlight')
+  " au CursorHold * silent call CocActionAsync('highlight')
   " au BufRead * if search('\M-*- C++ -*-', 'n', 1) | setlocal ft=cpp | endif
   au FileType c,cpp,objc,objcpp command! GA call s:a('e')
   au FileType c,cpp,objc,objcpp command! GAV call s:a('botright vertical split')
@@ -769,7 +901,7 @@ aug vimrc_cpp
   " au FileType c,cpp nmap <buffer> <silent> gd :YcmCompleter GoTo<CR>
   " au FileType c,cpp nmap <buffer> <silent> gz :YcmCompleter FixIt<CR>
   au FileType c,cpp,objc,objcpp,cs,json,java,actionscript,glsl,dot setlocal commentstring=//\ %s
-  au FileType c setlocal keywordprg=:Vman
+  " au FileType c setlocal keywordprg=:Vman
   " au FileType cpp setlocal keywordprg=cppman
   au FileType cmake,tmux,cfg setlocal commentstring=#\ %s
   " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
@@ -781,14 +913,14 @@ aug vimrc_markdown
   au filetype markdown setlocal conceallevel=2
   au filetype markdown nnoremap <silent><buffer> gN O<Esc>C- [ ] 
   au filetype markdown nnoremap <silent><buffer> gn o<Esc>C- [ ] 
-  au filetype markdown inoremap <silent><buffer> $ $<C-o>:set ft=tex<CR>
+  " au filetype markdown inoremap <silent><buffer> $ $<C-o>:set ft=tex<CR>
   au InsertLeave *.md if &filetype == 'tex' | set filetype=markdown | endif
   au filetype markdown noremap <silent><buffer> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
 aug END
 
 aug vimrc_tab
   au!
-  au FileType python setlocal noexpandtab ts=4 sw=4
+  au FileType python setlocal expandtab ts=4 sw=4
   au FileType tex setlocal ts=2 sw=2
   au FileType vim,lua,javascript,c,cpp setlocal expandtab ts=2 sw=2
   au FileType make setlocal noexpandtab
@@ -796,16 +928,18 @@ aug END
 
 aug vimrc_misc
   au!
+  au BufEnter * if &buftype == 'terminal' | startinsert | endif
   au VimEnter * call s:init()
   au FileType json syntax match Comment +\/\/.\+$+
-  au FileType help wincmd L | nnoremap <buffer><silent> q :q<CR>
-  au FileType man wincmd L | nnoremap <buffer><silent> q :lclose<CR>:q<CR>
+  au FileType help wincmd L | nnoremap <buffer><silent> q :bd<CR>
+  au FileType man  wincmd L | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
   au FileType git,gitcommit setlocal foldmethod=syntax
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
   au BufRead *.mangle setlocal equalprg=c++filt
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
+  au BufWritePost *.rs call CocActionAsync("format")
   " au InsertLeave * set imi=0 | set cursorline
   " au InsertEnter * set nocursorline
   " au WinEnter * set cursorline
@@ -897,7 +1031,7 @@ vnoremap < <gv
 vnoremap > >gv
 nnoremap gV `[v`]
 nnoremap Y y$
-vnoremap P yP`<
+vnoremap P yP`<O<Esc>j
 
 nnoremap <silent> <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
     \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
@@ -971,8 +1105,8 @@ nnoremap <M-p> "0p
 cnoremap <C-p> <UP>
 cnoremap <C-n> <DOWN>
 
-nnoremap <leader>et :tabe ~/Dropbox/notes/todo.md<CR>
-nnoremap <leader>en :tabe ~/Dropbox/notes<CR>:lcd %:h<CR>:pwd<CR>
+nnoremap <leader>et :tabe ~/Documents/notes/todo.md<CR>
+nnoremap <leader>en :tabe ~/Documents/notes<CR>:lcd %:h<CR>:pwd<CR>
 nnoremap <leader>es :tabe $VIMFILES/UltiSnips<CR>:lcd %:h<CR>:pwd<CR>
 nnoremap <leader>er :tabe $MYVIMRC<CR>
 
@@ -1051,8 +1185,14 @@ func! s:command_abbr(abbreviation, expansion)
   execute 'cabbr ' . a:abbreviation . ' <c-r>=getcmdpos() == 1 && getcmdtype() == ":" ? "' . a:expansion . '" : "' . a:abbreviation . '"<CR>'
 endfunc
 command! -nargs=+ Cabbr call s:command_abbr(<f-args>)
+
 Cabbr sf CtrlSF
 Cabbr gr Grep
+Cabbr dd DevDocs
+Cabbr cpp Cppman
+Cabbr gdb GdbStartLLDB\ lldb
+Cabbr gg OpenBrowserSearch
+Cabbr rr RustRun
 
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
@@ -1062,9 +1202,19 @@ endfunc
 
 call s:source_if_exists($VIMFILES.'/.localrc')
 
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
 func! s:init()
   " need overwrite ultisnips keymap
   inoremap <silent> <tab> <C-R>=pumvisible() ? coc#_select_confirm() : UltiSnips#ExpandSnippet()<CR>
+  " inoremap <silent><expr> <TAB>
+  "     \ pumvisible() ? coc#_select_confirm() :
+  "     \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+  "     \ <SID>check_back_space() ? "\<TAB>" :
+  "     \ coc#refresh()
   " nmap [a <Plug>(ale_previous_wrap)
   " nmap ]a <Plug>(ale_next_wrap)
   nmap <silent> [a <Plug>(coc-diagnostic-prev)
@@ -1078,6 +1228,7 @@ func! s:init()
   nmap ]w gt
   nmap [W :tabfirst<CR>
   nmap ]W :tablast<CR>
+  call vista#RunForNearestMethodOrFunction()
 endfunc
 
 func! s:change_dir()
@@ -1089,3 +1240,29 @@ endfunc
 let dllpath = $vimfiles . "/gvimfullscreen.dll"
 nnoremap <M-f> <Esc>:call libcallnr(dllpath, "ToggleFullScreen", 0)<CR>
 
+function! s:cppcheck()
+  cclose
+  update
+  setlocal makeprg=cppcheck\ --enable=all\ %
+  " setlocal errorformat=[%f:%l]:%m
+  setlocal errorformat=[%f:%l]\ ->\ %m,[%f:%l]:%m
+  let curr_dir = expand('%:h')
+  if curr_dir == ''
+    let curr_dir = '.'
+  endif
+  echo curr_dir
+  execute 'lcd ' . curr_dir
+  execute 'AsyncMake'
+  execute 'lcd -'
+  " exe    ":botright cwindow"
+  " copen
+endfunction
+
+command! -bang -nargs=* -complete=command CppCheck AsyncRun! cppcheck % --enable=style,performance,portability,unusedFunction --std=c++14 --template-location=gcc --template=gcc
+
+command! -bang -nargs=0 UE execute "normal o\<C-o>" . len(getline('.')). "i="
+command! -bang -nargs=0 UM execute "normal o\<C-o>" . len(getline('.')). "i-"
+
+if argc() == 0
+  call s:source_if_exists('Session.vim')
+endif

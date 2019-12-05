@@ -2,10 +2,12 @@ if not status is-interactive
 	exit
 end
 
+set -gx LANG "en_US.UTF-8"
+set -gx RUSTC_WRAPPER $HOME/.cargo/bin/sccache
 set -gx GOPATH $HOME/go
 set -gx PATH $fish_user_paths /usr/local/bin /usr/bin /bin /usr/sbin /sbin /Library/Apple/usr/bin /Library/Apple/bin /Library/TeX/texbin
 set -gx PATH $HOME/.local/bin $HOME/.cargo/bin $GOPATH/bin /usr/local/sbin $PATH
-set -gx PATH $HOME/work/vcpkg $HOME/work/flutter/bin /usr/local/opt/python/libexec/bin $PATH
+set -gx PATH /usr/local/opt/ccache/libexec $HOME/work/vcpkg $HOME/work/flutter/bin /usr/local/opt/python/libexec/bin $PATH
 
 set -gx FZF_DEFAULT_COMMAND 'fd --type f --color=never'
 set -gx FZF_CTRL_T_COMMAND $FZF_DEFAULT_COMMAND

@@ -4,10 +4,10 @@
 	"tabnine.priority": 100,
 	"diagnostic.errorSign": ">",
 	"diagnostic.warningSign": "-",
-	"diagnostic.virtualText": true,
+	"diagnostic.virtualText": false,
 	"diagnostic.virtualTextPrefix": "▶ ",
 	"diagnostic.checkCurrentLine": true,
-	"diagnostic.enableMessage": "jump",
+	"diagnostic.enableMessage": "always",
 	// "codeLens.enable": true,
 	"suggest.minTriggerInputLength": 3,
 	"imselect.enableStatusItem": false,
@@ -19,6 +19,7 @@
 	},
 	"typescript.suggest.completeFunctionCalls": true,
 	"coc.preferences.colorSupport": false,
+	// "rust-analyzer.enableCargoWatchOnStartup": "enabled",
 	"languageserver": {
 		// "ccls": {
 		//   // "trace.server": "verbose",
@@ -43,16 +44,31 @@
 		//    }
 		// },
 		"clangd": {
-		  "trace.server": "verbose",
-		  "command": "clangd",
-		  "filetypes": ["c", "cpp", "objc", "objcpp"],
-		  "rootPatterns": ["compile_commands.json", ".git/"]
+			// "trace.server": "verbose",
+			"command": "clangd",
+			"filetypes": [
+				"c",
+				"cpp",
+				"objc",
+				"objcpp"
+			],
+			"rootPatterns": [
+				"compile_commands.json",
+				".git/"
+			]
 		},
 		"golang": {
-		  "command": "gopls",
-		  // "args": ["--diagnostics-style=instant"],
-		  "rootPatterns": ["go.mod", ".vim/", ".git/", ".hg/"],
-		  "filetypes": ["go"]
+			"command": "gopls",
+			// "args": ["--diagnostics-style=instant"],
+			"rootPatterns": [
+				"go.mod",
+				".vim/",
+				".git/",
+				".hg/"
+			],
+			"filetypes": [
+				"go"
+			]
 		}
 	}
 }
