@@ -40,11 +40,13 @@ set rtp+=/usr/local/opt/fzf
 call plug#begin($VIMFILES . '/bundle')
 Plug 'arcticicestudio/nord-vim'
 Plug 'chriskempson/base16-vim'
+Plug 'arzg/vim-colors-xcode'
 
 " Plug 'Raimondi/delimitMate'
 " let delimitMate_expand_cr = 1
 " let delimitMate_matchpairs = "(:),[:],{:}"
 
+Plug 'tpope/vim-characterize'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
@@ -57,6 +59,15 @@ Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-obsession'
+" Plug 'tpope/vim-endwise'
+inoremap (<CR> (<CR>)<Esc>O
+inoremap {<CR> {<CR>}<Esc>O
+inoremap [<CR> [<CR>]<Esc>O
+inoremap {; {<CR>};<Esc>O
+inoremap {, {<CR>},<Esc>O
+inoremap [; [<CR>];<Esc>O
+inoremap [, [<CR>],<Esc>O
+
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/fzf.vim'
 nnoremap <leader>f :Files<CR>
@@ -164,7 +175,7 @@ let g:fzf_colors =
 
 Plug 'junegunn/vim-easy-align'
 vmap ga <Plug>(EasyAlign)
-nmap ga <Plug>(EasyAlign)
+" nmap ga <Plug>(EasyAlign)
 
 Plug 'xltan/lightline-colors.vim'
 Plug 'itchyny/lightline.vim'
@@ -277,8 +288,8 @@ function! s:std_get_commands(args)
   return 'OpenBrowserSearch -std '. word
 endfunction
 
-command! -bang -nargs=* -complete=command Rd execute <SID>std_get_commands(<q-args>)
-command! -bang -nargs=* -complete=command Doc execute 'OpenBrowserSearch -doc ' . <SID>get_current_word(':')
+command! -bang -nargs=* -complete=command Doc execute <SID>std_get_commands(<q-args>)
+command! -bang -nargs=* -complete=command Rs execute 'OpenBrowserSearch -doc ' . <SID>get_current_word(':')
 
 let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
@@ -290,6 +301,7 @@ let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSuppor
 let g:vimtex_view_general_options = '-r @line @pdf @tex'
 let g:vimtex_fold_enabled = 0
 let g:vimtex_view_general_callback = 'ViewerCallback'
+Plug 'vim/killersheep'
 
 function! ViewerCallback(status) dict
   if a:status
@@ -342,6 +354,9 @@ map z*  <Plug>(asterisk-z*)
 map z#  <Plug>(asterisk-z#)
 " map gz* <Plug>(asterisk-gz*)
 " map gz# <Plug>(asterisk-gz#)
+" Plug 'haya14busa/vim-edgemotion'
+" map <C-j> <Plug>(edgemotion-j)
+" map <C-k> <Plug>(edgemotion-k)
 
 Plug 'AndrewRadev/linediff.vim'
 
@@ -506,7 +521,7 @@ function! NearestMethodOrFunction() abort
   return get(b:, 'vista_nearest_method_or_function', '')
 endfunction
 
-Plug 'neoclide/coc.nvim', {'do': { -> coc#util#install()}}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 nmap <silent> ]v :CocNext<CR>
 nmap <silent> [v :CocPrev<CR>
 nmap <silent> gd <Plug>(coc-definition)
@@ -554,9 +569,7 @@ let g:openbrowser_search_engines = {
 \   'twitter-user': 'http://twitter.com/{query}',
 \   'wiki': 'http://en.wikipedia.org/wiki/{query}',
 \}
-
-Plug 'rhysd/devdocs.vim'
-nmap gK <Plug>(devdocs-under-cursor)
+let g:openbrowser_default_search = "duckduckgo"
 
 Plug 'skywind3000/asyncrun.vim'
 let g:asyncrun_open = 9
@@ -737,10 +750,11 @@ aug color_tomorrow
   au ColorScheme * hi ErrorMsg guibg=NONE
     \| hi! DiffDelete gui=NONE
     \| hi! Statement gui=NONE
-    \| hi! link DirvishSuffix Normal
     \| hi! link QuickFixLine WildMenu
     \| hi! link CocErrorSign DiffDelete 
     \| hi! link CocWarningSign Todo 
+    \| hi! link MatchParen DiffDelete 
+    " \| hi! link DirvishSuffix Normal
     " \| hi Statement gui=NONE
     " \| hi! link Special SpecialChar
     " \| hi! link Constant Number
@@ -798,6 +812,7 @@ set sw=4 ts=4
 set timeoutlen=500 ttimeoutlen=0
 
 set laststatus=2
+set scrolloff=4
 
 set hidden
 set autowrite
@@ -920,9 +935,9 @@ aug END
 
 aug vimrc_tab
   au!
-  au FileType python setlocal expandtab ts=4 sw=4
+  au FileType python,javascript setlocal expandtab ts=4 sw=4
   au FileType tex setlocal ts=2 sw=2
-  au FileType vim,lua,javascript,c,cpp setlocal expandtab ts=2 sw=2
+  au FileType vim,lua,c,cpp setlocal expandtab ts=2 sw=2
   au FileType make setlocal noexpandtab
 aug END
 
@@ -939,7 +954,7 @@ aug vimrc_misc
   au BufRead .clang-format setlocal ft=yaml
   au BufRead *.mangle setlocal equalprg=c++filt
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
-  au BufWritePost *.rs call CocActionAsync("format")
+  au BufWritePost *.rs,*.cc,*.c call CocActionAsync("format")
   " au InsertLeave * set imi=0 | set cursorline
   " au InsertEnter * set nocursorline
   " au WinEnter * set cursorline
@@ -1188,7 +1203,6 @@ command! -nargs=+ Cabbr call s:command_abbr(<f-args>)
 
 Cabbr sf CtrlSF
 Cabbr gr Grep
-Cabbr dd DevDocs
 Cabbr cpp Cppman
 Cabbr gdb GdbStartLLDB\ lldb
 Cabbr gg OpenBrowserSearch
