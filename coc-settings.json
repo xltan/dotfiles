@@ -1,7 +1,7 @@
 {
 	"suggest.maxCompleteItemCount": 10,
 	// "suggest.noselect": false,
-	"tabnine.priority": 100,
+	// "tabnine.priority": 100,
 	"diagnostic.errorSign": ">",
 	"diagnostic.warningSign": "-",
 	"diagnostic.virtualText": false,
@@ -19,7 +19,7 @@
 	},
 	"typescript.suggest.completeFunctionCalls": true,
 	"coc.preferences.colorSupport": false,
-	// "rust-analyzer.enableCargoWatchOnStartup": "enabled",
+	"rust-analyzer.serverPath":"~/.cargo/bin/rust-analyzer",
 	"languageserver": {
 		// "ccls": {
 		//   // "trace.server": "verbose",

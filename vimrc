@@ -56,7 +56,6 @@ Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-projectionist'
-Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-obsession'
 " Plug 'tpope/vim-endwise'
@@ -67,6 +66,10 @@ inoremap {; {<CR>};<Esc>O
 inoremap {, {<CR>},<Esc>O
 inoremap [; [<CR>];<Esc>O
 inoremap [, [<CR>],<Esc>O
+
+Plug 'tpope/vim-fugitive'
+Plug 'shumphrey/fugitive-gitlab.vim'
+let g:fugitive_gitlab_domains = ['https://git.garena.com']
 
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/fzf.vim'
@@ -81,14 +84,14 @@ nnoremap <leader>/ :History/<CR>
 
 let fzf_use_floating_window = 1
 
-let s:fzf_floating_window_height = min([15, &lines])
+let s:fzf_floating_window_height = min([20, &lines])
 if has('nvim')
   function! FloatingFZF()
     let buf = nvim_create_buf(v:false, v:true)
     " call setbufvar(buf, '&signcolumn', 'no')
 
     let height = s:fzf_floating_window_height
-    let width = min([120, float2nr(&columns - (&columns * 2 / 10))])
+    let width = min([160, float2nr(&columns - (&columns * 2 / 10))])
     let col = float2nr((&columns - width) / 2)
     let row = float2nr((&lines - height) / 2)
     let opts = {
@@ -285,11 +288,11 @@ function! s:std_get_commands(args)
     return 'silent !rustup doc '. word
   endif
 
-  return 'OpenBrowserSearch -std '. word
+  return 'OpenBrowserSearch -rs '. word
 endfunction
 
 command! -bang -nargs=* -complete=command Doc execute <SID>std_get_commands(<q-args>)
-command! -bang -nargs=* -complete=command Rs execute 'OpenBrowserSearch -doc ' . <SID>get_current_word(':')
+command! -bang -nargs=* -complete=command Rs execute 'OpenBrowserSearch -rsd ' . <SID>get_current_word(':')
 
 let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
@@ -386,41 +389,42 @@ endif
 
 map <leader>v :Man <C-r><C-w><CR>
 
+" Plug 'tpope/vim-vinegar'
 Plug 'justinmk/vim-dirvish'
-func! s:setup_dirvish()
+" func! s:setup_dirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
-  silent! unmap <silent><buffer> <C-p>
-  nnoremap <silent><buffer> q :bd<CR>
-  nnoremap <silent><buffer> o :call dirvish#open("p", 1)<CR><C-w>p
-  nnoremap <silent><buffer> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
-  nnoremap <silent><buffer> gr :noau Dirvish %<CR>
-  nnoremap <silent><buffer> gh :Silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>:set conceallevel=3<CR>
-  if has('win32')
-    nnoremap <silent><buffer> gx :SilentExt start <C-R><C-L><CR>
-  else
-    nnoremap <silent><buffer> gx :SilentExt open <C-R><C-L><CR>
-  endif
-  nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
-  xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
-endfun
+  " silent! unmap <silent><buffer> <C-p>
+  " nnoremap <silent><buffer> q :bd<CR>
+  " nnoremap <silent><buffer> o :call dirvish#open("p", 1)<CR><C-w>p
+  " nnoremap <silent><buffer> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
+  " nnoremap <silent><buffer> gr :noau Dirvish %<CR>
+  " nnoremap <silent><buffer> gh :Silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>:set conceallevel=3<CR>
+  " if has('win32')
+  "   nnoremap <silent><buffer> gx :SilentExt start <C-R><C-L><CR>
+  " else
+  "   nnoremap <silent><buffer> gx :SilentExt open <C-R><C-L><CR>
+  " endif
+  " nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
+  " xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
+" endfun
 
-aug dirvish
-  au!
-  au FileType dirvish call <SID>setup_dirvish()
-aug END
+" aug dirvish
+"   au!
+"   au FileType dirvish call <SID>setup_dirvish()
+" aug END
 
-func! DirvishSetup()
-  let text = getline('.')
-  let xp = []
-  for item in split(&wildignore, ',')
-    call add(xp, glob2regpat(item).'\=')
-  endfor
-  exec 'silent keeppatterns g/\(' . join(xp, '\|'). '\|[\/|\\]tags' . '\)/d _'
-  exec 'sort ,^.*[\/],'
-endfunc
-let g:dirvish_mode = 'call DirvishSetup()'
+" func! DirvishSetup()
+"   let text = getline('.')
+"   let xp = []
+"   for item in split(&wildignore, ',')
+"     call add(xp, glob2regpat(item).'\=')
+"   endfor
+"   exec 'silent keeppatterns g/\(' . join(xp, '\|'). '\|[\/|\\]tags' . '\)/d _'
+"   exec 'sort ,^.*[\/],'
+" endfunc
+" let g:dirvish_mode = 'call DirvishSetup()'
 
-" nnoremap <silent><C-e> :<C-U>exe 'vsplit +Dirvish\ %:p'.repeat(':h',v:count1)<CR>
+nnoremap <silent><C-e> :<C-U>exe 'vsplit +Dirvish\ %:p'.repeat(':h',v:count1)<CR>
 
 Plug 'justinmk/vim-sneak'
 let g:sneak#label = 1
@@ -516,6 +520,7 @@ let g:vista_executive_for = {
 " let g:vista_echo_cursor_strategy = 'floating_win'
 nnoremap <leader>j :Vista finder<CR>
 nnoremap <leader>tt :Vista!!<CR>
+nnoremap <space> za
 
 function! NearestMethodOrFunction() abort
   return get(b:, 'vista_nearest_method_or_function', '')
@@ -555,8 +560,8 @@ xmap af <Plug>(coc-funcobj-a)
 
 Plug 'tyru/open-browser.vim'
 let g:openbrowser_search_engines = {
-\   'std': 'https://doc.rust-lang.org/std/index.html?search={query}',
-\   'doc': 'https://docs.rs/releases/search?query={query}',
+\   'rs': 'https://doc.rust-lang.org/std/index.html?search={query}',
+\   'rsd': 'https://docs.rs/releases/search?query={query}',
 \   'baidu': 'http://www.baidu.com/s?wd={query}&rsv_bp=0&rsv_spt=3&inputT=2478',
 \   'cpan': 'http://search.cpan.org/search?query={query}',
 \   'devdocs': 'http://devdocs.io/#q={query}',
@@ -568,8 +573,9 @@ let g:openbrowser_search_engines = {
 \   'twitter-search': 'http://twitter.com/search/{query}',
 \   'twitter-user': 'http://twitter.com/{query}',
 \   'wiki': 'http://en.wikipedia.org/wiki/{query}',
+\   'go': 'https://pkg.go.dev/search?q={query}',
 \}
-let g:openbrowser_default_search = "duckduckgo"
+" let g:openbrowser_default_search = "duckduckgo"
 
 Plug 'skywind3000/asyncrun.vim'
 let g:asyncrun_open = 9
@@ -651,7 +657,7 @@ nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
 "   au FileType c,cpp,objc,objcpp,actionscript,python nmap <silent><buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
 " aug END
 
-Plug 'xltan/vim-project', { 'branch': 'jpmv27_master' }
+" Plug 'xltan/vim-project', { 'branch': 'jpmv27_master' }
 
 Plug 'editorconfig/editorconfig-vim'
 
@@ -686,9 +692,11 @@ Plug 'rust-lang/rust.vim'
 
 Plug 'fatih/vim-go'
 let g:go_def_mapping_enabled = 0
-let g:go_def_mode = 'godef'
+let g:go_def_mode = 'gopls'
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
+let g:go_doc_url = 'https://pkg.go.dev'
+map gb :GoDocBrowser<CR>
 
 Plug 'leafgarland/typescript-vim'
 " Plug 'Quramy/tsuquyomi'
@@ -696,7 +704,7 @@ Plug 'leafgarland/typescript-vim'
 Plug 'cespare/vim-toml'
 call plug#end()
 
-call project#rc()
+" call project#rc()
 
 if has("termguicolors")
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -749,11 +757,20 @@ aug color_tomorrow
   au!
   au ColorScheme * hi ErrorMsg guibg=NONE
     \| hi! DiffDelete gui=NONE
+    \| hi! link DiffNewFile Normal
+    \| hi! link DiffFile Normal
+    \| hi! link DiffText Todo
+    \| hi! link diffIndexLine Comment
+    \| hi! link Folded GitGutterChange
     \| hi! Statement gui=NONE
-    \| hi! link QuickFixLine WildMenu
+    \| hi! link QuickFixLine StatusLine
     \| hi! link CocErrorSign DiffDelete 
     \| hi! link CocWarningSign Todo 
     \| hi! link MatchParen DiffDelete 
+    \| hi! link gitDiff Comment 
+    \| hi! link fugitiveHunk Comment 
+    \| hi! DiffAdded guibg=None
+    \| hi! DiffRemoved guibg=None
     " \| hi! link DirvishSuffix Normal
     " \| hi Statement gui=NONE
     " \| hi! link Special SpecialChar
@@ -766,6 +783,7 @@ aug color_tomorrow
     " \| hi! link Error ALEErrorSign
 aug END
 color base16-tomorrow-night
+
 " hi! link CocErrorSign ErrorMsg 
 
 " let g:nord_uniform_diff_background = 1
@@ -801,7 +819,7 @@ set guioptions=
 " set foldcolumn=1
 set hlsearch
 set nowrap
-set nofoldenable
+" set nofoldenable
 set noshowmode
 
 set listchars=tab:\|\ ,eol:¬
@@ -835,9 +853,9 @@ set nofixeol
 set formatoptions+=j " Delete comment character when joining commented lines
 set cinoptions=:0,g0,(0,Ws,l1
 set viminfo^=!
-set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
-    \*.vscode,tags,*.vs,*.pyproj,*.idea,*.clangd,*__pycache__,
-    \*.bin,*.rlib,*.rmeta
+" set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
+"     \*.vscode,tags,*.vs,*.pyproj,*.idea,*.clangd,*__pycache__,
+"     \*.bin,*.rlib,*.rmeta
 set cpoptions+=>
 set belloff=all
 set history=1000
@@ -937,7 +955,7 @@ aug vimrc_tab
   au!
   au FileType python,javascript setlocal expandtab ts=4 sw=4
   au FileType tex setlocal ts=2 sw=2
-  au FileType vim,lua,c,cpp setlocal expandtab ts=2 sw=2
+  au FileType vim,lua,c,cpp,yaml setlocal expandtab ts=2 sw=2
   au FileType make setlocal noexpandtab
 aug END
 
@@ -948,13 +966,15 @@ aug vimrc_misc
   au FileType json syntax match Comment +\/\/.\+$+
   au FileType help wincmd L | nnoremap <buffer><silent> q :bd<CR>
   au FileType man  wincmd L | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
-  au FileType git,gitcommit setlocal foldmethod=syntax
+  au FileType git setlocal foldmethod=syntax
+  au FileType gitcommit setlocal foldmethod=syntax nofoldenable
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
   au BufRead *.mangle setlocal equalprg=c++filt
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
   au BufWritePost *.rs,*.cc,*.c call CocActionAsync("format")
+  au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
   " au InsertLeave * set imi=0 | set cursorline
   " au InsertEnter * set nocursorline
   " au WinEnter * set cursorline
@@ -1205,7 +1225,7 @@ Cabbr sf CtrlSF
 Cabbr gr Grep
 Cabbr cpp Cppman
 Cabbr gdb GdbStartLLDB\ lldb
-Cabbr gg OpenBrowserSearch
+Cabbr ob OpenBrowserSearch
 Cabbr rr RustRun
 
 func! s:source_if_exists(file)
@@ -1280,3 +1300,4 @@ command! -bang -nargs=0 UM execute "normal o\<C-o>" . len(getline('.')). "i-"
 if argc() == 0
   call s:source_if_exists('Session.vim')
 endif
+
