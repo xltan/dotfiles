@@ -1,1 +1,5 @@
 . ~/.bashrc
+
+[[ -s "/Users/tanxl/.gvm/scripts/gvm" ]] && source "/Users/tanxl/.gvm/scripts/gvm"
+
+export PATH="$HOME/.cargo/bin:$PATH"
