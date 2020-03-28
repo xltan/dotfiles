@@ -81,6 +81,7 @@ nnoremap <leader>gj :BTags<CR>
 nnoremap <leader>gt :Tags<CR>
 nnoremap <leader>: :History:<CR>
 nnoremap <leader>/ :History/<CR>
+nnoremap <leader>r :Files %:h<CR>
 
 let fzf_use_floating_window = 1
 
@@ -374,6 +375,8 @@ let g:snips_author = s:username
 let g:snips_email = "lidmuse@email.com"
 let g:snips_github = "https://github.com/xltan"
 
+Plug 'xltan/vim-extra-snippets'
+
 Plug 'ludovicchabant/vim-gutentags'
 let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = [ 'tags' ]
@@ -543,7 +546,6 @@ function! s:show_documentation()
     call CocAction('doHover')
   endif
 endfunction
-nmap <leader>r  <Plug>(coc-codelens-action)
 inoremap <silent><expr> <C-n>
       \ pumvisible() ? "\<C-n>" :
       \ coc#refresh()
@@ -657,8 +659,6 @@ nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
 "   au FileType c,cpp,objc,objcpp,actionscript,python nmap <silent><buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
 " aug END
 
-" Plug 'xltan/vim-project', { 'branch': 'jpmv27_master' }
-
 Plug 'editorconfig/editorconfig-vim'
 
 " language related
@@ -702,9 +702,13 @@ Plug 'leafgarland/typescript-vim'
 " Plug 'Quramy/tsuquyomi'
 "
 Plug 'cespare/vim-toml'
+
+Plug 'xltan/vim-project'
+
 call plug#end()
 
-" call project#rc()
+" call project#rc("~/work")
+" Project  'seatalk-server'
 
 if has("termguicolors")
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -971,6 +975,7 @@ aug vimrc_misc
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
+  au BufRead .localrc setlocal ft=vim
   au BufRead *.mangle setlocal equalprg=c++filt
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
   au BufWritePost *.rs,*.cc,*.c call CocActionAsync("format")
@@ -1142,7 +1147,7 @@ cnoremap <C-n> <DOWN>
 
 nnoremap <leader>et :tabe ~/Documents/notes/todo.md<CR>
 nnoremap <leader>en :tabe ~/Documents/notes<CR>:lcd %:h<CR>:pwd<CR>
-nnoremap <leader>es :tabe $VIMFILES/UltiSnips<CR>:lcd %:h<CR>:pwd<CR>
+nnoremap <leader>es :tabe $VIMFILES/bundle/vim-extra-snippets/UltiSnips<CR>:lcd %:h<CR>:pwd<CR>
 nnoremap <leader>er :tabe $MYVIMRC<CR>
 
 nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
