@@ -11,5 +11,6 @@ mv -v ~/.vimrc .bak/.vimrc.old 2> /dev/null
 mv -v ~/.config/nvim/coc-settings.json .bak/.coc-settings.old 2> /dev/null
 ln -sf $BASE/vimrc ~/.vimrc
 ln -sfv $BASE/coc-settings.json ~/.config/nvim/coc-settings.json
+ln -sv $BASE/indent ~/.vim/indent
 vim +PlugInstall +qall
 
