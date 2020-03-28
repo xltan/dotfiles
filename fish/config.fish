@@ -30,7 +30,7 @@ end
 set -g __fish_git_prompt_show_informative_status 1
 set -g __fish_git_prompt_hide_untrackedfiles 1
 
-set -g __fish_git_prompt_color_branch magenta bold
+set -g __fish_git_prompt_color_branch magenta
 set -g __fish_git_prompt_showupstream "informative"
 set -g __fish_git_prompt_char_upstream_ahead "↑"
 set -g __fish_git_prompt_char_upstream_behind "↓"
@@ -46,7 +46,7 @@ set -g __fish_git_prompt_color_dirtystate blue
 set -g __fish_git_prompt_color_stagedstate yellow
 set -g __fish_git_prompt_color_invalidstate red
 set -g __fish_git_prompt_color_untrackedfiles $fish_color_normal
-set -g __fish_git_prompt_color_cleanstate green bold
+set -g __fish_git_prompt_color_cleanstate green
 
 function fish_prompt --description 'Write out the prompt'
 	set last_status $status
@@ -55,7 +55,7 @@ function fish_prompt --description 'Write out the prompt'
 	printf '%s' (prompt_pwd)
 
 	set_color normal
-	printf '%s' (__fish_git_prompt)
+	printf '%s\n' (__fish_git_prompt)
 	set_color normal
 
     switch "$USER"
