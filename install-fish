@@ -1,6 +1,8 @@
 #!/bin/sh
 
-FISH_CONF=$(pwd)/fish
+SCRIPT=$(readlink "$0")
+BASE=$(dirname "$SCRIPT")
+FISH_CONF=$BASE/fish
 FISH_INSTALL_DIR=$HOME/.config/fish
 
 mkdir -pv .bak

@@ -1,6 +1,8 @@
 #!/bin/sh
 
-BASE=$(pwd)
+SCRIPT=$(readlink "$0")
+BASE=$(dirname "$SCRIPT")
+
 mkdir -pv .bak
 for rc in $(ls configs); do
   [ -e ~/."$rc" ] && rm -rf .bak/."$rc" && mv -v ~/."$rc" .bak/."$rc"
@@ -9,3 +11,4 @@ done
 
 ln -sfv $BASE/coc-settings.json $HOME/.config/nvim/coc-settings.json
 ln -sfv $BASE/configs/$rc ~/.$rc
+ln -sfv $BASE/update $HOME/.local/bin/update

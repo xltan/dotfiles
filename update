@@ -1,0 +1,6 @@
+#!/bin/sh
+SCRIPT=$(readlink "$0")
+BASE=$(dirname "$SCRIPT")
+vi +PlugUpdate +qa
+cd $BASE && git pull && cd -
+
