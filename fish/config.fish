@@ -4,7 +4,7 @@ end
 
 set -gx LANG "en_US.UTF-8"
 set -gx RUSTC_WRAPPER $HOME/.cargo/bin/sccache
-set -gx GOPATH $HOME/go
+set -gx GOPATH $HOME/tools/go
 set -gx PATH $fish_user_paths /usr/local/sbin /usr/local/bin /usr/bin /bin /usr/sbin /sbin /Library/Apple/usr/bin /Library/Apple/bin /Library/TeX/texbin
 set -gx PATH $HOME/.local/bin $HOME/.cargo/bin $GOPATH/bin /usr/local/sbin $PATH
 

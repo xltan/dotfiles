@@ -1,7 +1,6 @@
 #!/bin/sh
 
-SCRIPT=$(readlink "$0")
-BASE=$(dirname "$SCRIPT")
+BASE=$(cd "$(dirname "$0")"; pwd -P)
 
 mkdir -pv .bak
 for rc in $(ls configs); do

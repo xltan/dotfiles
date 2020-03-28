@@ -1,7 +1,5 @@
 #!/bin/sh
-
-SCRIPT=$(readlink "$0")
-BASE=$(dirname "$SCRIPT")
+BASE=$(cd "$(dirname "$0")"; pwd -P)
 FISH_CONF=$BASE/fish
 FISH_INSTALL_DIR=$HOME/.config/fish
 

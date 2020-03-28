@@ -1,7 +1,6 @@
 #!/bin/sh
 
-SCRIPT=$(readlink "$0")
-BASE=$(dirname "$SCRIPT")
+BASE=$(cd "$(dirname "$0")"; pwd -P)
 
 export GIT_SSL_NO_VERIFY=true
 mkdir -p ~/.vim/autoload ~/.vim/.swap ~/.vim/.undo
