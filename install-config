@@ -3,11 +3,10 @@
 BASE=$(cd "$(dirname "$0")"; pwd -P)
 
 mkdir -pv .bak
-for rc in $(ls configs); do
+for rc in $(ls $BASE/configs); do
   [ -e ~/."$rc" ] && rm -rf .bak/."$rc" && mv -v ~/."$rc" .bak/."$rc"
   ln -sfv "$BASE/configs/$rc" ~/."$rc"
 done
 
 ln -sfv $BASE/coc-settings.json $HOME/.config/nvim/coc-settings.json
 ln -sfv $BASE/configs/$rc ~/.$rc
-ln -sfv $BASE/update $HOME/.local/bin/update

@@ -1,0 +1,9 @@
+#!/bin/sh
+BASE=$(cd "$(dirname "$0")"; pwd -P)
+HOME_BIN=$HOME/.local/bin
+
+mkdir -pv $HOME_BIN
+
+for bin in $(ls $BASE/bin); do
+	ln -sfv $BASE/bin/$bin $HOME_BIN
+done
