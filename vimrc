@@ -89,10 +89,10 @@ let s:fzf_floating_window_height = min([20, &lines])
 if has('nvim')
   function! FloatingFZF()
     let buf = nvim_create_buf(v:false, v:true)
-    " call setbufvar(buf, '&signcolumn', 'no')
+    " call setbufvar(buf, '&syntax', 'off')
 
     let height = s:fzf_floating_window_height
-    let width = min([160, float2nr(&columns - (&columns * 2 / 10))])
+    let width = min([170, float2nr(&columns - (&columns * 2 / 12))])
     let col = float2nr((&columns - width) / 2)
     let row = float2nr((&lines - height) / 2)
     let opts = {
@@ -100,9 +100,11 @@ if has('nvim')
           \ 'row': row,
           \ 'col': col,
           \ 'width': width,
-          \ 'height': height
+          \ 'height': height,
+          \ 'style': 'minimal'
           \ }
-    call nvim_open_win(buf, v:true, opts)
+    let win = nvim_open_win(buf, v:true, opts)
+    call setwinvar(win, '&diff', 0)
   endfunction
   Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
   let g:nvimgdb_config_override = {
@@ -305,7 +307,6 @@ let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSuppor
 let g:vimtex_view_general_options = '-r @line @pdf @tex'
 let g:vimtex_fold_enabled = 0
 let g:vimtex_view_general_callback = 'ViewerCallback'
-Plug 'vim/killersheep'
 
 function! ViewerCallback(status) dict
   if a:status
@@ -703,6 +704,9 @@ Plug 'leafgarland/typescript-vim'
 "
 Plug 'cespare/vim-toml'
 
+Plug 'delphinus/vim-auto-cursorline'
+let g:auto_cursorline_wait_ms = 2000
+
 Plug 'xltan/vim-project'
 
 call plug#end()
@@ -755,67 +759,43 @@ call s:option_map('t', 'ts',
 " set t_ti= t_te=
 " let &t_SI = "\e[6 q"
 " let &t_EI = "\e[2 q"
+"
+function! s:reset_color() abort
+  hi! link Folded GitGutterChange
+  hi! link QuickFixLine StatusLine
+  hi! link CocWarningSign Todo 
+  hi! link CocErrorSign DiffDelete 
+  hi! link MatchParen DiffDelete 
+  hi! link fugitiveHunk Comment 
+
+  hi! link gitDiff Comment 
+  hi! link DiffNewFile Normal
+  hi! link DiffFile Normal
+  hi! link diffIndexLine Comment
+  hi DiffAdded guibg=None
+  hi DiffRemoved guibg=None
+  hi ErrorMsg guibg=None
+  hi Statement gui=None
+  exe "hi DiffAdd gui=bold guibg=#" . g:base16_gui02
+  exe "hi DiffDelete gui=None guibg=#" . g:base16_gui02
+  exe "hi DiffText gui=bold guifg=#" .g:base16_gui0A . " guibg=#" . g:base16_gui02
+  exe "hi DiffChange guibg=#" . g:base16_gui02
+endfunction
 
 set background=dark
 aug color_tomorrow
   au!
-  au ColorScheme * hi ErrorMsg guibg=NONE
-    \| hi! DiffDelete gui=NONE
-    \| hi! link DiffNewFile Normal
-    \| hi! link DiffFile Normal
-    \| hi! link DiffText Todo
-    \| hi! link diffIndexLine Comment
-    \| hi! link Folded GitGutterChange
-    \| hi! Statement gui=NONE
-    \| hi! link QuickFixLine StatusLine
-    \| hi! link CocErrorSign DiffDelete 
-    \| hi! link CocWarningSign Todo 
-    \| hi! link MatchParen DiffDelete 
-    \| hi! link gitDiff Comment 
-    \| hi! link fugitiveHunk Comment 
-    \| hi! DiffAdded guibg=None
-    \| hi! DiffRemoved guibg=None
-    " \| hi! link DirvishSuffix Normal
-    " \| hi Statement gui=NONE
-    " \| hi! link Special SpecialChar
-    " \| hi! link Constant Number
-    " \| hi! link Boolean Number
-    " \| hi! link CocHighlightText CursorLine
-    " \| hi! link pythonFunction Normal
-    " \| hi! link pythonBytesEscape SpecialChar
-    " \| hi! link WarningMsg SpecialChar
-    " \| hi! link Error ALEErrorSign
+  au ColorScheme * call <SID>reset_color()
 aug END
+
 color base16-tomorrow-night
 
-" hi! link CocErrorSign ErrorMsg 
-
-" let g:nord_uniform_diff_background = 1
-" let g:terminal_ansi_colors = [
-"   \ "#3B4252", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#88C0D0", "#E5E9F0", 
-"   \ "#4C566A", "#BF616A", "#A3BE8C", "#EBCB8B", "#81A1C1", "#B48EAD", "#8FBCBB", "#ECEFF4", 
-" \]
-" aug color
-"   au!
-"   au ColorScheme * hi! link pythonFunction Normal
-"     \| hi! link pythonBytesEscape SpecialChar
-"     \| hi! link Error ALEErrorSign
-"     \| hi! link WarningMsg SpecialChar
-"     \| hi! link Special SpecialChar
-"     \| hi! link DirvishSuffix Normal
-"     \| hi! link Statement Function
-"     \| hi! link QuickFixLine WildMenu
-"     \| hi! link Constant Number
-"     \| hi! link Boolean Number
-"     \| hi! link CocErrorSign ALEErrorSign
-"     \| hi! link CocHighlightText CursorLine
-" aug END
-" colorscheme nord
-"
-" hi! link StatusLineNC Comment
-" hi TabLine guifg=#7b88a1
+call <SID>reset_color()
 
 set guioptions=
+set mouse=a
+set diffopt+=vertical,algorithm:patience
+
 " set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 
 " set cursorline
@@ -941,7 +921,6 @@ aug vimrc_cpp
   " au FileType c setlocal keywordprg=:Vman
   " au FileType cpp setlocal keywordprg=cppman
   au FileType cmake,tmux,cfg setlocal commentstring=#\ %s
-  " au BufWrite *.cc,*.cpp,*.c call <SID>preserve("normal! gg=G")
 aug END
 
 aug vimrc_markdown
@@ -963,6 +942,27 @@ aug vimrc_tab
   au FileType make setlocal noexpandtab
 aug END
 
+func! s:goto_index(dir)
+  let winnr = bufwinnr('^.git/index$')
+  if winnr > 0
+    exec winnr 'wincmd w'
+  endif
+  if a:dir == "n"
+    exec "normal \<c-n>"
+  else
+    exec "normal \<c-p>"
+  end
+  set ei+=WinEnter
+  normal dv
+  set ei-=WinEnter
+endfunc
+
+func! s:stupid_diff()
+  exe "resize " . (&lines - 15)
+  nmap <buffer><silent> ]d :call <SID>goto_index("n")<CR>
+  nmap <buffer><silent> [d :call <SID>goto_index("p")<CR>
+endfunc
+
 aug vimrc_misc
   au!
   au BufEnter * if &buftype == 'terminal' | startinsert | endif
@@ -972,6 +972,8 @@ aug vimrc_misc
   au FileType man  wincmd L | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
   au FileType git setlocal foldmethod=syntax
   au FileType gitcommit setlocal foldmethod=syntax nofoldenable
+  au BufRead,BufNewFile * if &diff | nnoremap <buffer> ]d <c-w>p<c-n>dd | nnoremap <buffer> [d <c-w>p<c-p>dd | endif
+  au WinEnter * if &diff | call<SID>stupid_diff() | endif
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml

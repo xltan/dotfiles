@@ -46,15 +46,16 @@ set -g __fish_git_prompt_color_untrackedfiles $fish_color_normal
 set -g __fish_git_prompt_color_cleanstate green
 
 function fish_prompt --description 'Write out the prompt'
-	set last_status $status
+    set -l last_pipestatus $pipestatus
 
-	set_color $fish_color_cwd
-	printf '%s' (prompt_pwd)
+	set_color brblack
+    echo -n -s "$USER" @ (prompt_hostname) ' ' (set_color $fish_color_cwd) (prompt_pwd)
 
 	set_color normal
 	printf '%s\n' (__fish_git_prompt)
-	set_color normal
 
+	__fish_print_pipestatus "[" "]" "|" (set_color $fish_color_status) (set_color $fish_color_status) $last_pipestatus
+	set_color normal
     switch "$USER"
         case root
             printf '# '
