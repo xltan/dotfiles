@@ -34,7 +34,7 @@ export HISTIGNORE='fg'
 
 
 ### Global
-export GOPATH="$HOME/go"
+export GOPATH="$HOME/tools/go"
 if [ -z "$PATH_EXPANDED" ]; then
   export PATH="$HOME/.local/bin:$HOME/.bin:$HOME/.cargo/bin:$GOPATH/bin:/usr/local/bin:/usr/local/sbin:$PATH"
   export LESS='-F -X -R '$LESS
