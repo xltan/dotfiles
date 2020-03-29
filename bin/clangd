@@ -1,5 +1,0 @@
-#!/bin/sh
-CLANGD=`which -a clangd | tail -1`
-CLANG=`which -a clang | tail -1`
-# CPATH=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include/c++/v1:`xcrun --show-sdk-path`/usr/include exec $CLANGD --resource-dir=`$CLANG -print-resource-dir` --header-insertion=iwyu --background-index --clang-tidy=0 "$@"
-CPATH=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include exec $CLANGD --resource-dir=`$CLANG -print-resource-dir` --header-insertion=iwyu --background-index --clang-tidy=0 "$@"
