@@ -52,7 +52,10 @@ function fish_prompt --description 'Write out the prompt'
     echo -n -s "$USER" @ (prompt_hostname) ' ' (set_color $fish_color_cwd) (prompt_pwd)
 
 	set_color normal
-	printf '%s\n' (__fish_git_prompt)
+
+    if test -n "$USE_PROMPT_GIT"
+		printf '%s\n' (__fish_git_prompt)
+	end
 
 	__fish_print_pipestatus "[" "]" "|" (set_color $fish_color_status) (set_color $fish_color_status) $last_pipestatus
 	set_color normal
