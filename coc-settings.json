@@ -42,28 +42,27 @@
 		// 	 }
 		//    }
 		// },
-		"clangd": {
-			// "trace.server": "verbose",
-			"command": "clangd",
-			"filetypes": [
-				"c",
-				"cpp",
-				"objc",
-				"objcpp"
-			],
-			"rootPatterns": [
-				"compile_commands.json",
-				".git/"
-			]
-		},
+		// "clangd": {
+		// 	// "trace.server": "verbose",
+		// 	"command": "clangd",
+		// 	"args": ["--header-insertion=iwyu"],
+		// 	"filetypes": [
+		// 		"c",
+		// 		"cpp",
+		// 		"objc",
+		// 		"objcpp"
+		// 	],
+		// 	"rootPatterns": [
+		// 		"compile_commands.json",
+		// 		".git/"
+		// 	]
+		// },
 		"golang": {
 			"command": "gopls",
 			// "args": ["--diagnostics-style=instant"],
 			"rootPatterns": [
 				"go.mod",
-				".vim/",
-				".git/",
-				".hg/"
+				".git/"
 			],
 			"filetypes": [
 				"go"
