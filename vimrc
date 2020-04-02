@@ -2,7 +2,7 @@ if !has('nvim')
   source $VIMRUNTIME/defaults.vim
 else
   let g:loaded_python_provider = 1
-  let g:python3_host_prog = "/usr/local/bin/python3"
+  " let g:python3_host_prog = "/usr/local/bin/python3"
   aug nvim
     au!
     au BufRead *
@@ -36,7 +36,7 @@ set encoding=utf-8
 set fileencoding=utf-8
 
 let $VIMFILES=split(&rtp, ",")[0]
-set rtp+=/usr/local/opt/fzf
+set rtp+=$HOME/.fzf
 call plug#begin($VIMFILES . '/bundle')
 Plug 'arcticicestudio/nord-vim'
 Plug 'chriskempson/base16-vim'
@@ -73,16 +73,21 @@ let g:fugitive_gitlab_domains = ['https://git.garena.com']
 
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/fzf.vim'
+let $FZF_DEFAULT_COMMAND="fd --type f --color never --exclude /vendor"
+let g:fzf_preview_window = 'right:60%'
 nnoremap <leader>f :Files<CR>
+nnoremap <leader>r :Files %:h<CR>
 nnoremap <leader>b :Buffers<CR>
 nnoremap <leader>h :History<CR>
-" nnoremap <leader>gh :LeaderfMru<CR>
-nnoremap <leader>gj :BTags<CR>
+nnoremap <leader>v :Lines<CR>
+
+nnoremap <leader>j :BTags<CR>
 nnoremap <leader>gt :Tags<CR>
 nnoremap <leader>: :History:<CR>
 nnoremap <leader>/ :History/<CR>
-nnoremap <leader>r :Files %:h<CR>
 
+" nnoremap <leader>gh :LeaderfMru<CR>
+"
 let fzf_use_floating_window = 1
 
 let s:fzf_floating_window_height = min([20, &lines])
@@ -92,7 +97,7 @@ if has('nvim')
     " call setbufvar(buf, '&syntax', 'off')
 
     let height = s:fzf_floating_window_height
-    let width = min([170, float2nr(&columns - (&columns * 2 / 12))])
+    let width = min([160, float2nr(&columns - (&columns * 2 / 12))])
     let col = float2nr((&columns - width) / 2)
     let row = float2nr((&lines - height) / 2)
     let opts = {
@@ -226,9 +231,9 @@ let g:lightline = {
 		  \ },
       \ 'component_function': {
       \   'cocstatus': 'StatusDiagnostic',
-      \   'method': 'NearestMethodOrFunction',
       \ },
       \ }
+      
 
 Plug 'christoomey/vim-tmux-navigator'
 Plug 'jpalardy/vim-slime'
@@ -307,6 +312,7 @@ let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSuppor
 let g:vimtex_view_general_options = '-r @line @pdf @tex'
 let g:vimtex_fold_enabled = 0
 let g:vimtex_view_general_callback = 'ViewerCallback'
+Plug 'vim/killersheep'
 
 function! ViewerCallback(status) dict
   if a:status
@@ -390,8 +396,6 @@ if !has('win32')
     Plug 'vim-utils/vim-man'
   endif
 endif
-
-map <leader>v :Man <C-r><C-w><CR>
 
 " Plug 'tpope/vim-vinegar'
 Plug 'justinmk/vim-dirvish'
@@ -514,21 +518,21 @@ let s:warning_symbol = '-'
 " let g:ale_lint_on_save = 1
 " let g:ale_fix_on_save = 1
 
-Plug 'liuchengxu/vista.vim'
-let g:vista_icon_indent = ["▸ ", ""]
-let g:vista_default_executive = 'ctags'
-let g:vista_executive_for = {
-    \ 'markdown': 'toc',
-    \ }
+" Plug 'liuchengxu/vista.vim'
+" let g:vista_icon_indent = ["▸ ", ""]
+" let g:vista_default_executive = 'ctags'
+" let g:vista_executive_for = {
+"     \ 'markdown': 'toc',
+"     \ 'go': 'coc',
+"     \ }
 
-" let g:vista_echo_cursor_strategy = 'floating_win'
-nnoremap <leader>j :Vista finder<CR>
-nnoremap <leader>tt :Vista!!<CR>
-nnoremap <space> za
+" " let g:vista_echo_cursor_strategy = 'floating_win'
+" nnoremap <leader>j :Vista finder<CR>
+" nnoremap <leader>tt :Vista!!<CR>
 
-function! NearestMethodOrFunction() abort
-  return get(b:, 'vista_nearest_method_or_function', '')
-endfunction
+" function! NearestMethodOrFunction() abort
+"   return get(b:, 'vista_nearest_method_or_function', '')
+" endfunction
 
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 nmap <silent> ]v :CocNext<CR>
@@ -598,13 +602,15 @@ let g:ctrlsf_mapping = {
     \ "next": "<C-N>",
     \ "prev": "<C-P>",
     \ }
+let g:ctrlsf_populate_qflist = 1
 
 vmap <leader>g <Plug>CtrlSFVwordPath<CR>
-nmap <leader>gw <Plug>CtrlSFCwordPath<CR>
+nmap <leader>gs <Plug>CtrlSFCwordPath<CR>
+nmap <leader>gw :silent grep <c-r><c-w> %% <cr>:copen<cr>:wincmd p<cr>
 nmap <leader>go :CtrlSFToggle<CR>
 
 if executable("rg")
-  set grepprg=rg\ --vimgrep\ --no-heading
+  set grepprg=rg\ --vimgrep
   set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
 
@@ -653,6 +659,7 @@ endif
 " nnoremap <leader>/ :LeaderfHistorySearch<CR>
 
 nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
+nnoremap <space> za
 
 " Plug 'xltan/LeaderF-tjump'
 " aug vimrc_tjump
@@ -705,7 +712,7 @@ Plug 'leafgarland/typescript-vim'
 Plug 'cespare/vim-toml'
 
 Plug 'delphinus/vim-auto-cursorline'
-let g:auto_cursorline_wait_ms = 2000
+let g:auto_cursorline_wait_ms = 1500
 
 Plug 'xltan/vim-project'
 
@@ -762,12 +769,12 @@ call s:option_map('t', 'ts',
 "
 function! s:reset_color() abort
   hi! link Folded GitGutterChange
+  hi! link CocWarningSign Todo
+  hi! link CocErrorSign GitGutterDelete
+  hi! link MatchParen GitGutterDelete 
   hi! link QuickFixLine StatusLine
-  hi! link CocWarningSign Todo 
-  hi! link CocErrorSign DiffDelete 
-  hi! link MatchParen DiffDelete 
-  hi! link fugitiveHunk Comment 
 
+  hi! link fugitiveHunk Comment 
   hi! link gitDiff Comment 
   hi! link DiffNewFile Normal
   hi! link DiffFile Normal
@@ -826,6 +833,8 @@ set directory=$VIMFILES/.swap//
 set undodir=$VIMFILES/.undo
 set undofile
 
+set winheight=2
+set winminheight=2
 set winwidth=100
 set winminwidth=10
 set completeopt=menuone
@@ -952,27 +961,28 @@ func! s:goto_index(dir)
   else
     exec "normal \<c-p>"
   end
-  set ei+=WinEnter
+  " set ei+=WinEnter
   normal dv
-  set ei-=WinEnter
+  " set ei-=WinEnter
 endfunc
 
 func! s:stupid_diff()
-  exe "resize " . (&lines - 15)
+  if winheight(0) < (&lines - 15)
+    exe "resize " . (&lines - 15)
+  endif
   nmap <buffer><silent> ]d :call <SID>goto_index("n")<CR>
   nmap <buffer><silent> [d :call <SID>goto_index("p")<CR>
 endfunc
 
 aug vimrc_misc
   au!
-  au BufEnter * if &buftype == 'terminal' | startinsert | endif
+  au BufEnter,BufNew * if &buftype == 'terminal' | startinsert | endif
   au VimEnter * call s:init()
   au FileType json syntax match Comment +\/\/.\+$+
   au FileType help wincmd L | nnoremap <buffer><silent> q :bd<CR>
   au FileType man  wincmd L | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
   au FileType git setlocal foldmethod=syntax
   au FileType gitcommit setlocal foldmethod=syntax nofoldenable
-  au BufRead,BufNewFile * if &diff | nnoremap <buffer> ]d <c-w>p<c-n>dd | nnoremap <buffer> [d <c-w>p<c-p>dd | endif
   au WinEnter * if &diff | call<SID>stupid_diff() | endif
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
@@ -1269,7 +1279,7 @@ func! s:init()
   nmap ]w gt
   nmap [W :tabfirst<CR>
   nmap ]W :tablast<CR>
-  call vista#RunForNearestMethodOrFunction()
+  " call vista#RunForNearestMethodOrFunction()
 endfunc
 
 func! s:change_dir()
