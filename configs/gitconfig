@@ -62,7 +62,7 @@
     ra = !git r --all
     l = "!. ~/.githelpers && pretty_git_log"
     la = !git l --all
-    b = "!. ~/.githelpers && pretty_git_branch"
+    br = "!. ~/.githelpers && pretty_git_branch"
     bs = "!. ~/.githelpers && pretty_git_branch_sorted"
 	abbr = config --get-regexp alias
 

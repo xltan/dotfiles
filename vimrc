@@ -2,7 +2,7 @@ if !has('nvim')
   source $VIMRUNTIME/defaults.vim
 else
   let g:loaded_python_provider = 1
-  " let g:python3_host_prog = "/usr/local/bin/python3"
+  let g:python3_host_prog = "/usr/local/bin/python3"
   aug nvim
     au!
     au BufRead *
@@ -341,7 +341,7 @@ nmap gs :Scratch<CR>
 xmap gs <plug>(scratch-selection-reuse)
 
 Plug 'mhinz/vim-signify'
-let g:signify_vcs_list = ['git', 'svn']
+let g:signify_vcs_list = ['git']
 
 omap ic <plug>(signify-motion-inner-pending)
 xmap ic <plug>(signify-motion-inner-visual)
@@ -704,6 +704,7 @@ let g:go_def_mode = 'gopls'
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
 let g:go_doc_url = 'https://pkg.go.dev'
+let g:go_echo_go_info = 1
 map gb :GoDocBrowser<CR>
 
 Plug 'leafgarland/typescript-vim'
@@ -1016,6 +1017,9 @@ nnoremap <silent> <C-S> :update<CR>
 vnoremap <silent> <C-S> <C-C>:update<CR>
 inoremap <silent> <C-S> <Esc>:update<CR>
 
+" nnoremap <C-G> <C-B>
+" cnoremap <C-G> <C-B>
+
 nnoremap <silent> L :nohl<CR>
 
 func! s:get_buffer_list()
@@ -1244,6 +1248,7 @@ Cabbr cpp Cppman
 Cabbr gdb GdbStartLLDB\ lldb
 Cabbr ob OpenBrowserSearch
 Cabbr rr RustRun
+Cabbr cl CocList
 
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
