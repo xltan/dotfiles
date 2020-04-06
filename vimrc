@@ -50,7 +50,7 @@ Plug 'tpope/vim-characterize'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
-Plug 'tpope/vim-commentary'
+" Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-eunuch'
@@ -73,7 +73,7 @@ let g:fugitive_gitlab_domains = ['https://git.garena.com']
 
 Plug 'junegunn/gv.vim'
 Plug 'junegunn/fzf.vim'
-let $FZF_DEFAULT_COMMAND="fd --type f --color never --exclude /vendor"
+let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs --exclude /vendor"
 let g:fzf_preview_window = 'right:60%'
 nnoremap <leader>f :Files<CR>
 nnoremap <leader>r :Files %:h<CR>
@@ -206,15 +206,18 @@ function! StatusDiagnostic() abort
 endfunction
 let g:lightline = {
       \ 'colorscheme': 'tomorrow2',
+      \ 'component': {
+      \   'custom_relativepath': "%{expand('%:~:.')!=#''?expand('%:~:.'):'[No\ Name]'}",
+      \ },
       \ 'active': {
 		  \   'left': [ [ 'paste' ],
-		  \           [ 'readonly', 'relativepath', 'modified', 'cocstatus', 'method' ] ],
+		  \           [ 'readonly', 'custom_relativepath', 'modified', 'cocstatus', 'method' ] ],
       \  'right': [ [ 'percentwin' ],
       \            [ 'lineinfo' ],
       \            [ 'mode' ]]
       \ },
       \ 'inactive': {
-		  \   'left': [ [ 'relativepath' ] ],
+		  \   'left': [ [ 'custom_relativepath' ] ],
       \ },
       \ 'mode_map': {
 		  \    'n':      'N',
@@ -235,7 +238,7 @@ let g:lightline = {
       \ }
       
 
-Plug 'christoomey/vim-tmux-navigator'
+" Plug 'christoomey/vim-tmux-navigator'
 Plug 'jpalardy/vim-slime'
 if has('win32')
   let g:slime_target = "vimterminal"
@@ -583,6 +586,9 @@ let g:openbrowser_search_engines = {
 \   'go': 'https://pkg.go.dev/search?q={query}',
 \}
 " let g:openbrowser_default_search = "duckduckgo"
+"
+Plug 'tyru/caw.vim'
+vmap gc	<Plug>(caw:hatpos:toggle)
 
 Plug 'skywind3000/asyncrun.vim'
 let g:asyncrun_open = 9
@@ -681,8 +687,8 @@ let g:python_slow_sync = 0
 " a little bit slow
 Plug 'Vimjas/vim-python-pep8-indent'
 " Plug 'xltan/pythonhelper.vim'
-" Plug 'fisadev/vim-isort'
-command! -nargs=0 -complete=command ImportRemove update | AsyncRun -post=e autoflake --in-place --remove-all-unused-imports %<CR>
+Plug 'fisadev/vim-isort'
+command! -nargs=0 -complete=command ImportRemove update | SilentExt autoflake --in-place --remove-all-unused-imports %<CR>
 
 Plug 'xltan/vim-cppman'
 
@@ -704,7 +710,7 @@ let g:go_def_mode = 'gopls'
 let g:go_fmt_command = "goimports"
 let g:go_list_type = "quickfix"
 let g:go_doc_url = 'https://pkg.go.dev'
-let g:go_echo_go_info = 1
+let g:go_echo_go_info = 0
 map gb :GoDocBrowser<CR>
 
 Plug 'leafgarland/typescript-vim'
@@ -887,70 +893,82 @@ func! s:super()
   endif
 endfunc
 
-aug vimrc_go
-  au!
+aug vimrc_filetype
   au FileType go command! -bang GA call go#alternate#Switch(<bang>0, 'edit')
-  au FileType go command! -bang GAV call go#alternate#Switch(<bang>0, 'vsplit')
-  au FileType go command! -bang GAS call go#alternate#Switch(<bang>0, 'split')
-aug END
+        \| command! -bang GAV call go#alternate#Switch(<bang>0, 'vsplit')
+        \| command! -bang GAS call go#alternate#Switch(<bang>0, 'split')
+        \| nnoremap s= :s/ =/ :=<cr>:nohl<cr>
 
-aug vimrc_python
-  au!
-  " au FileType python let b:delimitMate_nesting_quotes = ['"']
   au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
-  au FileType python nmap <silent> <buffer> [s <C-^>
-  " au FileType python syn sync match pythonSync grouphere NONE '):$'
-  " au FileType python setlocal equalprg=yapf
-aug END
-
-" aug vimrc_rust
-"   au!
-"   au FileType rust nmap <silent> <buffer> _= :RustFmt<CR>
-"   au FileType rust nmap gd <Plug>(rust-def)
-"   au FileType rust nmap gs <Plug>(rust-def-split)
-"   au FileType rust nmap gv <Plug>(rust-def-vertical)
-"   au FileType rust nmap <leader>gd <Plug>(rust-doc)
-" aug END
-
-aug vimrc_cpp
-  au!
-  " au CursorHold * silent call CocAction('doHover')
-  " au CursorHold * silent call CocActionAsync('highlight')
-  " au BufRead * if search('\M-*- C++ -*-', 'n', 1) | setlocal ft=cpp | endif
+        \| nmap <silent> <buffer> [s <C-^>
   au FileType c,cpp,objc,objcpp command! GA call s:a('e')
-  au FileType c,cpp,objc,objcpp command! GAV call s:a('botright vertical split')
-  " au FileType c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
-  " au FileType c,cpp,objc,objcpp nmap <buffer> <silent> [a :lprevious<CR>
-  "       \ | nmap <buffer> <silent> ]a :lnext<CR>
-  "       \ | nmap <buffer> <silent> [A :lfirst<CR>
-  "       \ | nmap <buffer> <silent> ]A :llast<CR>
+        \| command! GAV call s:a('botright vertical split')
   au FileType c,cpp,objc,objcpp,go,python nmap <buffer> <silent> <leader>a :GA<CR>
-  " au FileType c,cpp nmap <buffer> <silent> gd :YcmCompleter GoTo<CR>
-  " au FileType c,cpp nmap <buffer> <silent> gz :YcmCompleter FixIt<CR>
-  au FileType c,cpp,objc,objcpp,cs,json,java,actionscript,glsl,dot setlocal commentstring=//\ %s
-  " au FileType c setlocal keywordprg=:Vman
-  " au FileType cpp setlocal keywordprg=cppman
-  au FileType cmake,tmux,cfg setlocal commentstring=#\ %s
-aug END
-
-aug vimrc_markdown
-  au!
-  " au FileType markdown let b:delimitMate_nesting_quotes = ['`']
   au filetype markdown setlocal conceallevel=2
-  au filetype markdown nnoremap <silent><buffer> gN O<Esc>C- [ ] 
-  au filetype markdown nnoremap <silent><buffer> gn o<Esc>C- [ ] 
-  " au filetype markdown inoremap <silent><buffer> $ $<C-o>:set ft=tex<CR>
-  au InsertLeave *.md if &filetype == 'tex' | set filetype=markdown | endif
-  au filetype markdown noremap <silent><buffer> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
-aug END
-
-aug vimrc_tab
-  au!
+      \| nnoremap <silent><buffer> gN O<Esc>C- [ ] 
+      \| nnoremap <silent><buffer> gn o<Esc>C- [ ] 
+      \| nnoremap <silent><buffer> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
+      \| nnoremap <buffer> <leader>q :q<CR>
+  au FileType help wincmd L | nnoremap <buffer><silent> q :bd<CR>
+  au FileType man  wincmd L | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
+  au FileType git setlocal foldmethod=syntax
+  au FileType gitcommit setlocal foldmethod=syntax nofoldenable
+  au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au FileType python,javascript setlocal expandtab ts=4 sw=4
   au FileType tex setlocal ts=2 sw=2
   au FileType vim,lua,c,cpp,yaml setlocal expandtab ts=2 sw=2
   au FileType make setlocal noexpandtab
 aug END
+
+aug vimrc_misc
+  au!
+  au BufEnter,BufNew * if &buftype == 'terminal' | startinsert | endif
+  au VimEnter * call s:init()
+  au WinEnter * if &diff | call<SID>stupid_diff() | endif
+  au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
+  au BufRead .clang-format setlocal ft=yaml
+  au BufRead .localrc setlocal ft=vim
+  au BufRead *.mangle setlocal equalprg=c++filt
+  au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
+  au BufWritePost *.rs,*.cc,*.c call CocActionAsync("format")
+  au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
+aug END
+
+" aug vimrc_old
+"   au!
+"   au FileType c,cpp,objc,objcpp,cs,json,java,actionscript,glsl,dot setlocal commentstring=//\ %s
+"   au FileType cmake,tmux,cfg setlocal commentstring=#\ %s
+"   au FileType rust nmap <silent> <buffer> _= :RustFmt<CR>
+"   au FileType rust nmap gd <Plug>(rust-def)
+"   au FileType rust nmap gs <Plug>(rust-def-split)
+"   au FileType rust nmap gv <Plug>(rust-def-vertical)
+"   au FileType rust nmap <leader>gd <Plug>(rust-doc)
+"   au FileType python let b:delimitMate_nesting_quotes = ['"']
+"   au FileType python syn sync match pythonSync grouphere NONE '):$'
+"   au FileType python setlocal equalprg=yapf
+"   au CursorHold * silent call CocAction('doHover')
+"   au CursorHold * silent call CocActionAsync('highlight')
+"   au BufRead * if search('\M-*- C++ -*-', 'n', 1) | setlocal ft=cpp | endif
+"   au FileType c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
+"   au FileType c,cpp,objc,objcpp nmap <buffer> <silent> [a :lprevious<CR>
+"         \ | nmap <buffer> <silent> ]a :lnext<CR>
+"         \ | nmap <buffer> <silent> [A :lfirst<CR>
+"         \ | nmap <buffer> <silent> ]A :llast<CR>
+"   au FileType c,cpp nmap <buffer> <silent> gd :YcmCompleter GoTo<CR>
+"   au FileType c,cpp nmap <buffer> <silent> gz :YcmCompleter FixIt<CR>
+"   au FileType c setlocal keywordprg=:Vman
+"   au FileType cpp setlocal keywordprg=cppman
+"   au FileType markdown let b:delimitMate_nesting_quotes = ['`']
+"   au filetype markdown inoremap <silent><buffer> $ $<C-o>:set ft=tex<CR>
+"   au InsertLeave *.md if &filetype == 'tex' | set filetype=markdown | endif
+"   au InsertLeave * set imi=0 | set cursorline
+"   au InsertEnter * set nocursorline
+"   au WinEnter * set cursorline
+"   au BufEnter * set cursorline
+"   au BufLeave * set nocursorline
+"   au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
+"   au DirChanged * call s:change_dir()
+" aug END
 
 func! s:goto_index(dir)
   let winnr = bufwinnr('^.git/index$')
@@ -962,47 +980,16 @@ func! s:goto_index(dir)
   else
     exec "normal \<c-p>"
   end
-  " set ei+=WinEnter
   normal dv
-  " set ei-=WinEnter
 endfunc
 
 func! s:stupid_diff()
-  if winheight(0) < (&lines - 15)
-    exe "resize " . (&lines - 15)
+  if winheight(0) < (&lines - 13)
+    exe "resize " . (&lines - 13)
   endif
   nmap <buffer><silent> ]d :call <SID>goto_index("n")<CR>
   nmap <buffer><silent> [d :call <SID>goto_index("p")<CR>
 endfunc
-
-aug vimrc_misc
-  au!
-  au BufEnter,BufNew * if &buftype == 'terminal' | startinsert | endif
-  au VimEnter * call s:init()
-  au FileType json syntax match Comment +\/\/.\+$+
-  au FileType help wincmd L | nnoremap <buffer><silent> q :bd<CR>
-  au FileType man  wincmd L | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
-  au FileType git setlocal foldmethod=syntax
-  au FileType gitcommit setlocal foldmethod=syntax nofoldenable
-  au WinEnter * if &diff | call<SID>stupid_diff() | endif
-  au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
-  au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
-  au BufRead .clang-format setlocal ft=yaml
-  au BufRead .localrc setlocal ft=vim
-  au BufRead *.mangle setlocal equalprg=c++filt
-  au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
-  au BufWritePost *.rs,*.cc,*.c call CocActionAsync("format")
-  au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
-  " au InsertLeave * set imi=0 | set cursorline
-  " au InsertEnter * set nocursorline
-  " au WinEnter * set cursorline
-  " au BufEnter * set cursorline
-  " au BufLeave * set nocursorline
-  " au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
-  " this is for scratch
-  au filetype markdown nnoremap <buffer> <leader>q :q<CR>
-  au DirChanged * call s:change_dir()
-aug END
 
 vnoremap <C-C> "+y
 vnoremap <C-Insert> "+y
@@ -1063,6 +1050,11 @@ inoremap <M-O> <C-o>O
 inoremap <C-l> <C-o>zz
 inoremap <C-k> <C-o>k
 inoremap <C-j> <C-o>j
+
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
 
 if has('nvim')
   tnoremap <Esc> <C-\><C-n>
@@ -1323,3 +1315,4 @@ if argc() == 0
   call s:source_if_exists('Session.vim')
 endif
 
+call s:change_dir()
