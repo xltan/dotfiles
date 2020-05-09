@@ -1,5 +1,7 @@
 tags
 .DS_Store
+*.d
+*.ll
 *.o
 *.lib
 *.dll

@@ -9,7 +9,7 @@
 	// "diagnostic.virtualText": false,
 	// "diagnostic.virtualTextPrefix": "▶ ",
 	// "codeLens.enable": true,
-	"suggest.minTriggerInputLength": 3,
+	// "suggest.minTriggerInputLength": 3,
 	"list.insertMappings": {
 		"<C-d>": "feedkeys:\\<C-f>",
 		"<C-u>": "feedkeys:\\<C-b>",
@@ -20,43 +20,6 @@
 	"coc.preferences.colorSupport": false,
 	"rust-analyzer.serverPath":"~/.cargo/bin/rust-analyzer",
 	"languageserver": {
-		// "ccls": {
-		//   // "trace.server": "verbose",
-		//   "command": "ccls",
-		//   "filetypes": ["c", "cpp", "objc", "objcpp"],
-		//   "rootPatterns": [".ccls", "compile_commands.json", ".git/"],
-		//   "initializationOptions": {
-		// 	 "cache": {
-		// 	   "directory": "/tmp/ccls"
-		// 	 }
-		//    }
-		// },
-		// "ccls-debug": {
-		//   "trace.server": "verbose",
-		//   "command": "ccls-debug",
-		//   "filetypes": ["c", "cpp", "objc", "objcpp"],
-		//   "rootPatterns": [".ccls", "compile_commands.json", ".git/"],
-		//   "initializationOptions": {
-		// 	 "cache": {
-		// 	   "directory": "/tmp/ccls"
-		// 	 }
-		//    }
-		// },
-		// "clangd": {
-		// 	// "trace.server": "verbose",
-		// 	"command": "clangd",
-		// 	"args": ["--header-insertion=iwyu"],
-		// 	"filetypes": [
-		// 		"c",
-		// 		"cpp",
-		// 		"objc",
-		// 		"objcpp"
-		// 	],
-		// 	"rootPatterns": [
-		// 		"compile_commands.json",
-		// 		".git/"
-		// 	]
-		// },
 		"golang": {
 			"command": "gopls",
 			// "args": ["--diagnostics-style=instant"],

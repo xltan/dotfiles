@@ -1,8 +1,8 @@
 if !has('nvim')
   source $VIMRUNTIME/defaults.vim
 else
-  let g:loaded_python_provider = 1
-  let g:python3_host_prog = "/usr/local/bin/python3"
+  " let g:loaded_python_provider = 1
+  " let g:python3_host_prog = "/usr/local/bin/python3"
   aug nvim
     au!
     au BufRead *
@@ -27,6 +27,7 @@ func! s:code(args)
 endfunc
 
 command! -nargs=? Code call s:code(<q-args>)
+command! -nargs=? Co exec "Code -g " . expand('%:p').":". line('.')
 
 let mapleader = ","
 let maplocalleader = ","
@@ -38,26 +39,23 @@ set fileencoding=utf-8
 let $VIMFILES=split(&rtp, ",")[0]
 set rtp+=$HOME/.fzf
 call plug#begin($VIMFILES . '/bundle')
-Plug 'arcticicestudio/nord-vim'
 Plug 'chriskempson/base16-vim'
 Plug 'arzg/vim-colors-xcode'
-
-" Plug 'Raimondi/delimitMate'
-" let delimitMate_expand_cr = 1
-" let delimitMate_matchpairs = "(:),[:],{:}"
 
 Plug 'tpope/vim-characterize'
 Plug 'tpope/vim-abolish'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
-" Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-eunuch'
-Plug 'tpope/vim-dispatch'
 Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-obsession'
+Plug 'tpope/vim-dispatch'
+Plug 'AdUki/vim-dispatch-neovim'
+let g:dispatch_no_neovim_start = 1
+Plug 'tpope/vim-commentary'
 " Plug 'tpope/vim-endwise'
 inoremap (<CR> (<CR>)<Esc>O
 inoremap {<CR> {<CR>}<Esc>O
@@ -70,15 +68,17 @@ inoremap [, [<CR>],<Esc>O
 Plug 'tpope/vim-fugitive'
 Plug 'shumphrey/fugitive-gitlab.vim'
 let g:fugitive_gitlab_domains = ['https://git.garena.com']
-
 Plug 'junegunn/gv.vim'
+Plug 'idanarye/vim-merginal'
+
 Plug 'junegunn/fzf.vim'
-let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs --exclude /vendor"
-let g:fzf_preview_window = 'right:60%'
+let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs --exclude /vendor --exclude /target/debug"
+" let g:fzf_preview_window = 'right:60%'
 nnoremap <leader>f :Files<CR>
 nnoremap <leader>r :Files %:h<CR>
 nnoremap <leader>b :Buffers<CR>
-nnoremap <leader>h :History<CR>
+nnoremap <leader>gh :History<CR>
+nnoremap <leader>h :CwdHistory<CR>
 nnoremap <leader>v :Lines<CR>
 
 nnoremap <leader>j :BTags<CR>
@@ -86,18 +86,66 @@ nnoremap <leader>gt :Tags<CR>
 nnoremap <leader>: :History:<CR>
 nnoremap <leader>/ :History/<CR>
 
-" nnoremap <leader>gh :LeaderfMru<CR>
-"
-let fzf_use_floating_window = 1
+nnoremap <leader>a :CocFzfList actions<CR>
 
-let s:fzf_floating_window_height = min([20, &lines])
+
+command! -bang CwdHistory call fzf#run(fzf#wrap({
+  \ 'source': s:directory_history(),
+  \ 'options': [
+  \   '--prompt', 'CwdHistory> ',
+  \   '--multi',
+  \ ]}, <bang>0))
+
+function! s:directory_history()
+  return fzf#vim#_uniq(map(
+    \ filter([expand('%')], 'len(v:val)')
+    \   + filter(map(s:buflisted_sorted(), 'bufname(v:val)'), 'len(v:val)')
+    \   + filter(copy(v:oldfiles), "s:file_is_in_cwd(fnamemodify(v:val, ':p'))"),
+    \ 'fnamemodify(v:val, ":~:.")'))
+endfunction
+
+function! s:file_is_in_cwd(file)
+  return filereadable(a:file) && match(a:file, getcwd() . '/') == 0
+endfunction
+
+
+" ------------------------------------------------------------------------------
+" # Script functions copied directly from fzf.vim to make above things work
+" ------------------------------------------------------------------------------
+
+function! s:buflisted_sorted()
+  return sort(s:buflisted(), 's:sort_buffers')
+endfunction
+
+function! s:sort_buffers(...)
+  let [b1, b2] = map(copy(a:000), 'get(g:fzf#vim#buffers, v:val, v:val)')
+  " Using minus between a float and a number in a sort function causes an error
+  return b1 < b2 ? 1 : -1
+endfunction
+
+function! s:buflisted()
+  return filter(range(1, bufnr('$')), 'buflisted(v:val) && getbufvar(v:val, "&filetype") != "qf"')
+endfunction
+
+let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse'
 if has('nvim')
+  Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
+  let g:nvimgdb_config_override = {
+    \ 'key_next': 'n',
+    \ 'key_step': 's',
+    \ 'key_finish': 'f',
+    \ 'key_continue': 'c',
+    \ 'key_until': '<space>',
+    \ 'key_breakpoint': 'b',
+    \ 'set_tkeymaps': "NvimGdbNoTKeymaps",
+    \ }
+
+  let s:fzf_floating_window_height = min([20, &lines])
   function! FloatingFZF()
     let buf = nvim_create_buf(v:false, v:true)
-    " call setbufvar(buf, '&syntax', 'off')
 
     let height = s:fzf_floating_window_height
-    let width = min([160, float2nr(&columns - (&columns * 2 / 12))])
+    let width = min([110, float2nr(&columns - (&columns * 2 / 12))])
     let col = float2nr((&columns - width) / 2)
     let row = float2nr((&lines - height) / 2)
     let opts = {
@@ -111,46 +159,12 @@ if has('nvim')
     let win = nvim_open_win(buf, v:true, opts)
     call setwinvar(win, '&diff', 0)
   endfunction
-  Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
-  let g:nvimgdb_config_override = {
-  \ 'key_next': 'n',
-  \ 'key_step': 's',
-  \ 'key_finish': 'f',
-  \ 'key_continue': 'c',
-  \ 'key_until': '<space>',
-  \ 'key_breakpoint': 'b',
-  \ 'set_tkeymaps': "NvimGdbNoTKeymaps",
-  \ }
+  let g:fzf_layout = { 'window': 'call FloatingFZF()' }
 else
-  " function! FloatingFZF()
-  "   let height = s:fzf_floating_window_height
-  "   let width = min([120, float2nr(&columns - (&columns * 2 / 10))])
-  "   " let col = float2nr((&columns - width) / 2)
-  "   " let row = float2nr((&lines - height) / 2)
-  "   let opts = {
-  "         \ 'maxwidth': width,
-  "         \ 'maxheight': height
-  "         \ }
-  "   call popup_dialog("fzf", opts)
-  " endfunction
+  let g:fzf_layout = { 'window': { 'width': 0.7, 'height': 0.4, 'highlight': 'Comment' }}
 endif
 
-let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse'
-"\ --preview "head -' . string(s:fzf_floating_window_height - 2) . ' {}"'
-let g:fzf_layout = { 'window': 'call FloatingFZF()' }
-
-aug fzf
-  au!
-  au FileType fzf tnoremap <silent><buffer> <Esc> <C-c>
-        \| tnoremap <silent><buffer> <C-j> <C-n>
-        \| tnoremap <silent><buffer> <C-k> <C-p>
-        \| tnoremap <silent><buffer> <C-h> <BS>
-        \| tnoremap <silent><buffer> <C-l> <C-c>
-  if !fzf_use_floating_window
-    au FileType fzf set laststatus=0 noshowmode noruler
-    \| autocmd BufLeave <buffer> set laststatus=2 showmode ruler
-  endif
-aug END
+let g:fzf_preview_window = ''
 
 function! s:build_quickfix_list(lines)
   call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
@@ -169,8 +183,8 @@ let g:fzf_action = {
   \ 'ctrl-s': 'split',
   \ 'ctrl-v': 'vsplit' }
 
-let g:fzf_colors =
-\ { 'fg':      ['fg', 'Normal'],
+let g:fzf_colors = {
+  \ 'fg':      ['fg', 'Normal'],
   \ 'bg':      ['bg', 'CursorLine'],
   \ 'hl':      ['fg', 'ALEErrorSign'],
   \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
@@ -183,6 +197,10 @@ let g:fzf_colors =
   \ 'marker':  ['fg', 'Keyword'],
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
+
+function! s:gitCheckoutRef(ref) 
+  execute('Git checkout ' . a:ref)
+endfunction
 
 Plug 'junegunn/vim-easy-align'
 vmap ga <Plug>(EasyAlign)
@@ -239,14 +257,43 @@ let g:lightline = {
       
 
 " Plug 'christoomey/vim-tmux-navigator'
-Plug 'jpalardy/vim-slime'
-if has('win32')
-  let g:slime_target = "vimterminal"
-else
-	let g:slime_target = "tmux"
-  let g:slime_default_config = {"socket_name": "default", "target_pane": "{right-of}"}
-  let g:slime_dont_ask_default = 1
-endif
+Plug 'voldikss/vim-floaterm'
+let g:floaterm_position='right'
+let g:floaterm_gitcommit = 'tabe'
+let g:floaterm_keymap_new    = '<leader>gv'
+let g:floaterm_keymap_prev   = '<leader>gp'
+let g:floaterm_keymap_next   = '<leader>gn'
+" let g:floaterm_keymap_toggle = '<c-z>'
+let g:floaterm_winblend = 5
+let g:floaterm_width = 120
+let g:floaterm_height = 0.8
+vmap <leader>gv :<c-u>'<,'>FloatermSend<CR>
+nnoremap <silent> <C-z> :update<CR>:FloatermToggle<CR>
+tnoremap <silent> <C-z> <C-\><C-N>:FloatermToggle<CR>
+
+Plug 'skywind3000/asyncrun.vim'
+let g:asyncrun_open = 6
+command! -bang -nargs=* -complete=file AsyncMake AsyncRun! -program=make @ <args>
+command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
+
+Plug 'skywind3000/asynctasks.vim'
+function! s:runner_proc(opts)
+  let curr_bufnr = floaterm#curr()
+  if has_key(a:opts, 'silent') && a:opts.silent == 1
+    call floaterm#hide()
+  endif
+  let cmd = 'cd ' . shellescape(getcwd())
+  call floaterm#terminal#send(curr_bufnr, [cmd])
+  call floaterm#terminal#send(curr_bufnr, [a:opts.cmd])
+  stopinsert
+  if &filetype == 'floaterm' && g:floaterm_autoinsert
+    startinsert
+  endif
+endfunction
+
+let g:asyncrun_runner = get(g:, 'asyncrun_runner', {})
+let g:asyncrun_runner.floaterm = function('s:runner_proc')
+let g:asynctasks_term_pos = "floaterm"
 
 Plug 'plasticboy/vim-markdown'
 let g:vim_markdown_folding_disabled = 1
@@ -254,7 +301,7 @@ let g:vim_markdown_follow_anchor = 1
 let g:vim_markdown_math = 1
 let g:tex_conceal = 0
 
-Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install' }
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
 Plug 'dhruvasagar/vim-table-mode'
 let g:table_mode_map_prefix = '<Leader>y'
 let g:table_mode_corner='|'
@@ -315,7 +362,6 @@ let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSuppor
 let g:vimtex_view_general_options = '-r @line @pdf @tex'
 let g:vimtex_fold_enabled = 0
 let g:vimtex_view_general_callback = 'ViewerCallback'
-Plug 'vim/killersheep'
 
 function! ViewerCallback(status) dict
   if a:status
@@ -351,8 +397,8 @@ xmap ic <plug>(signify-motion-inner-visual)
 omap ac <plug>(signify-motion-inner-pending)
 xmap ac <plug>(signify-motion-inner-visual)
 
-nnoremap [r :SignifyRefresh<CR>
-nnoremap ]r :SignifyToggle<CR>
+nnoremap [r :SignifyHunkUndo<CR>
+nnoremap ]r :SignifyDiff<CR>
 
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
@@ -400,8 +446,9 @@ if !has('win32')
   endif
 endif
 
-" Plug 'tpope/vim-vinegar'
 Plug 'justinmk/vim-dirvish'
+nnoremap <silent><C-e> :<C-U>exe 'vsplit +Dirvish\ %:p'.repeat(':h',v:count1)<CR>
+
 " func! s:setup_dirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
   " silent! unmap <silent><buffer> <C-p>
@@ -435,10 +482,9 @@ Plug 'justinmk/vim-dirvish'
 " endfunc
 " let g:dirvish_mode = 'call DirvishSetup()'
 
-nnoremap <silent><C-e> :<C-U>exe 'vsplit +Dirvish\ %:p'.repeat(':h',v:count1)<CR>
-
 Plug 'justinmk/vim-sneak'
 let g:sneak#label = 1
+let g:sneak#use_ic_scs = 1
 map <M-;> <Plug>Sneak_,
 
 Plug 'justinmk/vim-gtfo'
@@ -453,107 +499,20 @@ nmap gon :sav %%/
 
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
-let g:lt_height = 9
+let g:lt_height = 6
 
 let s:error_symbol = '>'
 let s:warning_symbol = '-'
 
-" Plug 'Valloric/YouCompleteMe', { 'frozen' : 1 }
-" let g:ycm_enable_diagnostic_highlighting = 0
-" let g:ycm_min_num_of_chars_for_completion = 3
-" " let g:ycm_max_num_candidates = 25
-" let g:ycm_max_num_identifier_candidates = 6
-" let g:ycm_confirm_extra_conf = 0
-" let g:ycm_global_ycm_extra_conf = '~/.ycm_extra_conf.py'
-" let g:ycm_key_list_select_completion = ['<C-N>', '<DOWN>']
-" let g:ycm_collect_identifiers_from_comments_and_strings = 1
-" let g:ycm_complete_in_comments = 1
-" let g:ycm_always_populate_location_list = 1
-" let g:ycm_error_symbol = s:error_symbol
-" let g:ycm_warning_symbol = s:warning_symbol
-" let g:ycm_autoclose_preview_window_after_insertion = 1
-" let g:ycm_use_ultisnips_completer = 0
-" let g:ycm_filetype_whitelist = { 'cpp' : 1, 'c' : 1 }
-" let g:ycm_filetype_blacklist = {
-"     \ 'tagbar' : 1,
-"     \ 'qf' : 1,
-"     \ 'notes' : 1,
-"     \ 'markdown' : 1,
-"     \ 'unite' : 1,
-"     \ 'text' : 1,
-"     \ 'vimwiki' : 1,
-"     \ 'pandoc' : 1,
-"     \ 'infolog' : 1,
-"     \ 'ctrlsf' : 1,
-"     \ 'mail' : 1,
-"     \ 'project' : 1,
-"     \ 'scratch' : 1,
-"     \}
-" nmap <silent> gd :YcmCompleter GoTo<CR>
-" nmap <silent> gz :YcmCompleter FixIt<CR>
-"
-" func! YcmOnDeleteChar()
-"   if pumvisible()
-"     return "\<C-y>\<Plug>delimitMateBS"
-"   endif
-"   return "\<Plug>delimitMateBS"
-" endfunc
-" imap <expr><BS> YcmOnDeleteChar()
-
-" if has('win32')
-"   Plug 'xltan/YcmGen'
-" else
-"   Plug 'rdnetto/YCM-Generator', { 'branch': 'stable'}
-"   command! -nargs=? -complete=file_in_path -bang YcmGen YcmGenerateConfig -f
-" endif
-
-" Plug 'w0rp/ale'
-" let g:ale_linters = {
-" \   'python': ['flake8'],
-" \   'go': ['golint'],
-" \   'javascript': ['standard'],
-" \   'c': [], 'cpp': [], 'objcpp': [], 'objc': [], 'markdown': [], 'java': []
-" \}
-" let g:ale_fixers = {'javascript': ['standard']}
-" let g:ale_sign_error = s:error_symbol
-" let g:ale_sign_warning = s:warning_symbol
-" let g:ale_lint_on_text_changed = 'never'
-" let g:ale_lint_on_save = 1
-" let g:ale_fix_on_save = 1
-
-" Plug 'liuchengxu/vista.vim'
-" let g:vista_icon_indent = ["▸ ", ""]
-" let g:vista_default_executive = 'ctags'
-" let g:vista_executive_for = {
-"     \ 'markdown': 'toc',
-"     \ 'go': 'coc',
-"     \ }
-
-" " let g:vista_echo_cursor_strategy = 'floating_win'
-" nnoremap <leader>j :Vista finder<CR>
-" nnoremap <leader>tt :Vista!!<CR>
-
-" function! NearestMethodOrFunction() abort
-"   return get(b:, 'vista_nearest_method_or_function', '')
-" endfunction
-
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
-nmap <silent> ]v :CocNext<CR>
-nmap <silent> [v :CocPrev<CR>
-nmap <silent> gd <Plug>(coc-definition)
-nmap <silent> gy <Plug>(coc-type-definition)
-nmap <silent> gi <Plug>(coc-implementation)
-nmap <silent> gr <Plug>(coc-references)
+
+nmap <silent> gd :call <SID>goto_tag("Definition")<CR>
+nmap <silent> gi :call <SID>goto_tag("Implementation")<CR>
+nmap <silent> gr :call <SID>goto_tag("References")<CR>
+nmap <silent> gy :call <SID>goto_tag("TypeDefinition")<CR>
 nmap <silent> gn <Plug>(coc-rename)
 nmap <silent> gz <Plug>(coc-fix-current)
 nmap <silent> gh :call <SID>show_documentation()<CR>
-function! s:show_documentation()
-  if &filetype == 'vim'
-    execute 'h '.expand('<cword>')
-  else
-    call CocAction('doHover')
-  endif
-endfunction
 inoremap <silent><expr> <C-n>
       \ pumvisible() ? "\<C-n>" :
       \ coc#refresh()
@@ -567,6 +526,32 @@ omap if <Plug>(coc-funcobj-i)
 xmap if <Plug>(coc-funcobj-i)
 omap af <Plug>(coc-funcobj-a)
 xmap af <Plug>(coc-funcobj-a)
+nmap <silent> ]v :CocNext<CR>
+nmap <silent> [v :CocPrev<CR>
+
+function! s:goto_tag(tagkind) abort
+  let tagname = expand('<cWORD>')
+  let winnr = winnr()
+  let pos = getcurpos()
+  let pos[0] = bufnr()
+
+  if CocAction('jump' . a:tagkind)
+    call settagstack(winnr, { 
+      \ 'curidx': gettagstack()['curidx'], 
+      \ 'items': [{'tagname': tagname, 'from': pos}] 
+      \ }, 't')
+  endif
+endfunction
+
+function! s:show_documentation()
+  if &filetype == 'vim'
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+Plug 'antoinemadec/coc-fzf'
 
 Plug 'tyru/open-browser.vim'
 let g:openbrowser_search_engines = {
@@ -587,13 +572,8 @@ let g:openbrowser_search_engines = {
 \}
 " let g:openbrowser_default_search = "duckduckgo"
 "
-Plug 'tyru/caw.vim'
-vmap gc	<Plug>(caw:hatpos:toggle)
-
-Plug 'skywind3000/asyncrun.vim'
-let g:asyncrun_open = 9
-command! -bang -nargs=* -complete=file AsyncMake AsyncRun! -program=make @ <args>
-command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
+" Plug 'tyru/caw.vim'
+" vmap gc	<Plug>(caw:hatpos:toggle)
 
 Plug 'dyng/ctrlsf.vim'
 let g:ctrlsf_ackprg="rg"
@@ -664,16 +644,11 @@ endif
 " nnoremap <leader>: :LeaderfHistoryCmd<CR>
 " nnoremap <leader>/ :LeaderfHistorySearch<CR>
 
-nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
-nnoremap <space> za
-
 " Plug 'xltan/LeaderF-tjump'
 " aug vimrc_tjump
 "   au!
 "   au FileType c,cpp,objc,objcpp,actionscript,python nmap <silent><buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
 " aug END
-
-Plug 'editorconfig/editorconfig-vim'
 
 " language related
 Plug 'vim-python/python-syntax'
@@ -687,8 +662,8 @@ let g:python_slow_sync = 0
 " a little bit slow
 Plug 'Vimjas/vim-python-pep8-indent'
 " Plug 'xltan/pythonhelper.vim'
-Plug 'fisadev/vim-isort'
 command! -nargs=0 -complete=command ImportRemove update | SilentExt autoflake --in-place --remove-all-unused-imports %<CR>
+command! -range=% Isort :<line1>,<line2>! isort
 
 Plug 'xltan/vim-cppman'
 
@@ -703,14 +678,18 @@ Plug 'dart-lang/dart-vim-plugin'
 let g:dart_style_guide = 1
 Plug 'dag/vim-fish'
 Plug 'rust-lang/rust.vim'
+let g:rustfmt_autosave = 1
 
 Plug 'fatih/vim-go'
 let g:go_def_mapping_enabled = 0
 let g:go_def_mode = 'gopls'
 let g:go_fmt_command = "goimports"
+let g:go_fmt_autosave = 1
 let g:go_list_type = "quickfix"
 let g:go_doc_url = 'https://pkg.go.dev'
 let g:go_echo_go_info = 0
+" let g:go_metalinter_autosave = 1
+" let g:go_metalinter_autosave_enabled = ['vet', 'golint']
 map gb :GoDocBrowser<CR>
 
 Plug 'leafgarland/typescript-vim'
@@ -721,12 +700,21 @@ Plug 'cespare/vim-toml'
 Plug 'delphinus/vim-auto-cursorline'
 let g:auto_cursorline_wait_ms = 1500
 
-Plug 'xltan/vim-project'
+Plug 'mhinz/vim-startify'
+let g:startify_lists = [
+        \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
+        \ { 'type': 'files',     'header': ['   MRU']            },
+        \ { 'type': 'sessions',  'header': ['   Sessions']       },
+        \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
+        \ { 'type': 'commands',  'header': ['   Commands']       },
+        \ ]
+
+Plug 'airblade/vim-rooter'
+let g:rooter_manual_only = 1
+let g:rooter_use_lcd = 1
+let g:rooter_patterns = ['.git/', 'cargo.toml', 'go.mod']
 
 call plug#end()
-
-" call project#rc("~/work")
-" Project  'seatalk-server'
 
 if has("termguicolors")
   let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
@@ -734,18 +722,15 @@ if has("termguicolors")
   set termguicolors
 endif
 
-" Eager-load these plugins so we can override their settings. {{{
+" Eager-load these plugins so we can override their settings.
 runtime! plugin/unimpaired.vim
 runtime! plugin/rsi.vim
-" inoremap <expr> <C-E> col('.')>strlen(getline('.'))?"\<Lt>C-E>":"\<Lt>End>"
 inoremap <C-E> <End>
 inoremap <M-t> <esc>diwbPa <esc>ea
 if !has("gui_running") " from tpope/vim-rsi
   silent! exe "set <F36>=\<esc>t"
   map! <F36> <M-t>
   map <F36> <M-t>
-
-  set mouse=
 endif
 
 set mps+=<:>
@@ -779,21 +764,27 @@ function! s:reset_color() abort
   hi! link CocWarningSign Todo
   hi! link CocErrorSign GitGutterDelete
   hi! link MatchParen GitGutterDelete 
-  hi! link QuickFixLine StatusLine
 
   hi! link fugitiveHunk Comment 
   hi! link gitDiff Comment 
   hi! link DiffNewFile Normal
   hi! link DiffFile Normal
   hi! link diffIndexLine Comment
-  hi DiffAdded guibg=None
-  hi DiffRemoved guibg=None
-  hi ErrorMsg guibg=None
-  hi Statement gui=None
+  hi DiffAdded guibg=NONE
+  hi DiffRemoved guibg=NONE
+  hi ErrorMsg guibg=NONE
+  hi Statement gui=NONE
+  hi ModeMsg gui=NONE
   exe "hi DiffAdd gui=bold guibg=#" . g:base16_gui02
-  exe "hi DiffDelete gui=None guibg=#" . g:base16_gui02
+  exe "hi DiffDelete gui=NONE guibg=#" . g:base16_gui02
   exe "hi DiffText gui=bold guifg=#" .g:base16_gui0A . " guibg=#" . g:base16_gui02
   exe "hi DiffChange guibg=#" . g:base16_gui02
+  exe "hi VertSplit guifg=#". g:base16_gui01 . " guibg=#" . g:base16_gui01
+  exe "hi StatusLine guifg=#". g:base16_gui05 . " guibg=#" . g:base16_gui01
+  exe "hi QuickfixLine guifg=#". g:base16_gui0A . " guibg=#" . g:base16_gui02
+  " hi link CocListsLine QuickfixLine
+	hi! link FloatermBorder Comment
+  hi! link jsonCommentError Comment
 endfunction
 
 set background=dark
@@ -804,20 +795,14 @@ aug END
 
 color base16-tomorrow-night
 
-call <SID>reset_color()
+call s:reset_color()
 
 set guioptions=
 set mouse=a
 set diffopt+=vertical,algorithm:patience
 
-" set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
-
-" set cursorline
-" set nu
-" set foldcolumn=1
 set hlsearch
 set nowrap
-" set nofoldenable
 set noshowmode
 
 set listchars=tab:\|\ ,eol:¬
@@ -828,7 +813,6 @@ set sw=4 ts=4
 set timeoutlen=500 ttimeoutlen=0
 
 set laststatus=2
-set scrolloff=4
 
 set hidden
 set autowrite
@@ -840,26 +824,46 @@ set directory=$VIMFILES/.swap//
 set undodir=$VIMFILES/.undo
 set undofile
 
-set winheight=2
-set winminheight=2
 set winwidth=100
-set winminwidth=10
-set completeopt=menuone
 
 set ignorecase smartcase
 set lazyredraw
+set textwidth=99
 
 set nofixeol
 set formatoptions+=j " Delete comment character when joining commented lines
-set cinoptions=:0,g0,(0,Ws,l1
 set viminfo^=!
-" set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
-"     \*.vscode,tags,*.vs,*.pyproj,*.idea,*.clangd,*__pycache__,
-"     \*.bin,*.rlib,*.rmeta
 set cpoptions+=>
 set belloff=all
 set history=1000
 set updatetime=300
+set gdefault
+set viminfo=!,'500,<50,s10,h
+set number
+set relativenumber
+syntax sync minlines=300
+
+if has('nvim')
+  aug Term
+    au!
+    au TermOpen * nnoremap <buffer> q a
+    au TermEnter * setlocal scrolloff=0
+    au TermLeave * setlocal scrolloff=3
+  aug END
+else
+  set scrolloff=3
+end
+
+" set cinoptions=:0,g0,(0,Ws,l1
+" set completeopt=menuone
+" set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
+" set cursorline
+" set nu
+" set foldcolumn=1
+" set nofoldenable
+" set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
+"     \*.vscode,tags,*.vs,*.pyproj,*.idea,*.clangd,*__pycache__,
+"     \*.bin,*.rlib,*.rmeta
 
 " for c-family files
 func! s:a(cmd)
@@ -898,12 +902,14 @@ aug vimrc_filetype
         \| command! -bang GAV call go#alternate#Switch(<bang>0, 'vsplit')
         \| command! -bang GAS call go#alternate#Switch(<bang>0, 'split')
         \| nnoremap s= :s/ =/ :=<cr>:nohl<cr>
+        \| nmap <buffer> <C-]> <Plug>(go-def)
+        \| nmap <buffer> <C-t> <Plug>(go-def-pop)
 
   au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
         \| nmap <silent> <buffer> [s <C-^>
   au FileType c,cpp,objc,objcpp command! GA call s:a('e')
         \| command! GAV call s:a('botright vertical split')
-  au FileType c,cpp,objc,objcpp,go,python nmap <buffer> <silent> <leader>a :GA<CR>
+  au FileType c,cpp,objc,objcpp,go,python nmap <buffer> <silent> <leader>ca :GA<CR>
   au filetype markdown setlocal conceallevel=2
       \| nnoremap <silent><buffer> gN O<Esc>C- [ ] 
       \| nnoremap <silent><buffer> gn o<Esc>C- [ ] 
@@ -916,13 +922,19 @@ aug vimrc_filetype
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au FileType python,javascript setlocal expandtab ts=4 sw=4
   au FileType tex setlocal ts=2 sw=2
-  au FileType vim,lua,c,cpp,yaml setlocal expandtab ts=2 sw=2
+  au FileType vim,lua,c,cpp,yaml,fish setlocal expandtab ts=2 sw=2
   au FileType make setlocal noexpandtab
+  au FileType fzf tnoremap <silent><buffer> <Esc> <C-c>
+        \| tnoremap <silent><buffer> <C-j> <C-n>
+        \| tnoremap <silent><buffer> <C-k> <C-p>
+        \| tnoremap <silent><buffer> <C-h> <BS>
+        \| tnoremap <silent><buffer> <C-l> <C-c>
+  au FileType c,cpp,objc,objcpp,cs,json,java,actionscript,glsl,dot setlocal commentstring=//\ %s
+  au FileType cmake,tmux,cfg setlocal commentstring=#\ %s
 aug END
 
 aug vimrc_misc
   au!
-  au BufEnter,BufNew * if &buftype == 'terminal' | startinsert | endif
   au VimEnter * call s:init()
   au WinEnter * if &diff | call<SID>stupid_diff() | endif
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
@@ -930,15 +942,15 @@ aug vimrc_misc
   au BufRead .localrc setlocal ft=vim
   au BufRead *.mangle setlocal equalprg=c++filt
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
-  au BufWritePost *.rs,*.cc,*.c call CocActionAsync("format")
+  au BufWritePost *.cc,*.c call CocActionAsync("format")
   au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
 aug END
 
 " aug vimrc_old
 "   au!
-"   au FileType c,cpp,objc,objcpp,cs,json,java,actionscript,glsl,dot setlocal commentstring=//\ %s
-"   au FileType cmake,tmux,cfg setlocal commentstring=#\ %s
-"   au FileType rust nmap <silent> <buffer> _= :RustFmt<CR>
+"   au TermOpen * startinsert
+"   au WinEnter * if &buftype == 'terminal' | startinsert | endif
+"   au BufEnter,BufNew * if &buftype == 'terminal' | startinsert | endif
 "   au FileType rust nmap gd <Plug>(rust-def)
 "   au FileType rust nmap gs <Plug>(rust-def-split)
 "   au FileType rust nmap gv <Plug>(rust-def-vertical)
@@ -1004,9 +1016,6 @@ nnoremap <silent> <C-S> :update<CR>
 vnoremap <silent> <C-S> <C-C>:update<CR>
 inoremap <silent> <C-S> <Esc>:update<CR>
 
-" nnoremap <C-G> <C-B>
-" cnoremap <C-G> <C-B>
-
 nnoremap <silent> L :nohl<CR>
 
 func! s:get_buffer_list()
@@ -1031,8 +1040,8 @@ if has('gui_running')
     term ++curwin ++close
   endfunc
 
-  nnoremap <silent> <C-z> :call <SID>toggle_term()<CR>
-  tnoremap <C-z> <C-w>N<C-^>
+  " nnoremap <silent> <C-z> :call <SID>toggle_term()<CR>
+  " tnoremap <buffer> <C-z> <C-w>N<C-^>
 
   if has('win32')
     let g:prog_name = '!start gvim'
@@ -1058,17 +1067,19 @@ nnoremap <C-l> <C-w>l
 
 if has('nvim')
   tnoremap <Esc> <C-\><C-n>
-  tnoremap <C-h> <C-\><C-N><C-w>h
-  tnoremap <C-j> <C-\><C-N><C-w>j
-  tnoremap <C-k> <C-\><C-N><C-w>k
-  tnoremap <C-l> <C-\><C-N><C-w>l
+  tnoremap <C-^> <C-\><C-n><C-^>
+  tnoremap <expr> <M-r> '<C-\><C-N>"'.nr2char(getchar()).'pi'
+  " tnoremap <C-h> <C-\><C-N><C-w>h
+  " tnoremap <C-j> <C-\><C-N><C-w>j
+  " tnoremap <C-k> <C-\><C-N><C-w>k
+  " tnoremap <C-l> <C-\><C-N><C-w>l
 else
   tnoremap <Esc> <C-w>N
   tnoremap <C-^> <C-w>N<C-^>
-  tnoremap <C-h> <C-w>h
-  tnoremap <C-l> <C-w>l
-  tnoremap <C-j> <C-w>j
-  tnoremap <C-k> <C-w>k
+  " tnoremap <C-h> <C-w>h
+  " tnoremap <C-l> <C-w>l
+  " tnoremap <C-j> <C-w>j
+  " tnoremap <C-k> <C-w>k
 endif
 
 nnoremap Q @q
@@ -1087,7 +1098,7 @@ nnoremap <silent> <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"nam
 
 if has("mac") && has("gui_running") && !has('nvim')
   set linespace=4
-  set guifont=Fira\ Code:h12
+  set guifont=SF\ Mono:h12
   set macligatures
   set macmeta
   set macthinstrokes
@@ -1159,6 +1170,8 @@ nnoremap <leader>es :tabe $VIMFILES/bundle/vim-extra-snippets/UltiSnips<CR>:lcd 
 nnoremap <leader>er :tabe $MYVIMRC<CR>
 
 nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
+nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
+nnoremap <space> za
 
 func! s:preserve(command)
   let _s=@/
@@ -1240,7 +1253,8 @@ Cabbr cpp Cppman
 Cabbr gdb GdbStartLLDB\ lldb
 Cabbr ob OpenBrowserSearch
 Cabbr rr RustRun
-Cabbr cl CocList
+Cabbr cl CocFzfList
+Cabbr t AsyncTask
 
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
@@ -1292,7 +1306,6 @@ function! s:cppcheck()
   cclose
   update
   setlocal makeprg=cppcheck\ --enable=all\ %
-  " setlocal errorformat=[%f:%l]:%m
   setlocal errorformat=[%f:%l]\ ->\ %m,[%f:%l]:%m
   let curr_dir = expand('%:h')
   if curr_dir == ''
