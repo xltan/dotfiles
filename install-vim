@@ -8,9 +8,12 @@ curl --insecure -fLo ~/.vim/autoload/plug.vim https://raw.github.com/junegunn/vi
 
 mkdir -pv .bak
 mv -v ~/.vimrc .bak/.vimrc.old 2> /dev/null
+mkdir -pv ~/.config/nvim
+
 mv -v ~/.config/nvim/coc-settings.json .bak/.coc-settings.old 2> /dev/null
-ln -sf $BASE/vimrc ~/.vimrc
+ln -sfv $BASE/vimrc ~/.vimrc
 ln -sfv $BASE/coc-settings.json ~/.config/nvim/coc-settings.json
+ln -sfv $BASE/init.vim ~/.config/nvim/init.vim
 ln -sv $BASE/indent ~/.vim/indent
 vim +PlugInstall +qall
 
