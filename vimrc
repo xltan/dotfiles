@@ -336,12 +336,17 @@ function! s:get_current_word(pattern)
   return line[ppos+1:npos-1]
 endfunction
 
-function! s:std_get_commands(args)
+function! s:get_args(args)
   if len(a:args) > 0
     let word = a:args
   else
     let word = s:get_current_word(':')
   endif
+  return word
+endf
+
+function! s:std_get_commands(args)
+  let word = s:get_args(a:args)
   if word =~ "^std"
     return 'silent !rustup doc '. word
   endif
@@ -350,7 +355,7 @@ function! s:std_get_commands(args)
 endfunction
 
 command! -bang -nargs=* -complete=command Doc execute <SID>std_get_commands(<q-args>)
-command! -bang -nargs=* -complete=command Rs execute 'OpenBrowserSearch -rsd ' . <SID>get_current_word(':')
+command! -bang -nargs=* -complete=command Rs execute 'OpenBrowserSearch -rsd ' . <SID>get_args(<q-args>)
 
 let g:targets_aiAI = 'ai  '
 let g:targets_quotes = '"d '' `'
@@ -494,8 +499,8 @@ if has('win32')
 else
   nmap gox :SilentExt open %<CR>
 endif
-cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>
-nmap gon :sav %%/
+cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>/
+nmap gon :sav %%
 
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
@@ -504,7 +509,8 @@ let g:lt_height = 6
 let s:error_symbol = '>'
 let s:warning_symbol = '-'
 
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'neoclide/coc.nvim', {'tag': '*'}
 
 nmap <silent> gd :call <SID>goto_tag("Definition")<CR>
 nmap <silent> gi :call <SID>goto_tag("Implementation")<CR>
@@ -569,6 +575,7 @@ let g:openbrowser_search_engines = {
 \   'twitter-user': 'http://twitter.com/{query}',
 \   'wiki': 'http://en.wikipedia.org/wiki/{query}',
 \   'go': 'https://pkg.go.dev/search?q={query}',
+\   'cpp': 'https://en.cppreference.com/mwiki/index.php?search={query}',
 \}
 " let g:openbrowser_default_search = "duckduckgo"
 "
@@ -679,19 +686,23 @@ let g:dart_style_guide = 1
 Plug 'dag/vim-fish'
 Plug 'rust-lang/rust.vim'
 let g:rustfmt_autosave = 1
+Plug 'mhinz/vim-crates'
 
 Plug 'fatih/vim-go'
 let g:go_def_mapping_enabled = 0
-let g:go_def_mode = 'gopls'
 let g:go_fmt_command = "goimports"
 let g:go_fmt_autosave = 1
 let g:go_list_type = "quickfix"
 let g:go_doc_url = 'https://pkg.go.dev'
 let g:go_echo_go_info = 0
+let g:go_gopls_enabled = 0
+" let g:go_gopls_options = ["-remote", "auto"]
+" let g:go_def_mode = 'gopls'
 " let g:go_metalinter_autosave = 1
 " let g:go_metalinter_autosave_enabled = ['vet', 'golint']
 map gb :GoDocBrowser<CR>
 
+Plug 'pangloss/vim-javascript'
 Plug 'leafgarland/typescript-vim'
 " Plug 'Quramy/tsuquyomi'
 "
@@ -828,7 +839,7 @@ set winwidth=100
 
 set ignorecase smartcase
 set lazyredraw
-set textwidth=99
+set textwidth=120
 
 set nofixeol
 set formatoptions+=j " Delete comment character when joining commented lines
@@ -838,10 +849,9 @@ set belloff=all
 set history=1000
 set updatetime=300
 set gdefault
-set viminfo=!,'500,<50,s10,h
 set number
 set relativenumber
-syntax sync minlines=300
+syntax sync minlines=500
 
 if has('nvim')
   aug Term
@@ -1253,8 +1263,9 @@ Cabbr cpp Cppman
 Cabbr gdb GdbStartLLDB\ lldb
 Cabbr ob OpenBrowserSearch
 Cabbr rr RustRun
-Cabbr cl CocFzfList
 Cabbr t AsyncTask
+Cabbr cl CocFzfList
+Cabbr cr CocRestart
 
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
@@ -1272,6 +1283,7 @@ endfunction
 func! s:init()
   " need overwrite ultisnips keymap
   inoremap <silent> <tab> <C-R>=pumvisible() ? coc#_select_confirm() : UltiSnips#ExpandSnippet()<CR>
+  " inoremap <silent> <tab> <C-R>=UltiSnips#ExpandSnippet()<CR>
   " inoremap <silent><expr> <TAB>
   "     \ pumvisible() ? coc#_select_confirm() :
   "     \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :

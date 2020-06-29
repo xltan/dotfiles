@@ -1,6 +1,7 @@
 tags
 .DS_Store
 *.d
+!conf.d
 *.ll
 *.o
 *.lib
@@ -33,3 +34,6 @@ tags
 .git/
 .vscode/
 *.dSYM/
+*.lock
+/vendor/
+target/

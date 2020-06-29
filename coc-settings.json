@@ -9,27 +9,19 @@
 	// "diagnostic.virtualText": false,
 	// "diagnostic.virtualTextPrefix": "▶ ",
 	// "codeLens.enable": true,
-	// "suggest.minTriggerInputLength": 3,
+	"suggest.minTriggerInputLength": 3,
 	"list.insertMappings": {
 		"<C-d>": "feedkeys:\\<C-f>",
 		"<C-u>": "feedkeys:\\<C-b>",
 		"<C-n>": "normal:j",
 		"<C-p>": "normal:k"
 	},
-	"typescript.suggest.completeFunctionCalls": true,
+	// "typescript.suggest.completeFunctionCalls": true,
 	"coc.preferences.colorSupport": false,
 	"rust-analyzer.serverPath":"~/.cargo/bin/rust-analyzer",
-	"languageserver": {
-		"golang": {
-			"command": "gopls",
-			// "args": ["--diagnostics-style=instant"],
-			"rootPatterns": [
-				"go.mod",
-				".git/"
-			],
-			"filetypes": [
-				"go"
-			]
-		}
+	"go.goplsPath": "gopls",
+	"go.goplsArgs": ["-remote", "auto"],
+	"go.goplsOptions": {
+		"completeUnimported": true
 	}
 }
