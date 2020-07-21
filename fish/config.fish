@@ -1,5 +1,5 @@
 if not status is-interactive
-	exit
+  exit
 end
 
 set -gx LANG "en_US.UTF-8"
@@ -18,7 +18,7 @@ end
 
 if status is-login
     if test -n "$SSH_CONNECTION"
-		and not test -n "$TMUX"
+    and not test -n "$TMUX"
         tmux has-session -t o; and tmux attach-session -t o; or tmux new-session -s o; and kill %self
         echo "tmux failed to start; using plain fish shell"
     end
@@ -46,53 +46,55 @@ set -g __fish_git_prompt_color_untrackedfiles $fish_color_normal
 set -g __fish_git_prompt_color_cleanstate green
 
 function fish_prompt --description 'Write out the prompt'
-	printf "\033[J"
-    set -l last_pipestatus $pipestatus
+  printf "\033[J"
+  set -l last_pipestatus $pipestatus
 
-	set_color brblack
-    echo -n -s "$USER" @ (prompt_hostname) ' ' (set_color $fish_color_cwd) (prompt_pwd)
+  set_color brblack
+  echo -n -s "$USER" @ (prompt_hostname) ' ' (set_color $fish_color_cwd) (prompt_pwd)
 
-	set_color normal
+  set_color normal
 
-    if test -n "$USE_PROMPT_GIT"
-		printf '%s\n' (__fish_git_prompt)
-	end
+  # if test -n "$USE_PROMPT_GIT"
+  #   printf '%s' (__fish_git_prompt)
+  # end
+  
+  printf '\n'
 
-	__fish_print_pipestatus "[" "]" "|" (set_color $fish_color_status) (set_color $fish_color_status) $last_pipestatus
-	set_color normal
-    switch "$USER"
-        case root
-            printf '# '
-        case '*'
-            printf '> '
-    end
+  __fish_print_pipestatus "[" "]" "|" (set_color $fish_color_status) (set_color $fish_color_status) $last_pipestatus
+  set_color normal
+  switch "$USER"
+    case root
+      printf '# '
+    case '*'
+      printf '> '
+  end
 end
 
 function mcd
-	mkdir -pv "$argv"
-	and cd "$argv"
+  mkdir -pv "$argv"
+  and cd "$argv"
 end
 
 function tc
-	cp -r ~/.template/conan "$argv"
-	and cd "$argv"
+  cp -r ~/.template/conan "$argv"
+  and cd "$argv"
 end
 
 function tm
-	cp -r ~/.template/make "$argv"
-	and cd "$argv"
+  cp -r ~/.template/make "$argv"
+  and cd "$argv"
 end
 
 function tv
-	cp -r ~/.template/vcpkg "$argv"
-	and cd "$argv"
+  cp -r ~/.template/vcpkg "$argv"
+  and cd "$argv"
 end
 
 function ls --description 'List contents of directory'
-	switch (uname)
-		case Darwin
-			command ls -G $argv
-		case '*'
-			command ls --color=auto $argv
-	end
+  switch (uname)
+    case Darwin
+      command ls -G $argv
+    case '*'
+      command ls --color=auto $argv
+  end
 end

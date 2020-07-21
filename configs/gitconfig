@@ -46,6 +46,7 @@
     dh1 = diff HEAD~1
 	last = log -1 HEAD
 	unstage = reset HEAD --
+	sp = stash pop
 
     # Fancy logging.
     #   h = head
@@ -70,3 +71,8 @@
 [merge]
 	tool = vimdiff
 
+[color "status"]
+	untracked = yellow
+	unmerged = magenta
+	localBranch = cyan
+	remoteBranch = blue

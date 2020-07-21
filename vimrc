@@ -69,9 +69,46 @@ Plug 'tpope/vim-fugitive'
 Plug 'shumphrey/fugitive-gitlab.vim'
 let g:fugitive_gitlab_domains = ['https://git.garena.com']
 Plug 'junegunn/gv.vim'
-Plug 'idanarye/vim-merginal'
+
+function! s:directory_history()
+  return s:_uniq(map(
+    \ filter([expand('%')], 'len(v:val)')
+    \   + filter(map(s:buflisted_sorted(), 'bufname(v:val)'), 'len(v:val)')
+    \   + filter(copy(v:oldfiles), "s:file_is_in_cwd(fnamemodify(v:val, ':p'))"),
+    \ 'fnamemodify(v:val, ":~:.")'))
+endfunction
+
+function! s:file_is_in_cwd(file)
+  return filereadable(a:file) && match(a:file, getcwd() . '/') == 0
+endfunction
+
+function! s:_uniq(list)
+  let visited = {}
+  let ret = []
+  for l in a:list
+    if !empty(l) && !has_key(visited, l)
+      call add(ret, l)
+      let visited[l] = 1
+    endif
+  endfor
+  return ret
+endfunction
+
+function! s:buflisted_sorted()
+  return sort(s:buflisted(), 's:sort_buffers')
+endfunction
+
+function! s:sort_buffers(...)
+  let [b1, b2] = map(copy(a:000), 'get(g:fzf#vim#buffers, v:val, v:val)')
+  return b1 < b2 ? 1 : -1
+endfunction
+
+function! s:buflisted()
+  return filter(range(1, bufnr('$')), 'buflisted(v:val) && getbufvar(v:val, "&filetype") != "qf"')
+endfunction
 
 Plug 'junegunn/fzf.vim'
+let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse'
 let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs --exclude /vendor --exclude /target/debug"
 " let g:fzf_preview_window = 'right:60%'
 nnoremap <leader>f :Files<CR>
@@ -87,82 +124,6 @@ nnoremap <leader>: :History:<CR>
 nnoremap <leader>/ :History/<CR>
 
 nnoremap <leader>a :CocFzfList actions<CR>
-
-
-command! -bang CwdHistory call fzf#run(fzf#wrap({
-  \ 'source': s:directory_history(),
-  \ 'options': [
-  \   '--prompt', 'CwdHistory> ',
-  \   '--multi',
-  \ ]}, <bang>0))
-
-function! s:directory_history()
-  return fzf#vim#_uniq(map(
-    \ filter([expand('%')], 'len(v:val)')
-    \   + filter(map(s:buflisted_sorted(), 'bufname(v:val)'), 'len(v:val)')
-    \   + filter(copy(v:oldfiles), "s:file_is_in_cwd(fnamemodify(v:val, ':p'))"),
-    \ 'fnamemodify(v:val, ":~:.")'))
-endfunction
-
-function! s:file_is_in_cwd(file)
-  return filereadable(a:file) && match(a:file, getcwd() . '/') == 0
-endfunction
-
-
-" ------------------------------------------------------------------------------
-" # Script functions copied directly from fzf.vim to make above things work
-" ------------------------------------------------------------------------------
-
-function! s:buflisted_sorted()
-  return sort(s:buflisted(), 's:sort_buffers')
-endfunction
-
-function! s:sort_buffers(...)
-  let [b1, b2] = map(copy(a:000), 'get(g:fzf#vim#buffers, v:val, v:val)')
-  " Using minus between a float and a number in a sort function causes an error
-  return b1 < b2 ? 1 : -1
-endfunction
-
-function! s:buflisted()
-  return filter(range(1, bufnr('$')), 'buflisted(v:val) && getbufvar(v:val, "&filetype") != "qf"')
-endfunction
-
-let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse'
-if has('nvim')
-  Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
-  let g:nvimgdb_config_override = {
-    \ 'key_next': 'n',
-    \ 'key_step': 's',
-    \ 'key_finish': 'f',
-    \ 'key_continue': 'c',
-    \ 'key_until': '<space>',
-    \ 'key_breakpoint': 'b',
-    \ 'set_tkeymaps': "NvimGdbNoTKeymaps",
-    \ }
-
-  let s:fzf_floating_window_height = min([20, &lines])
-  function! FloatingFZF()
-    let buf = nvim_create_buf(v:false, v:true)
-
-    let height = s:fzf_floating_window_height
-    let width = min([110, float2nr(&columns - (&columns * 2 / 12))])
-    let col = float2nr((&columns - width) / 2)
-    let row = float2nr((&lines - height) / 2)
-    let opts = {
-          \ 'relative': 'editor',
-          \ 'row': row,
-          \ 'col': col,
-          \ 'width': width,
-          \ 'height': height,
-          \ 'style': 'minimal'
-          \ }
-    let win = nvim_open_win(buf, v:true, opts)
-    call setwinvar(win, '&diff', 0)
-  endfunction
-  let g:fzf_layout = { 'window': 'call FloatingFZF()' }
-else
-  let g:fzf_layout = { 'window': { 'width': 0.7, 'height': 0.4, 'highlight': 'Comment' }}
-endif
 
 let g:fzf_preview_window = ''
 
@@ -198,14 +159,75 @@ let g:fzf_colors = {
   \ 'spinner': ['fg', 'Label'],
   \ 'header':  ['fg', 'Comment'] }
 
-function! s:gitCheckoutRef(ref) 
-  execute('Git checkout ' . a:ref)
-endfunction
+command! -bang CwdHistory call fzf#run(fzf#wrap({
+  \ 'source': s:directory_history(),
+  \ 'options': [
+  \   '--prompt', 'CwdHistory> ',
+  \   '--multi',
+  \ ]}, <bang>0))
+
+if has('nvim')
+  let s:fzf_floating_window_height = min([20, &lines])
+  function! FloatingFZF()
+    let buf = nvim_create_buf(v:false, v:true)
+
+    let height = s:fzf_floating_window_height
+    let width = min([110, float2nr(&columns - (&columns * 2 / 12))])
+    let col = float2nr((&columns - width) / 2)
+    let row = float2nr((&lines - height) / 2)
+    let opts = {
+          \ 'relative': 'editor',
+          \ 'row': row,
+          \ 'col': col,
+          \ 'width': width,
+          \ 'height': height,
+          \ 'style': 'minimal'
+          \ }
+    let win = nvim_open_win(buf, v:true, opts)
+    call setwinvar(win, '&diff', 0)
+  endfunction
+  let g:fzf_layout = { 'window': 'call FloatingFZF()' }
+else
+  let g:fzf_layout = { 'window': { 'width': 0.7, 'height': 0.4, 'highlight': 'Comment' }}
+endif
+
+Plug 'antoinemadec/coc-fzf'
+
+" Plug 'liuchengxu/vim-clap', { 'do': ':Clap install-binary' }
+" let g:clap_layout = { 'relative': 'editor' }
+" let g:clap#provider#cwd# = {
+"   \ 'syntax': 'clap_files',
+"   \ 'source': function("s:directory_history"),
+"   \ 'sink': 'e',
+"   \ }
+" let g:clap_insert_mode_only = v:true
+
+" aug clap_input
+"   au!
+"   au FileType clap_input inoremap <silent> <buffer> <C-n> <C-R>=clap#handler#navigate_result('down')<CR>
+"   au FileType clap_input inoremap <silent> <buffer> <C-p> <C-R>=clap#handler#navigate_result('up')<CR>
+" aug END
+
+" nnoremap <leader>f :Clap files<CR>
+" nnoremap <leader>r :Clap git_diff_files<CR>
+" nnoremap <leader>b :Clap buffers<CR>
+" nnoremap <leader>gh :Clap history<CR>
+" nnoremap <leader>h :Clap cwd<CR>
+" nnoremap <leader>v :Clap lines<CR>
+
+" nnoremap <leader>j :Clap tags<CR>
+" nnoremap <leader>gt :Clap proj_tags<CR>
+" nnoremap <leader>: :Clap hist:<CR>
+" nnoremap <leader>/ :Clap hist/<CR>
+"
+" Plug 'vn-ki/coc-clap'
 
 Plug 'junegunn/vim-easy-align'
 vmap ga <Plug>(EasyAlign)
 " nmap ga <Plug>(EasyAlign)
 
+" Plug 'ryanoasis/vim-devicons'
+" Plug 'hardcoreplayers/spaceline.vim'
 Plug 'xltan/lightline-colors.vim'
 Plug 'itchyny/lightline.vim'
 function! StatusDiagnostic() abort
@@ -226,10 +248,11 @@ let g:lightline = {
       \ 'colorscheme': 'tomorrow2',
       \ 'component': {
       \   'custom_relativepath': "%{expand('%:~:.')!=#''?expand('%:~:.'):'[No\ Name]'}",
+		  \   'lineinfo': '%3l,%-2v',
       \ },
       \ 'active': {
 		  \   'left': [ [ 'paste' ],
-		  \           [ 'readonly', 'custom_relativepath', 'modified', 'cocstatus', 'method' ] ],
+		  \           [ 'readonly', 'custom_relativepath', 'modified', 'cocstatus', 'method', 'gitbranch' ] ],
       \  'right': [ [ 'percentwin' ],
       \            [ 'lineinfo' ],
       \            [ 'mode' ]]
@@ -252,6 +275,7 @@ let g:lightline = {
 		  \ },
       \ 'component_function': {
       \   'cocstatus': 'StatusDiagnostic',
+      \   'gitbranch': 'FugitiveHead',
       \ },
       \ }
       
@@ -264,36 +288,34 @@ let g:floaterm_keymap_new    = '<leader>gv'
 let g:floaterm_keymap_prev   = '<leader>gp'
 let g:floaterm_keymap_next   = '<leader>gn'
 " let g:floaterm_keymap_toggle = '<c-z>'
-let g:floaterm_winblend = 5
-let g:floaterm_width = 120
-let g:floaterm_height = 0.8
+let g:floaterm_winblend = 10
+let g:floaterm_width = 110
+let g:floaterm_height = 0.9
 vmap <leader>gv :<c-u>'<,'>FloatermSend<CR>
 nnoremap <silent> <C-z> :update<CR>:FloatermToggle<CR>
-tnoremap <silent> <C-z> <C-\><C-N>:FloatermToggle<CR>
 
 Plug 'skywind3000/asyncrun.vim'
 let g:asyncrun_open = 6
 command! -bang -nargs=* -complete=file AsyncMake AsyncRun! -program=make @ <args>
-command! -bang -nargs=* -complete=file Grep AsyncRun! -program=grep @ <args>
+command! -bang -nargs=* -complete=file Grep silent grep <args>
 
 Plug 'skywind3000/asynctasks.vim'
 function! s:runner_proc(opts)
   let curr_bufnr = floaterm#curr()
   if has_key(a:opts, 'silent') && a:opts.silent == 1
-    call floaterm#hide()
+    FloatermHide!
   endif
-  let cmd = 'cd ' . shellescape(getcwd())
+  let cmd = 'pushd ' . shellescape(getcwd()) . ' && '. a:opts.cmd . ' && popd'
+  echom curr_bufnr
   call floaterm#terminal#send(curr_bufnr, [cmd])
-  call floaterm#terminal#send(curr_bufnr, [a:opts.cmd])
   stopinsert
   if &filetype == 'floaterm' && g:floaterm_autoinsert
-    startinsert
+    call floaterm#util#startinsert()
   endif
 endfunction
 
 let g:asyncrun_runner = get(g:, 'asyncrun_runner', {})
 let g:asyncrun_runner.floaterm = function('s:runner_proc')
-let g:asynctasks_term_pos = "floaterm"
 
 Plug 'plasticboy/vim-markdown'
 let g:vim_markdown_folding_disabled = 1
@@ -403,7 +425,7 @@ omap ac <plug>(signify-motion-inner-pending)
 xmap ac <plug>(signify-motion-inner-visual)
 
 nnoremap [r :SignifyHunkUndo<CR>
-nnoremap ]r :SignifyDiff<CR>
+nnoremap ]r :SignifyHunkDiff<CR>
 
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
@@ -445,8 +467,18 @@ let g:gutentags_project_root = [ 'tags' ]
 let g:gutentags_exclude_project_root = ['/usr/local', $HOME, $HOME.'/Documents']
 
 if !has('win32')
-  " let g:gutentags_cache_dir = $VIMFILES . '/.cache'
-  if !has('nvim')
+  if has('nvim')
+    Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
+    let g:nvimgdb_config_override = {
+      \ 'key_next': 'n',
+      \ 'key_step': 's',
+      \ 'key_finish': 'f',
+      \ 'key_continue': 'c',
+      \ 'key_until': '<space>',
+      \ 'key_breakpoint': 'b',
+      \ 'set_tkeymaps': "NvimGdbNoTKeymaps",
+      \ }
+  else
     Plug 'vim-utils/vim-man'
   endif
 endif
@@ -454,27 +486,28 @@ endif
 Plug 'justinmk/vim-dirvish'
 nnoremap <silent><C-e> :<C-U>exe 'vsplit +Dirvish\ %:p'.repeat(':h',v:count1)<CR>
 
-" func! s:setup_dirvish()
+func! s:setup_dirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
   " silent! unmap <silent><buffer> <C-p>
-  " nnoremap <silent><buffer> q :bd<CR>
-  " nnoremap <silent><buffer> o :call dirvish#open("p", 1)<CR><C-w>p
-  " nnoremap <silent><buffer> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
-  " nnoremap <silent><buffer> gr :noau Dirvish %<CR>
-  " nnoremap <silent><buffer> gh :Silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>:set conceallevel=3<CR>
-  " if has('win32')
-  "   nnoremap <silent><buffer> gx :SilentExt start <C-R><C-L><CR>
-  " else
-  "   nnoremap <silent><buffer> gx :SilentExt open <C-R><C-L><CR>
-  " endif
-  " nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
-  " xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
-" endfun
+  nnoremap <silent><buffer> q :bd<CR>
+  nnoremap <silent><buffer> o :call dirvish#open("p", 1)<CR><C-w>p
+  nnoremap <silent><buffer> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
+  nnoremap <silent><buffer> gr :noau Dirvish %<CR>
+  nnoremap <silent><buffer> gh :Silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>:set conceallevel=3<CR>
+  if has('win32')
+    nnoremap <silent><buffer> gx :SilentExt start <C-R><C-L><CR>
+  else
+    nnoremap <silent><buffer> gx :SilentExt open <C-R><C-L><CR>
+  endif
+  execute 'nnoremap <expr>'.'<buffer> <leader>xm ":<C-u>"."AsyncRun -mode=term -pos=flaoterm sh ".shellescape(fnamemodify(getline("."),":."))."<CR>"'
+  nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
+  xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
+endfun
 
-" aug dirvish
-"   au!
-"   au FileType dirvish call <SID>setup_dirvish()
-" aug END
+aug dirvish_custom
+  au!
+  au FileType dirvish call <SID>setup_dirvish()
+aug END
 
 " func! DirvishSetup()
 "   let text = getline('.')
@@ -502,15 +535,30 @@ endif
 cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>/
 nmap gon :sav %%
 
+" Plug 'mattboehm/vim-unstack'
+" let g:unstack_mapkey=''
+" let g:unstack_populate_quickfix=1
+" let g:unstack_open_tab=0
+
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
-let g:lt_height = 6
+let g:lt_height = 7
 
 let s:error_symbol = '>'
 let s:warning_symbol = '-'
 
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+let g:coc_global_extensions = [
+\ 'coc-ultisnips',
+\ 'coc-go',
+\ 'coc-json',
+\ 'coc-clangd',
+\ 'coc-rust-analyzer',
+\ 'coc-cmake',
+\ 'coc-yaml',
+\ 'coc-git',
+\ ]
 Plug 'neoclide/coc.nvim', {'tag': '*'}
+" Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 nmap <silent> gd :call <SID>goto_tag("Definition")<CR>
 nmap <silent> gi :call <SID>goto_tag("Implementation")<CR>
@@ -557,8 +605,6 @@ function! s:show_documentation()
   endif
 endfunction
 
-Plug 'antoinemadec/coc-fzf'
-
 Plug 'tyru/open-browser.vim'
 let g:openbrowser_search_engines = {
 \   'rs': 'https://doc.rust-lang.org/std/index.html?search={query}',
@@ -604,7 +650,6 @@ nmap <leader>go :CtrlSFToggle<CR>
 
 if executable("rg")
   set grepprg=rg\ --vimgrep
-  set grepformat=%f:%l:%c:%m,%f:%l:%m
 endif
 
 " Plug 'Yggdroot/LeaderF'
@@ -696,8 +741,8 @@ let g:go_list_type = "quickfix"
 let g:go_doc_url = 'https://pkg.go.dev'
 let g:go_echo_go_info = 0
 let g:go_gopls_enabled = 0
+let g:go_def_mode = 'gopls'
 " let g:go_gopls_options = ["-remote", "auto"]
-" let g:go_def_mode = 'gopls'
 " let g:go_metalinter_autosave = 1
 " let g:go_metalinter_autosave_enabled = ['vet', 'golint']
 map gb :GoDocBrowser<CR>
@@ -709,7 +754,7 @@ Plug 'leafgarland/typescript-vim'
 Plug 'cespare/vim-toml'
 
 Plug 'delphinus/vim-auto-cursorline'
-let g:auto_cursorline_wait_ms = 1500
+let g:auto_cursorline_wait_ms = 5000
 
 Plug 'mhinz/vim-startify'
 let g:startify_lists = [
@@ -722,7 +767,7 @@ let g:startify_lists = [
 
 Plug 'airblade/vim-rooter'
 let g:rooter_manual_only = 1
-let g:rooter_use_lcd = 1
+let g:rooter_cd_cmd = "lcd"
 let g:rooter_patterns = ['.git/', 'cargo.toml', 'go.mod']
 
 call plug#end()
@@ -839,7 +884,7 @@ set winwidth=100
 
 set ignorecase smartcase
 set lazyredraw
-set textwidth=120
+" set textwidth=120
 
 set nofixeol
 set formatoptions+=j " Delete comment character when joining commented lines
@@ -915,6 +960,13 @@ aug vimrc_filetype
         \| nmap <buffer> <C-]> <Plug>(go-def)
         \| nmap <buffer> <C-t> <Plug>(go-def-pop)
 
+  au FileType git setlocal foldmethod=syntax
+        \| nnoremap <buffer> coc :exec "G checkout ".expand("<cWORD>")<CR>
+        \| nnoremap <buffer> cdd :exec "G branch -d ".expand("<cWORD>")<CR>
+        \| nnoremap <buffer> q <c-w>q
+
+  au FileType gitcommit setlocal foldmethod=syntax nofoldenable
+
   au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
         \| nmap <silent> <buffer> [s <C-^>
   au FileType c,cpp,objc,objcpp command! GA call s:a('e')
@@ -927,8 +979,6 @@ aug vimrc_filetype
       \| nnoremap <buffer> <leader>q :q<CR>
   au FileType help wincmd L | nnoremap <buffer><silent> q :bd<CR>
   au FileType man  wincmd L | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
-  au FileType git setlocal foldmethod=syntax
-  au FileType gitcommit setlocal foldmethod=syntax nofoldenable
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au FileType python,javascript setlocal expandtab ts=4 sw=4
   au FileType tex setlocal ts=2 sw=2
@@ -954,6 +1004,7 @@ aug vimrc_misc
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
   au BufWritePost *.cc,*.c call CocActionAsync("format")
   au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
+  au QuickFixCmdPost * botright copen 7
 aug END
 
 " aug vimrc_old
@@ -1077,7 +1128,8 @@ nnoremap <C-l> <C-w>l
 
 if has('nvim')
   tnoremap <Esc> <C-\><C-n>
-  tnoremap <C-^> <C-\><C-n><C-^>
+  tnoremap <C-^> <C-\><C-n>:FloatermToggle<CR>:
+  tnoremap <silent><C-z> <C-\><C-N>:FloatermToggle<CR>
   tnoremap <expr> <M-r> '<C-\><C-N>"'.nr2char(getchar()).'pi'
   " tnoremap <C-h> <C-\><C-N><C-w>h
   " tnoremap <C-j> <C-\><C-N><C-w>j
@@ -1146,8 +1198,18 @@ func! s:make_args(args)
     let cmd = 'make CC="g++" CXXFLAGS="-std=c++17" '. bin . ' && ' . bin
   elseif &filetype == 'c'
     let cmd = 'make '. bin .' && '. bin
+  elseif &filetype == 'sh'
+    let cmd = 'sh '. expand('%:p')
+  elseif &filetype == 'go'
+    if bin =~ "_test$"
+      let cmd = 'go test -v -count=1 ' . expand('%:p:h')
+    else
+      let cmd = 'go run ' . expand('%:p:h')
+    end
+  elseif &filetype == 'rust'
+    let cmd = 'cargo run'
   else
-    let cmd = "make %<"
+    let cmd = &makeprg." %<"
   endif
   return cmd.' '.a:args
 endfunc
@@ -1157,16 +1219,16 @@ func! s:run(args)
 endfunc
 
 func! s:async_run(args)
-  exe 'AsyncRun '.<SID>make_args(a:args)
+  silent update
+  exe 'AsyncRun -mode=term -pos=floaterm '.<SID>make_args(a:args)
 endfunc
 
-nnoremap <silent> <leader>xm :update<CR>:call <SID>async_run('')<CR>
+nnoremap <silent> <leader>xm :call <SID>async_run('')<CR>
 nnoremap <silent> <leader>xx :AsyncStop!<CR>
 
 command! -nargs=* -complete=command Run call s:run(<q-args>)
 
 command! Only %bd|e#
-command! JsonPrettier %!python -m json.tool
 command! Todo exec "Grep 'XFIXME'"
 
 nnoremap <M-p> "0p
@@ -1258,14 +1320,28 @@ endfunc
 command! -nargs=+ Cabbr call s:command_abbr(<f-args>)
 
 Cabbr sf CtrlSF
-Cabbr gr Grep
+Cabbr gp Grep
+Cabbr Gp Grep
+Cabbr Gpi Grep\ -i
+Cabbr gpi Grep\ -i
+Cabbr fs FloatermSend
 Cabbr cpp Cppman
 Cabbr gdb GdbStartLLDB\ lldb
 Cabbr ob OpenBrowserSearch
-Cabbr rr RustRun
+Cabbr go OpenBrowserSearch\ -go
 Cabbr t AsyncTask
 Cabbr cl CocFzfList
+Cabbr clc CocFzfList\ commands
 Cabbr cr CocRestart
+Cabbr ife GoIfErr
+
+Cabbr gat GoAddTags
+Cabbr grt GoRemoveTags
+Cabbr gtf GoTestFunc
+Cabbr gi GoImpl
+" Cabbr ufc UnstackFromClipboard
+" Cabbr ufs UnstackFromSelection
+" Cabbr uft UnstackFromTmux
 
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
@@ -1291,8 +1367,8 @@ func! s:init()
   "     \ coc#refresh()
   " nmap [a <Plug>(ale_previous_wrap)
   " nmap ]a <Plug>(ale_next_wrap)
-  nmap <silent> [a <Plug>(coc-diagnostic-prev)
-  nmap <silent> ]a <Plug>(coc-diagnostic-next)
+  nmap <silent> [d <Plug>(coc-diagnostic-prev)
+  nmap <silent> ]d <Plug>(coc-diagnostic-next)
 
   nmap [x :cpf<CR>
   nmap ]x :cnf<CR>
@@ -1302,7 +1378,6 @@ func! s:init()
   nmap ]w gt
   nmap [W :tabfirst<CR>
   nmap ]W :tablast<CR>
-  " call vista#RunForNearestMethodOrFunction()
 endfunc
 
 func! s:change_dir()
