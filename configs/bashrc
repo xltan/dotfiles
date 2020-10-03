@@ -8,7 +8,6 @@
 export PLATFORM=$(uname -s)
 [ -f /etc/bashrc ] && . /etc/bashrc
 
-BASE=$(dirname $(readlink $BASH_SOURCE))
 # Options
 # --------------------------------------------------------------------
 
@@ -103,7 +102,6 @@ v() {
 
 [ -f ~/.fzf.bash ] && source ~/.fzf.bash
 
-[ -f $BASE/../z.sh ] && source $BASE/../z.sh
 unalias z 2> /dev/null
 z() {
   [ $# -gt 0 ] && _z "$*" && return
