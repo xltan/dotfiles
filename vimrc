@@ -17,7 +17,9 @@ set exrc
 
 command! -nargs=+ SilentExt execute 'silent !'. <q-args> | redraw!
 command! -nargs=+ Silent execute 'silent <args>' | redraw!
-
+command! -bang -nargs=* -complete=file Grep silent grep <args> | cwindow
+command! -nargs=? Code call s:code(<q-args>)
+command! -nargs=? Co exec "Code -g " . expand('%:p').":". line('.')
 func! s:code(args)
   let args = a:args
   if len(args) == 0
@@ -26,11 +28,8 @@ func! s:code(args)
   exec 'silent !code -r ' . args
 endfunc
 
-command! -nargs=? Code call s:code(<q-args>)
-command! -nargs=? Co exec "Code -g " . expand('%:p').":". line('.')
-
-let mapleader = ","
-let maplocalleader = ","
+let mapleader = " "
+let maplocalleader = " "
 let s:username = "Sinon"
 
 set encoding=utf-8
@@ -40,21 +39,79 @@ let $VIMFILES=split(&rtp, ",")[0]
 set rtp+=$HOME/.fzf
 call plug#begin($VIMFILES . '/bundle')
 Plug 'chriskempson/base16-vim'
-Plug 'arzg/vim-colors-xcode'
 
 Plug 'tpope/vim-characterize'
 Plug 'tpope/vim-abolish'
-Plug 'tpope/vim-surround'
+" Plug 'tpope/vim-surround'
 Plug 'tpope/vim-rsi'
 Plug 'tpope/vim-repeat'
 Plug 'tpope/vim-unimpaired'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-rhubarb'
-Plug 'tpope/vim-obsession'
 Plug 'tpope/vim-dispatch'
 Plug 'AdUki/vim-dispatch-neovim'
-let g:dispatch_no_neovim_start = 1
+" let g:dispatch_compilers = {
+"   \ 'go build': 'go',
+"   \ }
+aug dispatch_setting
+  au!
+  au filetype * call s:setup_makeprg()
+aug END
+
+func! s:setup_makeprg()
+  let m = {
+    \ 'dirvish': 'sh <sfile>',
+    \ 'python': 'python %',
+    \ 'cpp': "make CC='g++' CXXFLAGS='-std=c++17' %:p:r && %:p:r",
+    \ 'c': 'make %:p:r && %:p:r',
+    \ 'sh': 'sh %',
+    \ 'go': 'go run %',
+    \ 'rust': 'cargo run',
+    \ }
+  let o = {
+    \ 'go': 'go',
+    \ 'rust': 'cargo',
+    \ }
+  let f = &filetype
+
+  let prg = get(m, f, '')
+  let oprg = get(o, f, prg)
+  if prg != ''
+    if f == 'go'
+      if expand("%") =~ '_test.go'
+        let name = s:get_go_func()
+        if name == ""
+          let prg = 'go test '. expand('%:p:h') . ' -count=1 -v'
+        else
+          let prg = 'go test '. expand('%:p:h').' -run=' . name . ' -count=1 -v'
+        endif
+      endif
+    endif
+    if empty(maparg("g<cr>", "n"))
+      exec "nmap <buffer> g<cr> :Dispatch ". prg. '<CR>'
+      exec "nmap <buffer> g<space> :Dispatch ". oprg. '<space>'
+      exec "nmap <buffer> g! :Dispatch! ". oprg. '<space>'
+      exec "nmap <buffer> s<space> :Start ". oprg. '<space>'
+      exec "nmap <buffer> s! :Dispatch! ". oprg. '<space>'
+      exec "nmap <buffer> s<cr> :Start ". prg. '<CR>'
+    endif
+  end
+endf
+
+func s:get_go_func()
+  let test = search('func \(Test\|Example\)', "bcnW")
+  if test == 0
+    return ""
+  end
+  let line = getline(test)
+  let name = split(split(line, " ")[1], "(")[0]
+  return name
+endfunc
+
+" Plug 'tyru/caw.vim'
+" vmap gc	<Plug>(caw:hatpos:toggle)
+
 Plug 'tpope/vim-commentary'
 " Plug 'tpope/vim-endwise'
 inoremap (<CR> (<CR>)<Esc>O
@@ -69,6 +126,73 @@ Plug 'tpope/vim-fugitive'
 Plug 'shumphrey/fugitive-gitlab.vim'
 let g:fugitive_gitlab_domains = ['https://git.garena.com']
 Plug 'junegunn/gv.vim'
+
+Plug 'machakann/vim-sandwich'
+
+Plug 'junegunn/vim-easy-align'
+vmap ga <Plug>(EasyAlign)
+" nmap ga <Plug>(EasyAlign)
+
+Plug 'tittanlee/fzf-tags'
+" nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
+nmap <C-]> <Plug>(fzf_tags)
+
+Plug 'junegunn/fzf.vim'
+let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse'
+let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs --exclude /vendor --exclude /target/debug"
+" let g:fzf_preview_window = 'right:60%'
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>r :Files %:h<CR>
+nnoremap <leader>b :Buffers<CR>
+nnoremap <leader>gh :History<CR>
+nnoremap <leader>h :CwdHistory<CR>
+nnoremap <leader>v :Lines<CR>
+
+nnoremap <leader>j :BTags<CR>
+nnoremap <leader>t :Tags<CR>
+nnoremap <leader>: :History:<CR>
+nnoremap <leader>/ :History/<CR>
+
+let g:fzf_preview_window = ''
+
+function! s:build_quickfix_list(lines)
+  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
+  cwindow
+  cc
+endfunction
+
+function! s:open_file(lines)
+  exec 'silent !open ' . a:lines[0]
+endfunction
+
+let g:fzf_action = {
+  \ 'ctrl-q': function('s:build_quickfix_list'),
+  \ 'ctrl-x': function('s:open_file'),
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-s': 'split',
+  \ 'ctrl-v': 'vsplit' }
+
+let g:fzf_colors = {
+  \ 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'CursorLine'],
+  \ 'hl':      ['fg', 'ALEErrorSign'],
+  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'Normal', 'CursorLine', 'CursorColumn'],
+  \ 'hl+':     ['fg', 'ALEErrorSign'],
+  \ 'info':    ['fg', 'Comment'],
+  \ 'border':  ['fg', 'Ignore'],
+  \ 'prompt':  ['fg', 'Comment'],
+  \ 'pointer': ['fg', 'ALEErrorSign'],
+  \ 'marker':  ['fg', 'Keyword'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'header':  ['fg', 'Comment'] }
+
+command! -bang CwdHistory call fzf#run(fzf#wrap({
+  \ 'source': s:directory_history(),
+  \ 'options': [
+  \   '--prompt', 'CwdHistory> ',
+  \   '--multi',
+  \ ]}, <bang>0))
 
 function! s:directory_history()
   return s:_uniq(map(
@@ -107,72 +231,12 @@ function! s:buflisted()
   return filter(range(1, bufnr('$')), 'buflisted(v:val) && getbufvar(v:val, "&filetype") != "qf"')
 endfunction
 
-Plug 'junegunn/fzf.vim'
-let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse'
-let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs --exclude /vendor --exclude /target/debug"
-" let g:fzf_preview_window = 'right:60%'
-nnoremap <leader>f :Files<CR>
-nnoremap <leader>r :Files %:h<CR>
-nnoremap <leader>b :Buffers<CR>
-nnoremap <leader>gh :History<CR>
-nnoremap <leader>h :CwdHistory<CR>
-nnoremap <leader>v :Lines<CR>
-
-nnoremap <leader>j :BTags<CR>
-nnoremap <leader>gt :Tags<CR>
-nnoremap <leader>: :History:<CR>
-nnoremap <leader>/ :History/<CR>
-
-nnoremap <leader>a :CocFzfList actions<CR>
-
-let g:fzf_preview_window = ''
-
-function! s:build_quickfix_list(lines)
-  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
-  copen
-  cc
-endfunction
-
-function! s:open_file(lines)
-  exec 'silent !open ' . a:lines[0]
-endfunction
-
-let g:fzf_action = {
-  \ 'ctrl-q': function('s:build_quickfix_list'),
-  \ 'ctrl-x': function('s:open_file'),
-  \ 'ctrl-t': 'tab split',
-  \ 'ctrl-s': 'split',
-  \ 'ctrl-v': 'vsplit' }
-
-let g:fzf_colors = {
-  \ 'fg':      ['fg', 'Normal'],
-  \ 'bg':      ['bg', 'CursorLine'],
-  \ 'hl':      ['fg', 'ALEErrorSign'],
-  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
-  \ 'bg+':     ['bg', 'Normal', 'CursorLine', 'CursorColumn'],
-  \ 'hl+':     ['fg', 'ALEErrorSign'],
-  \ 'info':    ['fg', 'Comment'],
-  \ 'border':  ['fg', 'Ignore'],
-  \ 'prompt':  ['fg', 'Comment'],
-  \ 'pointer': ['fg', 'ALEErrorSign'],
-  \ 'marker':  ['fg', 'Keyword'],
-  \ 'spinner': ['fg', 'Label'],
-  \ 'header':  ['fg', 'Comment'] }
-
-command! -bang CwdHistory call fzf#run(fzf#wrap({
-  \ 'source': s:directory_history(),
-  \ 'options': [
-  \   '--prompt', 'CwdHistory> ',
-  \   '--multi',
-  \ ]}, <bang>0))
-
 if has('nvim')
   let s:fzf_floating_window_height = min([20, &lines])
   function! FloatingFZF()
     let buf = nvim_create_buf(v:false, v:true)
-
     let height = s:fzf_floating_window_height
-    let width = min([110, float2nr(&columns - (&columns * 2 / 12))])
+    let width = min([140, float2nr(&columns - (&columns * 2 / 12))])
     let col = float2nr((&columns - width) / 2)
     let row = float2nr((&lines - height) / 2)
     let opts = {
@@ -188,10 +252,8 @@ if has('nvim')
   endfunction
   let g:fzf_layout = { 'window': 'call FloatingFZF()' }
 else
-  let g:fzf_layout = { 'window': { 'width': 0.7, 'height': 0.4, 'highlight': 'Comment' }}
+  let g:fzf_layout = { 'window': { 'width': 0.7, 'height': 0.6, 'highlight': 'Comment' }}
 endif
-
-Plug 'antoinemadec/coc-fzf'
 
 " Plug 'liuchengxu/vim-clap', { 'do': ':Clap install-binary' }
 " let g:clap_layout = { 'relative': 'editor' }
@@ -222,12 +284,9 @@ Plug 'antoinemadec/coc-fzf'
 "
 " Plug 'vn-ki/coc-clap'
 
-Plug 'junegunn/vim-easy-align'
-vmap ga <Plug>(EasyAlign)
-" nmap ga <Plug>(EasyAlign)
-
 " Plug 'ryanoasis/vim-devicons'
 " Plug 'hardcoreplayers/spaceline.vim'
+
 Plug 'xltan/lightline-colors.vim'
 Plug 'itchyny/lightline.vim'
 function! StatusDiagnostic() abort
@@ -281,49 +340,26 @@ let g:lightline = {
       
 
 " Plug 'christoomey/vim-tmux-navigator'
-Plug 'voldikss/vim-floaterm'
-let g:floaterm_position='right'
-let g:floaterm_gitcommit = 'tabe'
-let g:floaterm_keymap_new    = '<leader>gv'
-let g:floaterm_keymap_prev   = '<leader>gp'
-let g:floaterm_keymap_next   = '<leader>gn'
-" let g:floaterm_keymap_toggle = '<c-z>'
-let g:floaterm_winblend = 10
-let g:floaterm_width = 110
-let g:floaterm_height = 0.9
-vmap <leader>gv :<c-u>'<,'>FloatermSend<CR>
-nnoremap <silent> <C-z> :update<CR>:FloatermToggle<CR>
-
-Plug 'skywind3000/asyncrun.vim'
-let g:asyncrun_open = 6
-command! -bang -nargs=* -complete=file AsyncMake AsyncRun! -program=make @ <args>
-command! -bang -nargs=* -complete=file Grep silent grep <args>
-
-Plug 'skywind3000/asynctasks.vim'
-function! s:runner_proc(opts)
-  let curr_bufnr = floaterm#curr()
-  if has_key(a:opts, 'silent') && a:opts.silent == 1
-    FloatermHide!
-  endif
-  let cmd = 'pushd ' . shellescape(getcwd()) . ' && '. a:opts.cmd . ' && popd'
-  echom curr_bufnr
-  call floaterm#terminal#send(curr_bufnr, [cmd])
-  stopinsert
-  if &filetype == 'floaterm' && g:floaterm_autoinsert
-    call floaterm#util#startinsert()
-  endif
-endfunction
-
-let g:asyncrun_runner = get(g:, 'asyncrun_runner', {})
-let g:asyncrun_runner.floaterm = function('s:runner_proc')
+" Plug 'voldikss/vim-floaterm'
+" let g:floaterm_position='right'
+" let g:floaterm_gitcommit = 'tabe'
+" let g:floaterm_keymap_new    = '<leader>gv'
+" let g:floaterm_keymap_prev   = '<leader>gp'
+" let g:floaterm_keymap_next   = '<leader>gn'
+" " let g:floaterm_keymap_toggle = '<c-z>'
+" let g:floaterm_winblend = 10
+" let g:floaterm_width = 110
+" let g:floaterm_height = 0.9
+" vmap <leader>gv :<c-u>'<,'>FloatermSend<CR>
+" nnoremap <silent> <C-z> :update<CR>:FloatermToggle<CR>
 
 Plug 'plasticboy/vim-markdown'
 let g:vim_markdown_folding_disabled = 1
 let g:vim_markdown_follow_anchor = 1
 let g:vim_markdown_math = 1
 let g:tex_conceal = 0
-
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
+
 Plug 'dhruvasagar/vim-table-mode'
 let g:table_mode_map_prefix = '<Leader>y'
 let g:table_mode_corner='|'
@@ -335,8 +371,8 @@ function! s:isAtStartOfLine(mapping)
 endfunction
 
 inoreabbrev <expr> <bar><bar>
-          \ <SID>isAtStartOfLine('\|\|') ?
-          \ '<c-o>:TableModeEnable<cr><bar><space><bar><left><left>' : '<bar><bar>'
+  \ <SID>isAtStartOfLine('\|\|') ?
+  \ '<c-o>:TableModeEnable<cr><bar><space><bar><left><left>' : '<bar><bar>'
 
 function! s:get_current_word(pattern)
   let line = getline('.')
@@ -369,9 +405,9 @@ endf
 
 function! s:std_get_commands(args)
   let word = s:get_args(a:args)
-  if word =~ "^std"
-    return 'silent !rustup doc '. word
-  endif
+  " if word =~ "^std"
+  "   return 'silent !rustup doc '. word
+  " endif
 
   return 'OpenBrowserSearch -rs '. word
 endfunction
@@ -380,52 +416,34 @@ command! -bang -nargs=* -complete=command Doc execute <SID>std_get_commands(<q-a
 command! -bang -nargs=* -complete=command Rs execute 'OpenBrowserSearch -rsd ' . <SID>get_args(<q-args>)
 
 let g:targets_aiAI = 'ai  '
-let g:targets_quotes = '"d '' `'
 Plug 'wellle/targets.vim'
+Plug 'machakann/vim-swap'
+let g:swap_no_default_key_mappings = 1
+map z[ <Plug>(swap-prev)
+map z] <Plug>(swap-next)
 
-Plug 'lervag/vimtex'
-let g:tex_flavor = 'latex'
-let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSupport/displayline'
-let g:vimtex_view_general_options = '-r @line @pdf @tex'
-let g:vimtex_fold_enabled = 0
-let g:vimtex_view_general_callback = 'ViewerCallback'
+" Plug 'lervag/vimtex'
+" let g:tex_flavor = 'latex'
+" let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSupport/displayline'
+" let g:vimtex_view_general_options = '-r @line @pdf @tex'
+" let g:vimtex_fold_enabled = 0
+" let g:vimtex_view_general_callback = 'ViewerCallback'
 
-function! ViewerCallback(status) dict
-  if a:status
-    VimtexView
-  endif
-endfunction
-if has('nvim')
-  let g:vimtex_compiler_progname = 'nvr'
-endif
-aug vimtex_config
-  au!
-  au User VimtexEventQuit call vimtex#compiler#clean(0)
-  " au User VimtexEventInitPost call vimtex#compiler#compile()
-aug END
+" function! ViewerCallback(status) dict
+"   if a:status
+"     VimtexView
+"   endif
+" endfunction
+" if has('nvim')
+"   let g:vimtex_compiler_progname = 'nvr'
+" endif
+" aug vimtex_config
+"   au!
+"   au User VimtexEventQuit call vimtex#compiler#clean(0)
+"   " au User VimtexEventInitPost call vimtex#compiler#compile()
+" aug END
 
-Plug 'editorconfig/editorconfig-vim'
-
-let g:scratch_horizontal = 0
-let g:scratch_height = 100
-let g:scratch_no_mappings = 1
-let g:scratch_filetype = 'markdown'
-let g:scratch_persistence_file = $VIMFILES . '/.scratch.md'
-Plug 'mtth/scratch.vim'
-
-nmap gs :Scratch<CR>
-xmap gs <plug>(scratch-selection-reuse)
-
-Plug 'mhinz/vim-signify'
-let g:signify_vcs_list = ['git']
-
-omap ic <plug>(signify-motion-inner-pending)
-xmap ic <plug>(signify-motion-inner-visual)
-omap ac <plug>(signify-motion-inner-pending)
-xmap ac <plug>(signify-motion-inner-visual)
-
-nnoremap [r :SignifyHunkUndo<CR>
-nnoremap ]r :SignifyHunkDiff<CR>
+" Plug 'editorconfig/editorconfig-vim'
 
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
@@ -439,11 +457,6 @@ map g*  <Plug>(asterisk-g*)
 map g#  <Plug>(asterisk-g#)
 map z*  <Plug>(asterisk-z*)
 map z#  <Plug>(asterisk-z#)
-" map gz* <Plug>(asterisk-gz*)
-" map gz# <Plug>(asterisk-gz#)
-" Plug 'haya14busa/vim-edgemotion'
-" map <C-j> <Plug>(edgemotion-j)
-" map <C-k> <Plug>(edgemotion-k)
 
 Plug 'AndrewRadev/linediff.vim'
 
@@ -465,6 +478,10 @@ let g:gutentags_add_default_project_roots = 0
 let g:gutentags_project_root = [ 'tags' ]
 " '.git', '.svn', '.gutctags', '.clang-format', '.ignore']
 let g:gutentags_exclude_project_root = ['/usr/local', $HOME, $HOME.'/Documents']
+let g:gutentags_ctags_exclude = ['testdata', 'build', 'bin', 'vendor', 'tags', 
+    \ 'github.com', 'auth_cli',
+    \ '*_test.go', '*.json', '*.pb.go', '*_gen.go',
+    \ ]
 
 if !has('win32')
   if has('nvim')
@@ -484,7 +501,6 @@ if !has('win32')
 endif
 
 Plug 'justinmk/vim-dirvish'
-nnoremap <silent><C-e> :<C-U>exe 'vsplit +Dirvish\ %:p'.repeat(':h',v:count1)<CR>
 
 func! s:setup_dirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
@@ -499,7 +515,6 @@ func! s:setup_dirvish()
   else
     nnoremap <silent><buffer> gx :SilentExt open <C-R><C-L><CR>
   endif
-  execute 'nnoremap <expr>'.'<buffer> <leader>xm ":<C-u>"."AsyncRun -mode=term -pos=flaoterm sh ".shellescape(fnamemodify(getline("."),":."))."<CR>"'
   nnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
   xnoremap <buffer> t :call dirvish#open('tabedit', 0)<CR>
 endfun
@@ -523,10 +538,39 @@ aug END
 Plug 'justinmk/vim-sneak'
 let g:sneak#label = 1
 let g:sneak#use_ic_scs = 1
-map <M-;> <Plug>Sneak_,
+omap z <Plug>Sneak_s
+omap Z <Plug>Sneak_S
+
+" Plug 'easymotion/vim-easymotion'
+" let g:EasyMotion_do_mapping = 0
+" nmap s <Plug>(easymotion-overwin-f2)
+"
+
+let s:istmux = !(empty($TMUX))
+
+func! s:scrub(s) abort
+  "replace \\ with \ (greedy) #21
+  return substitute(a:s, '\\\\\+', '\', 'g')
+endf
+
+func! s:open_term(dir, cmd) abort "{{{
+  let l:dir = s:scrub(expand(a:dir, 1))
+  if !isdirectory(l:dir) "this happens if a directory was deleted outside of vim.
+    call s:beep('invalid/missing directory: '.l:dir)
+    return
+  endif
+
+  if s:istmux
+    silent call system("tmux split-window -c '" . l:dir . "'")
+  else
+    call gtfo#open#term(a:dir, a:cmd)
+  endif
+endfunc
 
 Plug 'justinmk/vim-gtfo'
 let g:gtfo#terminals = { 'win': 'cmd.exe /k' }
+nnoremap <silent> got :<c-u>call <SID>open_term("%:p:h", "")<cr>
+nnoremap <silent> goT :<c-u>call <SID>open_term(getcwd())<cr>
 if has('win32')
   nmap gox :SilentExt start %<CR>
 else
@@ -535,30 +579,27 @@ endif
 cnoremap %% <C-R>=fnameescape(expand('%:h'))<CR>/
 nmap gon :sav %%
 
-" Plug 'mattboehm/vim-unstack'
-" let g:unstack_mapkey=''
-" let g:unstack_populate_quickfix=1
-" let g:unstack_open_tab=0
-
 Plug 'Valloric/ListToggle'
 let g:lt_quickfix_list_toggle_map = '<leader>z'
-let g:lt_height = 7
+let g:lt_height = 10
 
 let s:error_symbol = '>'
 let s:warning_symbol = '-'
 
+Plug 'antoinemadec/coc-fzf'
 let g:coc_global_extensions = [
+\ 'coc-imselect',
 \ 'coc-ultisnips',
-\ 'coc-go',
 \ 'coc-json',
+\ 'coc-go',
 \ 'coc-clangd',
 \ 'coc-rust-analyzer',
 \ 'coc-cmake',
 \ 'coc-yaml',
-\ 'coc-git',
+\ 'coc-flutter',
 \ ]
-Plug 'neoclide/coc.nvim', {'tag': '*'}
-" Plug 'neoclide/coc.nvim', {'branch': 'release'}
+" Plug 'neoclide/coc.nvim', {'tag': '*'}
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
 
 nmap <silent> gd :call <SID>goto_tag("Definition")<CR>
 nmap <silent> gi :call <SID>goto_tag("Implementation")<CR>
@@ -575,7 +616,6 @@ inoremap <silent><expr> <cr>
       \ "\<cr>"
 vmap <silent>= <Plug>(coc-format-selected)
 map <silent>_= <Plug>(coc-format)
-command! -nargs=0 Format :call CocAction('format')
 omap if <Plug>(coc-funcobj-i)
 xmap if <Plug>(coc-funcobj-i)
 omap af <Plug>(coc-funcobj-a)
@@ -607,7 +647,7 @@ endfunction
 
 Plug 'tyru/open-browser.vim'
 let g:openbrowser_search_engines = {
-\   'rs': 'https://doc.rust-lang.org/std/index.html?search={query}',
+\   'rs': 'https://doc.rust-lang.org/nightly/std/index.html?search={query}',
 \   'rsd': 'https://docs.rs/releases/search?query={query}',
 \   'baidu': 'http://www.baidu.com/s?wd={query}&rsv_bp=0&rsv_spt=3&inputT=2478',
 \   'cpan': 'http://search.cpan.org/search?query={query}',
@@ -625,8 +665,6 @@ let g:openbrowser_search_engines = {
 \}
 " let g:openbrowser_default_search = "duckduckgo"
 "
-" Plug 'tyru/caw.vim'
-" vmap gc	<Plug>(caw:hatpos:toggle)
 
 Plug 'dyng/ctrlsf.vim'
 let g:ctrlsf_ackprg="rg"
@@ -645,62 +683,12 @@ let g:ctrlsf_populate_qflist = 1
 
 vmap <leader>g <Plug>CtrlSFVwordPath<CR>
 nmap <leader>gs <Plug>CtrlSFCwordPath<CR>
-nmap <leader>gw :silent grep <c-r><c-w> %% <cr>:copen<cr>:wincmd p<cr>
+nmap <silent> <leader>gw :silent grep <c-r><c-w> %% <cr>:copen<cr>:wincmd p<cr>
 nmap <leader>go :CtrlSFToggle<CR>
 
 if executable("rg")
   set grepprg=rg\ --vimgrep
 endif
-
-" Plug 'Yggdroot/LeaderF'
-" let g:Lf_WindowHeight = 0.4
-" let g:Lf_CacheDiretory = $VIMFILES
-" let g:Lf_HideHelp = 1
-" let g:Lf_DefaultMode = 'NameOnly'
-" 
-" if !exists('g:Lf_CommandMap')
-"   let g:Lf_CommandMap = {
-"       \ '<Tab>': ['<C-I>'],
-"       \ '<C-C>': ['<Esc>', '<C-C>'],
-"       \ '<C-]>': ['<C-V>'],
-"       \ '<C-X>': ['<C-S>'],
-"       \ '<C-V>': ['<C-Q>'],
-"       \ '<CR>': ['<C-O>', '<CR>'],
-"       \ '<C-J>': ['<C-N>'],
-"       \ '<C-K>': ['<C-P>'],
-"       \ '<C-U>': ['<C-W>'],
-"       \}
-"   let g:Lf_PreviewResult = {
-"       \ 'BufTag': 0,
-"       \ 'Function': 0,
-"       \}
-"   let g:Lf_StlSeparator = { 'left': '', 'right': '' }
-"   let g:Lf_WildIgnore = {
-"       \ 'dir': ['.svn','.git','.hg','bin'],
-"       \ 'file': ['*.sw?','~$*','*.bak','*.exe','*.o','*.so','*.py[co]','tags']
-"       \}
-"   let g:Lf_MruWildIgnore = {
-"       \ 'dir': [],
-"       \ 'file': ['*.fugitiveblame', '*.so'],
-"       \}
-"   let g:Lf_UseCache = 1
-"   let g:Lf_NeedCacheTime = 0.3
-"   let g:Lf_CursorBlink = 0
-" endif
-" 
-" nnoremap <leader>h :LeaderfMruCwd<CR>
-" nnoremap <leader>gh :LeaderfMru<CR>
-" nnoremap <leader>gj :LeaderfBufTag<CR>
-" nnoremap <leader>gt :LeaderfTag<CR>
-" nnoremap <leader>tt :LeaderfFunction!<CR>
-" nnoremap <leader>: :LeaderfHistoryCmd<CR>
-" nnoremap <leader>/ :LeaderfHistorySearch<CR>
-
-" Plug 'xltan/LeaderF-tjump'
-" aug vimrc_tjump
-"   au!
-"   au FileType c,cpp,objc,objcpp,actionscript,python nmap <silent><buffer> <C-]> :LeaderfTjump <C-r><C-w><CR>
-" aug END
 
 " language related
 Plug 'vim-python/python-syntax'
@@ -717,8 +705,6 @@ Plug 'Vimjas/vim-python-pep8-indent'
 command! -nargs=0 -complete=command ImportRemove update | SilentExt autoflake --in-place --remove-all-unused-imports %<CR>
 command! -range=% Isort :<line1>,<line2>! isort
 
-Plug 'xltan/vim-cppman'
-
 let c_no_curly_error = 1
 let g:cpp_no_function_highlight = 1
 let g:cpp_simple_highlight = 1
@@ -727,36 +713,48 @@ Plug 'bfrg/vim-cpp-modern'
 Plug 'pboettch/vim-cmake-syntax'
 
 Plug 'dart-lang/dart-vim-plugin'
-let g:dart_style_guide = 1
 Plug 'dag/vim-fish'
-Plug 'rust-lang/rust.vim'
-let g:rustfmt_autosave = 1
-Plug 'mhinz/vim-crates'
+" Plug 'rust-lang/rust.vim'
+" let g:rustfmt_autosave = 1
+let g:cargo_shell_command_runner = 'Dispatch!'
 
 Plug 'fatih/vim-go'
 let g:go_def_mapping_enabled = 0
 let g:go_fmt_command = "goimports"
-let g:go_fmt_autosave = 1
+let g:go_fmt_autosave = 0
 let g:go_list_type = "quickfix"
 let g:go_doc_url = 'https://pkg.go.dev'
 let g:go_echo_go_info = 0
 let g:go_gopls_enabled = 0
 let g:go_def_mode = 'gopls'
+let g:go_template_autocreate = 1
+let g:go_template_use_pkg = 1
+
 " let g:go_gopls_options = ["-remote", "auto"]
 " let g:go_metalinter_autosave = 1
 " let g:go_metalinter_autosave_enabled = ['vet', 'golint']
-map gb :GoDocBrowser<CR>
 
 Plug 'pangloss/vim-javascript'
 Plug 'leafgarland/typescript-vim'
 " Plug 'Quramy/tsuquyomi'
-"
+Plug 'keith/swift.vim'
 Plug 'cespare/vim-toml'
 
-Plug 'delphinus/vim-auto-cursorline'
-let g:auto_cursorline_wait_ms = 5000
+" Plug 'delphinus/vim-auto-cursorline'
+" let g:auto_cursorline_wait_ms = 5000
 
+Plug 'mhinz/vim-signify'
+let g:signify_vcs_list = ['git']
+
+omap id <plug>(signify-motion-inner-pending)
+xmap id <plug>(signify-motion-inner-visual)
+
+nnoremap [r :SignifyHunkUndo<CR>
+nnoremap ]r :SignifyHunkDiff<CR>
+
+Plug 'mhinz/vim-crates'
 Plug 'mhinz/vim-startify'
+let g:startify_change_to_dir = 0
 let g:startify_lists = [
         \ { 'type': 'dir',       'header': ['   MRU '. getcwd()] },
         \ { 'type': 'files',     'header': ['   MRU']            },
@@ -764,6 +762,9 @@ let g:startify_lists = [
         \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
         \ { 'type': 'commands',  'header': ['   Commands']       },
         \ ]
+" let g:startify_session_autoload    = 1
+" let g:startify_session_persistence = 1
+" let g:startify_session_delete_buffers = 1
 
 Plug 'airblade/vim-rooter'
 let g:rooter_manual_only = 1
@@ -778,9 +779,11 @@ if has("termguicolors")
   set termguicolors
 endif
 
+runtime! macros/sandwich/keymap/surround.vim
 " Eager-load these plugins so we can override their settings.
 runtime! plugin/unimpaired.vim
 runtime! plugin/rsi.vim
+
 inoremap <C-E> <End>
 inoremap <M-t> <esc>diwbPa <esc>ea
 if !has("gui_running") " from tpope/vim-rsi
@@ -793,8 +796,9 @@ set mps+=<:>
 if !has('nvim')
   packadd! matchit
 endif
+packadd! cfilter
 
-nnoremap cos :if exists("g:syntax_on") <Bar>
+nnoremap <silent> cos :if exists("g:syntax_on") <Bar>
   \   syntax off <Bar>
   \ else <Bar>
   \   syntax on <Bar>
@@ -823,8 +827,7 @@ function! s:reset_color() abort
 
   hi! link fugitiveHunk Comment 
   hi! link gitDiff Comment 
-  hi! link DiffNewFile Normal
-  hi! link DiffFile Normal
+  hi! link DiffNewFile Comment
   hi! link diffIndexLine Comment
   hi DiffAdded guibg=NONE
   hi DiffRemoved guibg=NONE
@@ -835,12 +838,15 @@ function! s:reset_color() abort
   exe "hi DiffDelete gui=NONE guibg=#" . g:base16_gui02
   exe "hi DiffText gui=bold guifg=#" .g:base16_gui0A . " guibg=#" . g:base16_gui02
   exe "hi DiffChange guibg=#" . g:base16_gui02
+  exe "hi DiffFile guifg=#". g:base16_gui04
   exe "hi VertSplit guifg=#". g:base16_gui01 . " guibg=#" . g:base16_gui01
   exe "hi StatusLine guifg=#". g:base16_gui05 . " guibg=#" . g:base16_gui01
   exe "hi QuickfixLine guifg=#". g:base16_gui0A . " guibg=#" . g:base16_gui02
   " hi link CocListsLine QuickfixLine
-	hi! link FloatermBorder Comment
+	" hi! link FloatermBorder Comment
   hi! link jsonCommentError Comment
+  hi! link CocHintSign Comment
+  hi! link CocHoverRange Comment
 endfunction
 
 set background=dark
@@ -866,7 +872,7 @@ set listchars=tab:\|\ ,eol:¬
 set autoindent
 set smarttab
 set sw=4 ts=4
-set timeoutlen=500 ttimeoutlen=0
+set timeoutlen=500
 
 set laststatus=2
 
@@ -883,6 +889,7 @@ set undofile
 set winwidth=100
 
 set ignorecase smartcase
+set tagcase=match
 set lazyredraw
 " set textwidth=120
 
@@ -891,29 +898,27 @@ set formatoptions+=j " Delete comment character when joining commented lines
 set viminfo^=!
 set cpoptions+=>
 set belloff=all
-set history=1000
-set updatetime=300
+set updatetime=500
 set gdefault
-set number
-set relativenumber
+" set number
+" set relativenumber
 syntax sync minlines=500
+set scrolloff=3
 
 if has('nvim')
   aug Term
     au!
-    au TermOpen * nnoremap <buffer> q a
     au TermEnter * setlocal scrolloff=0
     au TermLeave * setlocal scrolloff=3
+    " au TermClose * silent call feedkeys('\<CR>')
+    au TermOpen * nnoremap <buffer> q a<CR>
   aug END
-else
-  set scrolloff=3
 end
 
 " set cinoptions=:0,g0,(0,Ws,l1
 " set completeopt=menuone
 " set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
 " set cursorline
-" set nu
 " set foldcolumn=1
 " set nofoldenable
 " set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
@@ -953,32 +958,39 @@ func! s:super()
 endfunc
 
 aug vimrc_filetype
-  au FileType go command! -bang GA call go#alternate#Switch(<bang>0, 'edit')
-        \| command! -bang GAV call go#alternate#Switch(<bang>0, 'vsplit')
-        \| command! -bang GAS call go#alternate#Switch(<bang>0, 'split')
-        \| nnoremap s= :s/ =/ :=<cr>:nohl<cr>
-        \| nmap <buffer> <C-]> <Plug>(go-def)
-        \| nmap <buffer> <C-t> <Plug>(go-def-pop)
+  au!
+  " au FileType go nnoremap <buffer> <c-]> :call <SID>goto_tag("Definition")<CR>
+  au Filetype go
+    \  command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+    \| command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+    \| command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+
+  au BufWritePre *.go silent call CocAction('organizeImport')
+
+  au FileType c,cpp,objc,objcpp command! A call s:a('e')
+        \| command! AV call s:a('botright vertical split')
 
   au FileType git setlocal foldmethod=syntax
         \| nnoremap <buffer> coc :exec "G checkout ".expand("<cWORD>")<CR>
-        \| nnoremap <buffer> cdd :exec "G branch -d ".expand("<cWORD>")<CR>
+        \| nnoremap <buffer> cdd ^:exec "G branch -D ".expand("<cWORD>")<CR>
         \| nnoremap <buffer> q <c-w>q
+        \| nmap <buffer> ]<space> ]/
+        \| nmap <buffer> [<space> [/
+  au FileType fugitive nnoremap <buffer> q <c-w>q
 
   au FileType gitcommit setlocal foldmethod=syntax nofoldenable
 
   au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
         \| nmap <silent> <buffer> [s <C-^>
-  au FileType c,cpp,objc,objcpp command! GA call s:a('e')
-        \| command! GAV call s:a('botright vertical split')
-  au FileType c,cpp,objc,objcpp,go,python nmap <buffer> <silent> <leader>ca :GA<CR>
+  " au FileType c,cpp,objc,objcpp,go,python nmap <buffer> <silent> <leader>ca :GA<CR>
   au filetype markdown setlocal conceallevel=2
       \| nnoremap <silent><buffer> gN O<Esc>C- [ ] 
       \| nnoremap <silent><buffer> gn o<Esc>C- [ ] 
       \| nnoremap <silent><buffer> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
       \| nnoremap <buffer> <leader>q :q<CR>
   au FileType help wincmd L | nnoremap <buffer><silent> q :bd<CR>
-  au FileType man  wincmd L | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
+  au FileType man  wincmd T | nnoremap <buffer><silent> q :lclose<CR>:bd<CR>
+  au FileType quickfix wincmd J | setlocal nonu norelativenumber
   au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
   au FileType python,javascript setlocal expandtab ts=4 sw=4
   au FileType tex setlocal ts=2 sw=2
@@ -989,87 +1001,85 @@ aug vimrc_filetype
         \| tnoremap <silent><buffer> <C-k> <C-p>
         \| tnoremap <silent><buffer> <C-h> <BS>
         \| tnoremap <silent><buffer> <C-l> <C-c>
-  au FileType c,cpp,objc,objcpp,cs,json,java,actionscript,glsl,dot setlocal commentstring=//\ %s
+  au FileType c,cpp,objc,objcpp,cs,json,java,gomod,dot setlocal commentstring=//\ %s
   au FileType cmake,tmux,cfg setlocal commentstring=#\ %s
 aug END
 
 aug vimrc_misc
   au!
   au VimEnter * call s:init()
-  au WinEnter * if &diff | call<SID>stupid_diff() | endif
+  " au WinEnter * if &diff | call<SID>stupid_diff() | endif
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
+  au BufRead,BufNewFile go.mod setlocal ft=gomod
+  au BufRead,BufNewFile *.tmpl setlocal ft=gohtmltmpl
   au BufRead .localrc setlocal ft=vim
+  au BufRead goscripts setlocal ft=go
   au BufRead *.mangle setlocal equalprg=c++filt
   au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
-  au BufWritePost *.cc,*.c call CocActionAsync("format")
   au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
-  au QuickFixCmdPost * botright copen 7
+  au BufRead Cargo.toml call crates#toggle()
+  au WinEnter * if &buftype == "terminal" | startinsert | endif
 aug END
 
-" aug vimrc_old
-"   au!
-"   au TermOpen * startinsert
-"   au WinEnter * if &buftype == 'terminal' | startinsert | endif
-"   au BufEnter,BufNew * if &buftype == 'terminal' | startinsert | endif
-"   au FileType rust nmap gd <Plug>(rust-def)
-"   au FileType rust nmap gs <Plug>(rust-def-split)
-"   au FileType rust nmap gv <Plug>(rust-def-vertical)
-"   au FileType rust nmap <leader>gd <Plug>(rust-doc)
-"   au FileType python let b:delimitMate_nesting_quotes = ['"']
-"   au FileType python syn sync match pythonSync grouphere NONE '):$'
-"   au FileType python setlocal equalprg=yapf
-"   au CursorHold * silent call CocAction('doHover')
-"   au CursorHold * silent call CocActionAsync('highlight')
-"   au BufRead * if search('\M-*- C++ -*-', 'n', 1) | setlocal ft=cpp | endif
-"   au FileType c,cpp,objc,objcpp setlocal equalprg=clang-format formatprg=clang-format
-"   au FileType c,cpp,objc,objcpp nmap <buffer> <silent> [a :lprevious<CR>
-"         \ | nmap <buffer> <silent> ]a :lnext<CR>
-"         \ | nmap <buffer> <silent> [A :lfirst<CR>
-"         \ | nmap <buffer> <silent> ]A :llast<CR>
-"   au FileType c,cpp nmap <buffer> <silent> gd :YcmCompleter GoTo<CR>
-"   au FileType c,cpp nmap <buffer> <silent> gz :YcmCompleter FixIt<CR>
-"   au FileType c setlocal keywordprg=:Vman
-"   au FileType cpp setlocal keywordprg=cppman
-"   au FileType markdown let b:delimitMate_nesting_quotes = ['`']
-"   au filetype markdown inoremap <silent><buffer> $ $<C-o>:set ft=tex<CR>
-"   au InsertLeave *.md if &filetype == 'tex' | set filetype=markdown | endif
-"   au InsertLeave * set imi=0 | set cursorline
-"   au InsertEnter * set nocursorline
-"   au WinEnter * set cursorline
-"   au BufEnter * set cursorline
-"   au BufLeave * set nocursorline
-"   au BufWinEnter * if &buftype == 'terminal' | nnoremap <buffer> <leader>q a<C-W><C-c> | endif
-"   au DirChanged * call s:change_dir()
-" aug END
-
-func! s:goto_index(dir)
-  let winnr = bufwinnr('^.git/index$')
-  if winnr > 0
-    exec winnr 'wincmd w'
+" Save current view settings on a per-window, per-buffer basis.
+function! s:auto_save_win_view()
+  if !exists("w:SavedBufView")
+    let w:SavedBufView = {}
   endif
-  if a:dir == "n"
-    exec "normal \<c-n>"
-  else
-    exec "normal \<c-p>"
-  end
-  normal dv
-endfunc
+  let w:SavedBufView[bufnr("%")] = winsaveview()
+endfunction
 
-func! s:stupid_diff()
-  if winheight(0) < (&lines - 13)
-    exe "resize " . (&lines - 13)
+" Restore current view settings.
+function! s:auto_restore_win_view()
+  let buf = bufnr("%")
+  if exists("w:SavedBufView") && has_key(w:SavedBufView, buf)
+    let v = winsaveview()
+    let atStartOfFile = v.lnum == 1 && v.col == 0
+    if atStartOfFile && !&diff
+      call winrestview(w:SavedBufView[buf])
+    endif
+    unlet w:SavedBufView[buf]
   endif
-  nmap <buffer><silent> ]d :call <SID>goto_index("n")<CR>
-  nmap <buffer><silent> [d :call <SID>goto_index("p")<CR>
-endfunc
+endfunction
+
+aug auto_save_view
+  au!
+  au BufLeave * call s:auto_save_win_view()
+  au BufEnter * call s:auto_restore_win_view()
+aug end
+
+func! s:open_origin_file()
+  let filename = @%
+  exec "e ".substitute(filename, "fugitive.*\.git\/\/[a-f0-9]*\/", "", "")
+endf
+command! FugitiveEdit call s:open_origin_file()
+
+" func! s:goto_index(dir)
+"   let winnr = bufwinnr('^.git/index$')
+"   if winnr > 0
+"     exec winnr 'wincmd w'
+"   endif
+"   if a:dir == "n"
+"     exec "normal \<c-n>"
+"   else
+"     exec "normal \<c-p>"
+"   end
+"   normal dv
+" endfunc
+
+" func! s:stupid_diff()
+"   if winheight(0) < (&lines - 13)
+"     exe "resize " . (&lines - 13)
+"   endif
+"   nmap <buffer><silent> ]d :call <SID>goto_index("n")<CR>
+"   nmap <buffer><silent> [d :call <SID>goto_index("p")<CR>
+" endfunc
 
 vnoremap <C-C> "+y
 vnoremap <C-Insert> "+y
 map <C-Q> "+gP
-map <S-Insert> "+gP
 cmap <C-Q> <C-R>+
-cmap <S-Insert> <C-R>+
 exe 'inoremap <script> <C-Q> <C-G>u' . paste#paste_cmd['i']
 exe 'vnoremap <script> <C-Q> ' . paste#paste_cmd['v']
 
@@ -1087,23 +1097,6 @@ func! s:get_buffer_list()
 endfunc
 
 if has('gui_running')
-  func! s:toggle_term()
-    let buflist = <SID>get_buffer_list()
-    for bufnum in map(filter(split(buflist, '\n'), 'v:val =~# "Terminal"'), 'str2nr(matchstr(v:val, "\\d\\+"))')
-      if bufwinnr(bufnum) == -1
-        exec 'b '.bufnum
-        normal! a
-      else
-        silent! e#
-      endif
-      return
-    endfor
-    term ++curwin ++close
-  endfunc
-
-  " nnoremap <silent> <C-z> :call <SID>toggle_term()<CR>
-  " tnoremap <buffer> <C-z> <C-w>N<C-^>
-
   if has('win32')
     let g:prog_name = '!start gvim'
   elseif has('mac')
@@ -1115,8 +1108,6 @@ if has('gui_running')
 endif
 
 inoremap <C-^> <Esc><C-^>
-inoremap <M-o> <C-o>o
-inoremap <M-O> <C-o>O
 inoremap <C-l> <C-o>zz
 inoremap <C-k> <C-o>k
 inoremap <C-j> <C-o>j
@@ -1128,16 +1119,20 @@ nnoremap <C-l> <C-w>l
 
 if has('nvim')
   tnoremap <Esc> <C-\><C-n>
-  tnoremap <C-^> <C-\><C-n>:FloatermToggle<CR>:
-  tnoremap <silent><C-z> <C-\><C-N>:FloatermToggle<CR>
+  " tnoremap <C-^> <C-\><C-n>:FloatermToggle<CR>:
+  " tnoremap <silent><C-z> <C-\><C-N>:FloatermToggle<CR>
   tnoremap <expr> <M-r> '<C-\><C-N>"'.nr2char(getchar()).'pi'
-  " tnoremap <C-h> <C-\><C-N><C-w>h
-  " tnoremap <C-j> <C-\><C-N><C-w>j
-  " tnoremap <C-k> <C-\><C-N><C-w>k
-  " tnoremap <C-l> <C-\><C-N><C-w>l
+  tnoremap [w <C-\><C-n>gT
+  tnoremap ]w <C-\><C-n>gt
+  tnoremap <C-i><C-h> <C-\><C-N><C-w>h
+  tnoremap <C-i><C-j> <C-\><C-N><C-w>j
+  tnoremap <C-i><C-k> <C-\><C-N><C-w>k
+  tnoremap <C-i><C-l> <C-\><C-N><C-w>l
 else
   tnoremap <Esc> <C-w>N
   tnoremap <C-^> <C-w>N<C-^>
+  tnoremap [w <C-w>NgT
+  tnoremap ]w <C-w>Ngt
   " tnoremap <C-h> <C-w>h
   " tnoremap <C-l> <C-w>l
   " tnoremap <C-j> <C-w>j
@@ -1146,13 +1141,15 @@ endif
 
 nnoremap Q @q
 xnoremap Q :normal @q<CR>
-xnoremap . :normal .<CR>
 
 vnoremap < <gv
 vnoremap > >gv
 nnoremap gV `[v`]
 nnoremap Y y$
-vnoremap P yP`<O<Esc>j
+vnoremap P y`>o<Esc>p
+
+cnoremap <C-p> <Up>
+cnoremap <C-n> <Down>
 
 nnoremap <silent> <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
     \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
@@ -1189,61 +1186,21 @@ endif
 nmap <silent> <leader>q :bd<CR>
 nmap <silent> <leader>w :tabclose<CR>
 
-func! s:make_args(args)
-  let cmd = ''
-  let bin = expand('%:p:r')
-  if &filetype == 'python'
-    let cmd = "python %"
-  elseif &filetype == 'cpp'
-    let cmd = 'make CC="g++" CXXFLAGS="-std=c++17" '. bin . ' && ' . bin
-  elseif &filetype == 'c'
-    let cmd = 'make '. bin .' && '. bin
-  elseif &filetype == 'sh'
-    let cmd = 'sh '. expand('%:p')
-  elseif &filetype == 'go'
-    if bin =~ "_test$"
-      let cmd = 'go test -v -count=1 ' . expand('%:p:h')
-    else
-      let cmd = 'go run ' . expand('%:p:h')
-    end
-  elseif &filetype == 'rust'
-    let cmd = 'cargo run'
-  else
-    let cmd = &makeprg." %<"
-  endif
-  return cmd.' '.a:args
-endfunc
-
 func! s:run(args)
   exe '!'.<SID>make_args(a:args)
 endfunc
 
-func! s:async_run(args)
-  silent update
-  exe 'AsyncRun -mode=term -pos=floaterm '.<SID>make_args(a:args)
-endfunc
-
-nnoremap <silent> <leader>xm :call <SID>async_run('')<CR>
-nnoremap <silent> <leader>xx :AsyncStop!<CR>
-
-command! -nargs=* -complete=command Run call s:run(<q-args>)
-
 command! Only %bd|e#
 command! Todo exec "Grep 'XFIXME'"
 
-nnoremap <M-p> "0p
-
-cnoremap <C-p> <UP>
-cnoremap <C-n> <DOWN>
-
 nnoremap <leader>et :tabe ~/Documents/notes/todo.md<CR>
+nnoremap <leader>er :tabe ~/Documents/notes/reading.md<CR>
 nnoremap <leader>en :tabe ~/Documents/notes<CR>:lcd %:h<CR>:pwd<CR>
 nnoremap <leader>es :tabe $VIMFILES/bundle/vim-extra-snippets/UltiSnips<CR>:lcd %:h<CR>:pwd<CR>
-nnoremap <leader>er :tabe $MYVIMRC<CR>
 
 nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
-nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
-nnoremap <space> za
+nnoremap <silent><leader>co :Copen \| copen<CR>
+nnoremap <leader><space> za
 
 func! s:preserve(command)
   let _s=@/
@@ -1309,10 +1266,24 @@ func! s:tab_message(cmd)
   else
     tabnew
     setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified
-    silent put=message
+    silent put!=message
   endif
 endfunc
 command! -nargs=+ -complete=command TabMessage call s:tab_message(<q-args>)
+
+func! s:tab_quickfix_message(cmd)
+  let qf = getqflist()
+  let message = join(map(qf, 'get(v:val, "text", "")'), "\n")
+  if empty(message)
+    echoerr "no output"
+  else
+    tabnew
+    setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified
+    silent put!=message
+    g/^$/d
+  endif
+endfunc
+command! -nargs=0 TabQuickfixMessage call s:tab_quickfix_message(<q-args>)
 
 func! s:command_abbr(abbreviation, expansion)
   execute 'cabbr ' . a:abbreviation . ' <c-r>=getcmdpos() == 1 && getcmdtype() == ":" ? "' . a:expansion . '" : "' . a:abbreviation . '"<CR>'
@@ -1320,28 +1291,31 @@ endfunc
 command! -nargs=+ Cabbr call s:command_abbr(<f-args>)
 
 Cabbr sf CtrlSF
+Cabbr qf TabQuickfixMessage
 Cabbr gp Grep
-Cabbr Gp Grep
-Cabbr Gpi Grep\ -i
 Cabbr gpi Grep\ -i
-Cabbr fs FloatermSend
-Cabbr cpp Cppman
 Cabbr gdb GdbStartLLDB\ lldb
-Cabbr ob OpenBrowserSearch
-Cabbr go OpenBrowserSearch\ -go
-Cabbr t AsyncTask
-Cabbr cl CocFzfList
-Cabbr clc CocFzfList\ commands
-Cabbr cr CocRestart
-Cabbr ife GoIfErr
 
+Cabbr obs OpenBrowserSearch
+Cabbr obg OpenBrowserSearch\ -go
+
+Cabbr cl CocFzfList
+Cabbr cc CocFzfList\ commands
+Cabbr ca CocFzfList\ actions
+Cabbr cr CocRestart
+xmap <silent> <leader>a <Plug>(coc-codeaction-selected)
+nmap <silent> <leader>a <Plug>(coc-codeaction-selected)
+nnoremap <leader>ca :CocFzfList actions<CR>
+nnoremap <leader>cc :CocFzfList commands<CR>
+
+Cabbr ife GoIfErr
 Cabbr gat GoAddTags
 Cabbr grt GoRemoveTags
-Cabbr gtf GoTestFunc
+Cabbr gfs GoFillStruct
 Cabbr gi GoImpl
-" Cabbr ufc UnstackFromClipboard
-" Cabbr ufs UnstackFromSelection
-" Cabbr uft UnstackFromTmux
+nnoremap gb :GoDocBrowser<CR>
+
+Cabbr Gfa Git\ fa\ --prune
 
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
@@ -1365,15 +1339,9 @@ func! s:init()
   "     \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
   "     \ <SID>check_back_space() ? "\<TAB>" :
   "     \ coc#refresh()
-  " nmap [a <Plug>(ale_previous_wrap)
-  " nmap ]a <Plug>(ale_next_wrap)
-  nmap <silent> [d <Plug>(coc-diagnostic-prev)
-  nmap <silent> ]d <Plug>(coc-diagnostic-next)
+  nmap <silent> [a <Plug>(coc-diagnostic-prev)
+  nmap <silent> ]a <Plug>(coc-diagnostic-next)
 
-  nmap [x :cpf<CR>
-  nmap ]x :cnf<CR>
-  nmap [X :lpf<CR>
-  nmap ]X :lnf<CR>
   nmap [w gT
   nmap ]w gt
   nmap [W :tabfirst<CR>
@@ -1386,9 +1354,6 @@ func! s:change_dir()
   endif
 endfunc
 
-let dllpath = $vimfiles . "/gvimfullscreen.dll"
-nnoremap <M-f> <Esc>:call libcallnr(dllpath, "ToggleFullScreen", 0)<CR>
-
 function! s:cppcheck()
   cclose
   update
@@ -1400,19 +1365,56 @@ function! s:cppcheck()
   endif
   echo curr_dir
   execute 'lcd ' . curr_dir
-  execute 'AsyncMake'
   execute 'lcd -'
-  " exe    ":botright cwindow"
-  " copen
 endfunction
-
-command! -bang -nargs=* -complete=command CppCheck AsyncRun! cppcheck % --enable=style,performance,portability,unusedFunction --std=c++14 --template-location=gcc --template=gcc
 
 command! -bang -nargs=0 UE execute "normal o\<C-o>" . len(getline('.')). "i="
 command! -bang -nargs=0 UM execute "normal o\<C-o>" . len(getline('.')). "i-"
+command! -bang -nargs=0 Unescape call <SID>unescape()
+command! -bang -nargs=0 Unstack setlocal efm-=%-G%.%# efm+=%f:%l | cbuffer
 
-if argc() == 0
-  call s:source_if_exists('Session.vim')
-endif
+func! s:unescape()
+  silent %s/\\n/\r/
+  silent %s/\\t/\t/
+  silent %s/\S*\/seatalk-server\///
+endf
+
+function s:diff_current_quickfix_entry() abort
+  " Cleanup windows
+  diffoff!
+  silent! only
+  silent! cc
+  call s:add_mappings()
+  let qf = getqflist({'context': 0, 'idx': 0})
+  if get(qf, 'idx') && type(get(qf, 'context')) == type({}) && type(get(qf.context, 'items')) == type([])
+    let diff = get(qf.context.items[qf.idx - 1], 'diff', [])
+    for i in reverse(range(len(diff)))
+      exec 'leftabove vert diffsplit' fnameescape(diff[i].filename)
+      call s:add_mappings()
+      wincmd l
+    endfor
+  endif
+endfunction
+
+function! s:add_mappings() abort
+  nnoremap <buffer> [<C-Q> :cpfile <BAR> :call <sid>diff_current_quickfix_entry()<CR>
+  nnoremap <buffer> ]<C-Q> :cnfile <BAR> :call <sid>diff_current_quickfix_entry()<CR>
+  nnoremap <buffer> [q :cprevious <BAR> :call <sid>diff_current_quickfix_entry()<CR>
+  nnoremap <buffer> ]q :cnext <BAR> :call <sid>diff_current_quickfix_entry()<CR>
+  " Reset quickfix height. Sometimes it messes up after selecting another item
+  exec "copen ". g:lt_height
+  wincmd p
+endfunction
+
+command! -nargs=? GitDiffBranch exec "Git difftool " . <q-args> | wincmd p | call s:diff_current_quickfix_entry()
+command! -nargs=0 DiffQuickfix call s:diff_current_quickfix_entry()
+Cabbr gd GitDiffBranch
+Cabbr gl GV\ -22
+Cabbr glc GV!
+Cabbr ge FugitiveEdit
+
+command! -nargs=1 VagrantProvision exec "Dispatch! vagrant provision --provision-with " . <q-args>
+Cabbr vp VagrantProvision
 
 call s:change_dir()
+
