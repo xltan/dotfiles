@@ -1,9 +1,15 @@
 {
-	"imselect.defaultInput":"com.apple.keylayout.ABC",
-	"imselect.enableStatusItem":false,
-	"imselect.enableFloating":false,
+	"imselect.defaultInput": "com.apple.keylayout.ABC",
+	"imselect.enableStatusItem": false,
+	"imselect.enableFloating": false,
 	"coc.preferences.colorSupport": false,
-	"coc.preferences.formatOnSaveFiletypes": ["c", "cpp", "rust", "go", "dart"],
+	"coc.preferences.formatOnSaveFiletypes": [
+		"c",
+		"cpp",
+		"rust",
+		"go",
+		"dart"
+	],
 	"suggest.maxCompleteItemCount": 30,
 	"diagnostic.errorSign": ">",
 	"diagnostic.warningSign": "-",
@@ -24,6 +30,7 @@
 		"<C-p>": "normal:k"
 	},
 	// "typescript.suggest.completeFunctionCalls": true,
+  	"typescript.preferences.importModuleSpecifier": "non-relative",
 	"rust-analyzer.serverPath": "rust-analyzer",
 	"rust-analyzer.inlayHints.chainingHints": false,
 	"rust-analyzer.completion.postfix.enable": false,
@@ -36,5 +43,9 @@
 	// ],
 	"go.goplsOptions": {
 		"completeUnimported": true
-	}
+	},
+	"snippets.ultisnips.directories": [
+		"UltiSnips",
+		"gosnippets/UltiSnips"
+	]
 }

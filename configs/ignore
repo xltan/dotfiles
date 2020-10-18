@@ -36,4 +36,5 @@ tags
 *.dSYM/
 *.lock
 /vendor/
+/node_modules/
 target/
