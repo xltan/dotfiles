@@ -17,8 +17,10 @@ if not functions -q fisher
 end
 
 if status is-login
-  set -gx MANPAGER "nvim -u NORC -c 'set smartcase ignorecase ft=man' -c 'hi! link StatusLine Comment' -c 'cmap <C-a> <Home>' -" 
-  if status is-interactive and test -n "$SSH_CONNECTION" and not test -n "$TMUX"
+  set -gx MANPAGER "nvim -u NORC -c 'set smartcase ignorecase ft=man' -c 'hi! link StatusLine Comment' -c 'cmap <C-a> <Home>' -"
+  if status is-interactive
+    and test -n "$SSH_CONNECTION"
+    and not test -n "$TMUX"
     tmux has-session -t o; and tmux attach-session -t o; or tmux new-session -s o; and kill %self
     echo "tmux failed to start; using plain fish shell"
   end
@@ -57,7 +59,7 @@ end
 #   # if test -n "$USE_PROMPT_GIT"
 #   #   printf '%s' (__fish_git_prompt)
 #   # end
-  
+
 #   printf '\n'
 
 #   __fish_print_pipestatus "[" "]" "|" (set_color $fish_color_status) (set_color $fish_color_status) $last_pipestatus
