@@ -1,51 +1,51 @@
 {
-	"imselect.defaultInput": "com.apple.keylayout.ABC",
-	"imselect.enableStatusItem": false,
-	"imselect.enableFloating": false,
-	"coc.preferences.colorSupport": false,
-	"coc.preferences.formatOnSaveFiletypes": [
-		"c",
-		"cpp",
-		"rust",
-		"go",
-		"dart"
-	],
-	"suggest.maxCompleteItemCount": 30,
-	"diagnostic.errorSign": ">",
-	"diagnostic.warningSign": "-",
-	"diagnostic.checkCurrentLine": true,
-	"diagnostic.enableMessage": "always",
-	"suggest.noselect": false,
-	"suggest.maxPreviewWidth": 66,
-	// "tabnine.priority": 100,
-	// "diagnostic.virtualTextPrefix": "▶ ",
-	// "codeLens.enable": true,
-	// "codeLens.separator": "",
-	// "codeLens.subseparator": "|",
-	"suggest.minTriggerInputLength": 3,
-	"list.insertMappings": {
-		"<C-d>": "feedkeys:\\<C-f>",
-		"<C-u>": "feedkeys:\\<C-b>",
-		"<C-n>": "normal:j",
-		"<C-p>": "normal:k"
-	},
-	// "typescript.suggest.completeFunctionCalls": true,
-  	"typescript.preferences.importModuleSpecifier": "non-relative",
-	"rust-analyzer.serverPath": "rust-analyzer",
-	"rust-analyzer.inlayHints.chainingHints": false,
-	"rust-analyzer.completion.postfix.enable": false,
-	"rust-analyzer.lens.enable": false,
-	"flutter.lsp.initialization.closingLabels": false,
-	"go.goplsPath": "gopls",
-	// "go.goplsArgs": [
-	// 	"-remote",
-	// 	"auto"
-	// ],
-	"go.goplsOptions": {
-		"completeUnimported": true
-	},
-	"snippets.ultisnips.directories": [
-		"UltiSnips",
-		"gosnippets/UltiSnips"
-	]
+  "imselect.defaultInput": "com.apple.keylayout.ABC",
+  "imselect.enableStatusItem": false,
+  "imselect.enableFloating": false,
+  "coc.preferences.colorSupport": false,
+  "coc.preferences.formatOnSaveFiletypes": [
+    "c",
+    "cpp",
+    "rust",
+    "go",
+    "dart",
+    "json",
+    "javascript",
+    "typescript"
+  ],
+  "suggest.maxCompleteItemCount": 30,
+  "diagnostic.errorSign": ">",
+  "diagnostic.warningSign": "-",
+  "diagnostic.checkCurrentLine": true,
+  "diagnostic.enableMessage": "always",
+  "suggest.noselect": false,
+  "suggest.maxPreviewWidth": 66,
+  // "tabnine.priority": 100,
+  // "diagnostic.virtualTextPrefix": "▶ ",
+  // "codeLens.enable": true,
+  // "codeLens.separator": "",
+  // "codeLens.subseparator": "|",
+  "suggest.minTriggerInputLength": 3,
+  "list.insertMappings": {
+    "<C-d>": "feedkeys:\\<C-f>",
+    "<C-u>": "feedkeys:\\<C-b>",
+    "<C-n>": "normal:j",
+    "<C-p>": "normal:k"
+  },
+  // "typescript.suggest.completeFunctionCalls": true,
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "rust-analyzer.serverPath": "rust-analyzer",
+  "rust-analyzer.inlayHints.chainingHints": false,
+  "rust-analyzer.completion.postfix.enable": false,
+  "rust-analyzer.lens.enable": false,
+  "flutter.lsp.initialization.closingLabels": false,
+  "go.goplsPath": "gopls",
+  // "go.goplsArgs": [
+  // 	"-remote",
+  // 	"auto"
+  // ],
+  "go.goplsOptions": {
+    "completeUnimported": true
+  },
+  "snippets.ultisnips.directories": ["UltiSnips", "gosnippets/UltiSnips"]
 }

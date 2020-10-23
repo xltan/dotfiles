@@ -1,19 +1,6 @@
 if !has('nvim')
   source $VIMRUNTIME/defaults.vim
-else
-  " let g:loaded_python_provider = 1
-  " let g:python3_host_prog = "/usr/local/bin/python3"
-  aug nvim
-    au!
-    au BufRead *
-      \ if search('\M-*- C++ -*-', 'n', 1) | setlocal ft=cpp | endif
-      \ | if line("'\"") > 1 && line("'\"") <= line("$") && &ft !~# 'commit'
-      \ |   exe "normal! g`\""
-      \ | endif
-  aug END
 endif
-
-set exrc
 
 command! -nargs=+ SilentExt execute 'silent !'. <q-args> | redraw!
 command! -nargs=+ Execute execute '!'. <q-args> | redraw!
@@ -108,9 +95,6 @@ func s:get_go_func()
 endfunc
 
 Plug 'machakann/vim-sandwich'
-
-" Plug 'tyru/caw.vim'
-" vmap gc	<Plug>(caw:hatpos:toggle)
 
 Plug 'tpope/vim-commentary'
 " Plug 'tpope/vim-endwise'
@@ -251,6 +235,7 @@ if has('nvim')
   let g:fzf_layout = { 'window': 'call FloatingFZF()' }
   Plug 'nvim-treesitter/nvim-treesitter'
   Plug 'nvim-treesitter/playground'
+  Plug 'norcalli/nvim-colorizer.lua'
 else
   let g:fzf_layout = { 'window': { 'width': 0.7, 'height': 0.6, 'highlight': 'Comment' }}
 endif
@@ -286,6 +271,19 @@ endif
 
 " Plug 'ryanoasis/vim-devicons'
 " Plug 'hardcoreplayers/spaceline.vim'
+
+" Plug 'voldikss/vim-floaterm'
+" let g:floaterm_position='right'
+" let g:floaterm_gitcommit = 'tabe'
+" let g:floaterm_keymap_new    = '<leader>gv'
+" let g:floaterm_keymap_prev   = '<leader>gp'
+" let g:floaterm_keymap_next   = '<leader>gn'
+" let g:floaterm_keymap_toggle = '<c-z>'
+" let g:floaterm_winblend = 10
+" let g:floaterm_width = 110
+" let g:floaterm_height = 0.9
+" vmap <leader>gv :<c-u>'<,'>FloatermSend<CR>
+" nnoremap <silent> <C-z> :update<CR>:FloatermToggle<CR>
 
 Plug 'xltan/lightline-colors.vim'
 Plug 'itchyny/lightline.vim'
@@ -337,27 +335,9 @@ let g:lightline = {
       \   'gitbranch': 'FugitiveHead',
       \ },
       \ }
-      
 
-" Plug 'christoomey/vim-tmux-navigator'
-" Plug 'voldikss/vim-floaterm'
-" let g:floaterm_position='right'
-" let g:floaterm_gitcommit = 'tabe'
-" let g:floaterm_keymap_new    = '<leader>gv'
-" let g:floaterm_keymap_prev   = '<leader>gp'
-" let g:floaterm_keymap_next   = '<leader>gn'
-" let g:floaterm_keymap_toggle = '<c-z>'
-" let g:floaterm_winblend = 10
-" let g:floaterm_width = 110
-" let g:floaterm_height = 0.9
-" vmap <leader>gv :<c-u>'<,'>FloatermSend<CR>
-" nnoremap <silent> <C-z> :update<CR>:FloatermToggle<CR>
-
-Plug 'plasticboy/vim-markdown'
-let g:vim_markdown_folding_disabled = 1
-let g:vim_markdown_follow_anchor = 1
-let g:vim_markdown_math = 1
-let g:tex_conceal = 0
+Plug 'tpope/vim-markdown'
+let g:markdown_fenced_languages = ['go', 'c', 'cpp', 'python', 'bash=sh', 'rust', 'javascript', 'js=javascript', 'json', 'yaml', 'css', 'xml', 'html']
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
 
 Plug 'dhruvasagar/vim-table-mode'
@@ -446,8 +426,6 @@ map z] <Plug>(swap-next)
 "   " au User VimtexEventInitPost call vimtex#compiler#compile()
 " aug END
 
-" Plug 'editorconfig/editorconfig-vim'
-
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
 
@@ -499,8 +477,8 @@ if !has('win32')
   endif
 endif
 
-Plug 'justinmk/vim-dirvish'
 let g:loaded_netrwPlugin = 1
+Plug 'justinmk/vim-dirvish'
 
 func! s:setup_dirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
@@ -543,8 +521,9 @@ nmap S <Plug>Sneak_S
 
 " Plug 'easymotion/vim-easymotion'
 " let g:EasyMotion_do_mapping = 0
-" nmap s <Plug>(easymotion-overwin-f2)
-"
+" let g:EasyMotion_smartcase = 1
+" let g:EasyMotion_do_shade = 0
+" nmap <leader>s <Plug>(easymotion-overwin-f2)
 
 let s:istmux = !(empty($TMUX))
 
@@ -553,24 +532,24 @@ func! s:scrub(s) abort
   return substitute(a:s, '\\\\\+', '\', 'g')
 endf
 
-func! s:open_term(dir, cmd) abort "{{{
-  let l:dir = s:scrub(expand(a:dir, 1))
+func! s:open_term(direction, cmd) abort "{{{
+  let l:dir = s:scrub(expand("%:p:h", 1))
   if !isdirectory(l:dir) "this happens if a directory was deleted outside of vim.
     call s:beep('invalid/missing directory: '.l:dir)
     return
   endif
 
   if s:istmux
-    silent call system("tmux split-window -c '" . l:dir . "'")
+    silent call system("tmux split-window " .  a:direction. " -c '" . l:dir . "'")
   else
-    call gtfo#open#term(a:dir, a:cmd)
+    call gtfo#open#term(l:dir, a:cmd)
   endif
 endfunc
 
 Plug 'justinmk/vim-gtfo'
 let g:gtfo#terminals = { 'win': 'cmd.exe /k' }
-nnoremap <silent> got :<c-u>call <SID>open_term("%:p:h", "")<cr>
-nnoremap <silent> goT :<c-u>call <SID>open_term(getcwd())<cr>
+nnoremap <silent> got :<c-u>call <SID>open_term("", "")<cr>
+nnoremap <silent> gov :<c-u>call <SID>open_term("-h", "")<cr>
 if has('win32')
   nmap gox :SilentExt start %<CR>
 else
@@ -620,6 +599,13 @@ omap af <Plug>(coc-funcobj-a)
 xmap af <Plug>(coc-funcobj-a)
 nmap <silent> ]v :CocNext<CR>
 nmap <silent> [v :CocPrev<CR>
+xmap <silent> <leader>a <Plug>(coc-codeaction-selected)
+nmap <silent> <leader>a v<Plug>(coc-codeaction-selected)
+nmap <silent> [a <Plug>(coc-diagnostic-prev)
+nmap <silent> ]a <Plug>(coc-diagnostic-next)
+nnoremap <leader>ca :CocFzfList actions<CR>
+nnoremap <leader>cc :CocFzfList commands<CR>
+vmap <silent> <leader>f  <Plug>(coc-format-selected)
 
 " nmap [c <Plug>(coc-git-prevchunk)
 " nmap ]c <Plug>(coc-git-nextchunk)
@@ -669,6 +655,8 @@ let g:openbrowser_search_engines = {
 \   'go': 'https://pkg.go.dev/search?q={query}',
 \   'cpp': 'https://en.cppreference.com/mwiki/index.php?search={query}',
 \}
+nmap gx <Plug>(openbrowser-smart-search)
+vmap gx <Plug>(openbrowser-smart-search)
 " let g:openbrowser_default_search = "duckduckgo"
 "
 
@@ -696,19 +684,19 @@ if executable("rg")
   set grepprg=rg\ --vimgrep
 endif
 
-" language related
-Plug 'vim-python/python-syntax'
-let g:python_version_3 = 1
-let g:python_highlight_class_vars = 0
-let g:python_highlight_indent_errors = 0
-let g:python_highlight_space_errors = 0
-let g:python_highlight_operators = 0
-let g:python_highlight_all = 1
-let g:python_slow_sync = 0
-" a little bit slow
-Plug 'Vimjas/vim-python-pep8-indent'
+" " language related
+" Plug 'vim-python/python-syntax'
+" let g:python_version_3 = 1
+" let g:python_highlight_class_vars = 0
+" let g:python_highlight_indent_errors = 0
+" let g:python_highlight_space_errors = 0
+" let g:python_highlight_operators = 0
+" let g:python_highlight_all = 1
+" let g:python_slow_sync = 0
+" " a little bit slow
+" Plug 'Vimjas/vim-python-pep8-indent'
+
 " Plug 'xltan/pythonhelper.vim'
-command! -nargs=0 -complete=command ImportRemove update | Execute autoflake --in-place --remove-all-unused-imports %<CR>
 " command! -range=% Isort :<line1>,<line2>! isort
 
 let c_no_curly_error = 1
@@ -725,12 +713,14 @@ let g:cargo_shell_command_runner = 'Dispatch!'
 
 Plug 'fatih/vim-go'
 let g:go_def_mapping_enabled = 0
+let g:go_textobj_enabled = 0
+let g:go_gopls_enabled = 0
+let g:go_doc_keywordprg_enabled = 0
 let g:go_fmt_command = "goimports"
 let g:go_fmt_autosave = 0
 let g:go_list_type = "quickfix"
 let g:go_doc_url = 'https://pkg.go.dev'
 let g:go_echo_go_info = 0
-let g:go_gopls_enabled = 0
 let g:go_def_mode = 'gopls'
 let g:go_template_autocreate = 1
 let g:go_template_use_pkg = 1
@@ -885,6 +875,8 @@ color base16-tomorrow-night
 
 call s:reset_color()
 
+set exrc
+
 set guioptions=
 set mouse=a
 
@@ -896,7 +888,7 @@ set listchars=tab:\|\ ,eol:¬
 
 set autoindent
 set smarttab
-set sw=4 ts=4
+" set sw=4 ts=4
 set timeoutlen=500
 
 set laststatus=2
@@ -927,7 +919,7 @@ set updatetime=500
 set gdefault
 " set number
 " set relativenumber
-syntax sync minlines=400
+syntax sync minlines=200
 set scrolloff=3
 
 set diffopt+=vertical,algorithm:patience
@@ -938,16 +930,30 @@ set diffopt+=vertical,algorithm:patience
 " set foldcolumn=1
 " set nofoldenable
 
+" set cinoptions=:0,g0,(0,Ws,l1
+" set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
+" set cursorline
+" set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
+"     \*.vscode,tags,*.vs,*.pyproj,*.idea,*.clangd,*__pycache__,
+"     \*.bin,*.rlib,*.rmeta
+
+
 if has('nvim')
 lua <<EOF
 require 'nvim-treesitter.configs'.setup {
-  ensure_installed = { "query", "rust", "c", "cpp", "typescript", "javascript", "markdown" },
+  ensure_installed = { "query", "c", "cpp", "typescript", "javascript"},
   highlight = {
     enable = true,       -- false will disable the whole extension
     disable = { },       -- list of language that will be disabled
   },
+} 
+require 'colorizer'.setup {
+  'css';
+  'javascript';
+  'vim';
 }
 EOF
+
   aug Term
     au!
     au TermLeave * setlocal scrolloff=3
@@ -956,13 +962,6 @@ EOF
     au BufEnter term://* startinsert
   aug END
 end
-
-" set cinoptions=:0,g0,(0,Ws,l1
-" set statusline=%<%f\ %h%m%r\ %=\ %{'['.(&fenc!=''?&fenc:&enc).','.&ff.']'}\ %-14.(%l,%c%V%)\ %P
-" set cursorline
-" set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
-"     \*.vscode,tags,*.vs,*.pyproj,*.idea,*.clangd,*__pycache__,
-"     \*.bin,*.rlib,*.rmeta
 
 " for c-family files
 func! s:a(cmd)
@@ -984,55 +983,46 @@ func! s:a(cmd)
   endfor
 endfunc
 
-func! s:super()
-  if &filetype == 'python'
-    let pattern = '^class [^(]*(\zs[^)]*\ze):'
-    let lineno = search(pattern, 'bn')
-    let content = getline(lineno)
-    let m = matchstr(content, pattern)
-    let sm = split(m, '\.')
-    exe 'tag '.sm[len(sm)-1]
-    return
-  endif
+func! s:python_super()
+  let pattern = '^class [^(]*(\zs[^)]*\ze):'
+  let lineno = search(pattern, 'bn')
+  let content = getline(lineno)
+  let m = matchstr(content, pattern)
+  let sm = split(m, '\.')
+  exe 'tag '.sm[len(sm)-1]
+  return
 endfunc
 
 aug vimrc_filetype
   au!
-  au Filetype go
-    \  command! -bang A call go#alternate#Switch(<bang>0, 'edit')
-    \| command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
-    \| command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+  au Filetype go call s:filetype_go()
+  au Filetype python call s:filetype_python()
 
-  au BufWritePre *.go OrganizeImport
-
-  au FileType c,cpp,objc,objcpp command! A call s:a('e')
-        \| command! AV call s:a('botright vertical split')
+  au FileType c,cpp,objc,objcpp command! A -buffer call s:a('e')
+        \| command! AV -buffer call s:a('botright vertical split')
 
   au FileType git setlocal foldmethod=syntax
-        \| nnoremap <buffer> coc :exec "G checkout ".expand("<cWORD>")<CR>
-        \| nnoremap <buffer> cdd ^:exec "G branch -D ".expand("<cWORD>")<CR>
+        \| nnoremap <buffer> coc 0w:exec "G checkout ".expand("<cWORD>")<CR>
+        \| nnoremap <buffer> cdd 0w:exec "G branch -D ".expand("<cWORD>")<CR>
         \| nnoremap <buffer> q <c-w>q
         \| nmap <buffer> ]<space> ]/
         \| nmap <buffer> [<space> [/
   au FileType fugitive nnoremap <buffer> q <c-w>q
-
   au FileType gitcommit setlocal foldmethod=syntax nofoldenable
+
   au FileType rust setlocal iskeyword+=!
 
-  au FileType python nmap <silent> <buffer> ]s :call <SID>super()<CR>
-        \| nmap <silent> <buffer> [s <C-^>
   au filetype markdown setlocal conceallevel=2
       \| nnoremap <silent><buffer> gN O<Esc>C- [ ] 
       \| nnoremap <silent><buffer> gn o<Esc>C- [ ] 
       \| nnoremap <silent><buffer> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
-      \| nnoremap <buffer> <leader>q :q<CR>
+      \| nnoremap <silent><buffer> <leader>q :q<CR>
   au FileType help wincmd L | nnoremap <buffer><silent> q :bd<CR>
   au FileType man silent wincmd T
   au FileType quickfix wincmd J | setlocal nonu norelativenumber
-  au FileType leaderf setlocal nonumber | setlocal foldcolumn=1
-  au FileType python,javascript setlocal expandtab ts=4 sw=4
+  au FileType leaderf setlocal nonumber foldcolumn=1
+  au FileType vim,lua,c,cpp,typescript,javascript,json,yaml,fish setlocal expandtab ts=2 sw=2
   au FileType tex setlocal ts=2 sw=2
-  au FileType vim,lua,c,cpp,yaml,fish setlocal expandtab ts=2 sw=2
   au FileType make setlocal noexpandtab
   au FileType fzf tnoremap <silent><buffer> <Esc> <C-c>
         \| tnoremap <silent><buffer> <C-j> <C-n>
@@ -1045,8 +1035,11 @@ aug END
 
 aug vimrc_misc
   au!
-  au VimEnter * call s:init()
-  " au WinEnter * if &diff | call<SID>stupid_diff() | endif
+  au BufRead *
+      \ if search('\M-*- C++ -*-', 'n', 1) | setlocal ft=cpp | endif
+      \ | if line("'\"") > 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+      \ |   exe "normal! g`\""
+      \ | endif
   au BufRead *gl.vs,*gl.ps setlocal ft=glsl iskeyword=@,48-57,_,128-167,224-235
   au BufRead .clang-format setlocal ft=yaml
   au BufRead,BufNewFile go.mod setlocal ft=gomod
@@ -1054,9 +1047,11 @@ aug vimrc_misc
   au BufRead .localrc setlocal ft=vim
   au BufRead goscripts setlocal ft=go
   au BufRead *.mangle setlocal equalprg=c++filt
-  au BufWritePost *vimrc,*.vim so % | setlocal expandtab ts=2 sw=2
-  au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
+  au BufWritePre *.go OrganizeImport
+  au BufWritePost *vimrc,*.vim so %
   au BufRead Cargo.toml call crates#toggle()
+  " au WinEnter * if &diff | call<SID>stupid_diff() | endif
+  " au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
 aug END
 
 " Save current view settings on a per-window, per-buffer basis.
@@ -1090,7 +1085,6 @@ func! s:open_origin_file()
   let filename = @%
   exec "e ".substitute(filename, "fugitive.*\.git\/\/[a-f0-9]*\/", "", "")
 endf
-command! FugitiveEdit call s:open_origin_file()
 
 " func! s:goto_index(dir)
 "   let winnr = bufwinnr('^.git/index$')
@@ -1237,9 +1231,6 @@ nmap <silent> <M-7> 7gt
 nmap <silent> <M-8> 8gt
 nmap <silent> <M-9> 9gt
 
-command! Only %bd|e#
-command! Todo exec "Grep 'XFIXME'"
-
 nnoremap <leader>et :tabe ~/Documents/notes/todo.md<CR>
 nnoremap <leader>er :tabe ~/Documents/notes/reading.md<CR>
 nnoremap <leader>en :tabe ~/Documents/notes<CR>:lcd %:h<CR>:pwd<CR>
@@ -1250,6 +1241,13 @@ nnoremap <leader><space> za
 nnoremap <silent><leader>z :call <SID>qfix_toggle()<CR>
 nnoremap <silent><leader>co :execute "Copen \| copen 10 \| normal G"<CR>
 
+" used to track the quickfix window
+aug vimrc_qfix_toggle
+  au!
+  au BufWinEnter quickfix let g:qfix_win = bufnr("$")
+  au BufWinLeave * if exists("g:qfix_win") && expand("<abuf>") == g:qfix_win | unlet! g:qfix_win | endif
+aug END
+
 function! s:qfix_toggle()
   if exists("g:qfix_win")
     cclose
@@ -1257,13 +1255,6 @@ function! s:qfix_toggle()
     execute "Copen \| copen 10"
   endif
 endfunction
-
-" used to track the quickfix window
-aug vimrc_qfix_toggle
-  au!
-  au BufWinEnter quickfix let g:qfix_win = bufnr("$")
-  au BufWinLeave * if exists("g:qfix_win") && expand("<abuf>") == g:qfix_win | unlet! g:qfix_win | endif
-aug END
 
 func! s:preserve(command)
   let _s=@/
@@ -1334,64 +1325,14 @@ func! s:tab_message(cmd)
 endfunc
 command! -nargs=+ -complete=command TabMessage call s:tab_message(<q-args>)
 
-func! s:tab_quickfix_message(cmd)
-  let qf = getqflist()
-  let message = join(map(qf, 'get(v:val, "text", "")'), "\n")
-  if empty(message)
-    echoerr "no output"
-  else
-    tabnew
-    setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified
-    silent put!=message
-    g/^$/d
-  endif
-endfunc
-command! -nargs=0 TabQuickfixMessage call s:tab_quickfix_message(<q-args>)
-
-func! s:command_abbr(abbreviation, expansion)
-  execute 'cabbr ' . a:abbreviation . ' <c-r>=getcmdpos() == 1 && getcmdtype() == ":" ? "' . a:expansion . '" : "' . a:abbreviation . '"<CR>'
-endfunc
-command! -nargs=+ Cabbr call s:command_abbr(<f-args>)
-
-Cabbr sf CtrlSF
-Cabbr qf TabQuickfixMessage
-Cabbr gp Grep
-Cabbr gpi Grep\ -i
-Cabbr gdb GdbStartLLDB\ lldb
-
-Cabbr obs OpenBrowserSearch
-Cabbr obg OpenBrowserSearch\ -go
-Cabbr obg OpenBrowserSearch\ -cpp
-
-Cabbr cl CocFzfList
-Cabbr cc CocFzfList\ commands
-Cabbr ca CocFzfList\ actions
-Cabbr cr CocRestart
-xmap <silent> <leader>a <Plug>(coc-codeaction-selected)
-nmap <silent> <leader>a v<Plug>(coc-codeaction-selected)
-nnoremap <leader>ca :CocFzfList actions<CR>
-nnoremap <leader>cc :CocFzfList commands<CR>
-vmap <silent> <leader>f  <Plug>(coc-format-selected)
-
 command! -nargs=0 OrganizeImport :silent call CocAction('runCommand', 'editor.action.organizeImport')
 command! -nargs=0 Prettier :CocCommand prettier.formatFile
-
-Cabbr ife GoIfErr
-Cabbr gat GoAddTags
-Cabbr grt GoRemoveTags
-Cabbr gfs GoFillStruct
-Cabbr gi GoImpl
-nnoremap gb :GoDocBrowser<CR>
-
-Cabbr Gfa Git\ fa\ --prune
 
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
     exe 'source' a:file
   endif
 endfunc
-
-call s:source_if_exists($VIMFILES.'/.localrc')
 
 function! s:end_terminal() abort
   let col = col('.')
@@ -1414,17 +1355,6 @@ inoremap <silent><expr> <TAB>
     \ <SID>check_back_space() ? "\<TAB>" :
     \ coc#refresh()
 
-func! s:init()
-  nmap <silent> [a <Plug>(coc-diagnostic-prev)
-  nmap <silent> ]a <Plug>(coc-diagnostic-next)
-endfunc
-
-func! s:change_dir()
-  if getcwd() != $HOME
-    call s:source_if_exists(getcwd() . '/.vimrc')
-  endif
-endfunc
-
 function! s:cppcheck()
   cclose
   update
@@ -1438,11 +1368,6 @@ function! s:cppcheck()
   execute 'lcd ' . curr_dir
   execute 'lcd -'
 endfunction
-
-command! -bang -nargs=0 UE execute "normal o\<C-o>" . len(getline('.')). "i="
-command! -bang -nargs=0 UM execute "normal o\<C-o>" . len(getline('.')). "i-"
-command! -bang -nargs=0 Unescape call <SID>unescape()
-command! -bang -nargs=0 Unstack setlocal efm-=%-G%.%# efm+=%f:%l | cbuffer
 
 func! s:unescape()
   silent %s/\\n/\r/
@@ -1468,23 +1393,89 @@ function s:diff_current_quickfix_entry() abort
 endfunction
 
 function! s:add_mappings() abort
-  nnoremap <buffer> [<C-Q> :cpfile <BAR> :call <sid>diff_current_quickfix_entry()<CR>
-  nnoremap <buffer> ]<C-Q> :cnfile <BAR> :call <sid>diff_current_quickfix_entry()<CR>
-  nnoremap <buffer> [q :cprevious <BAR> :call <sid>diff_current_quickfix_entry()<CR>
-  nnoremap <buffer> ]q :cnext <BAR> :call <sid>diff_current_quickfix_entry()<CR>
-  " Reset quickfix height. Sometimes it messes up after selecting another item
-  exec "copen ". g:lt_height
+  nnoremap <silent><buffer> [<C-Q> :cpfile <BAR> :call <sid>diff_current_quickfix_entry()<CR>
+  nnoremap <silent><buffer> ]<C-Q> :cnfile <BAR> :call <sid>diff_current_quickfix_entry()<CR>
+  nnoremap <silent><buffer> [q :cprevious <BAR> :call <sid>diff_current_quickfix_entry()<CR>
+  nnoremap <silent><buffer> ]q :cnext <BAR> :call <sid>diff_current_quickfix_entry()<CR>
+  copen 10
   wincmd p
 endfunction
 
+command! -bang -nargs=0 UE execute "normal o\<C-o>" . len(getline('.')). "i="
+command! -bang -nargs=0 UM execute "normal o\<C-o>" . len(getline('.')). "i-"
+command! -bang -nargs=0 Unescape call <SID>unescape()
+command! -bang -nargs=0 Unstack setlocal efm-=%-G%.%# efm+=%f:%l | cbuffer
+
 command! -nargs=? GitDiffBranch exec "Git difftool " . <q-args> | wincmd p | call s:diff_current_quickfix_entry()
 command! -nargs=0 DiffQuickfix call s:diff_current_quickfix_entry()
+
+command! -nargs=1 VagrantProvision exec "Dispatch! vagrant provision --provision-with " . <q-args>
+
+func! s:command_abbr(args, abbreviation, expansion)
+  execute 'cabbr ' . a:args . a:abbreviation . ' <c-r>=getcmdpos() == 1 && getcmdtype() == ":" ? "' . a:expansion . '" : "' . a:abbreviation . '"<CR>'
+endfunc
+command! -nargs=* Cabbr call s:command_abbr("", <f-args>)
+command! -nargs=* Cabbrb call s:command_abbr("<buffer>", <f-args>)
+
+command! Only %bd|e#
+command! Todo exec "Grep 'XFIXME'"
+
+
+Cabbr sf CtrlSF
+Cabbr gp Grep
+Cabbr gpi Grep\ -i
+
+Cabbr gdb GdbStartLLDB\ lldb
+
+Cabbr Gfa Git\ fa\ --prune
+
+Cabbr obs OpenBrowserSearch
+Cabbr obg OpenBrowserSearch\ -go
+Cabbr obg OpenBrowserSearch\ -cpp
+
+Cabbr cl CocFzfList
+Cabbr cc CocFzfList\ commands
+Cabbr ca CocFzfList\ actions
+Cabbr cr CocRestart
+
 Cabbr gd GitDiffBranch
 Cabbr gl GV\ -22
 Cabbr glc GV!
-Cabbr ge FugitiveEdit
+Cabbr ge call\ <SID>open_origin_file()
 
-command! -nargs=1 VagrantProvision exec "Dispatch! vagrant provision --provision-with " . <q-args>
 Cabbr vp VagrantProvision
 
+func! s:change_dir()
+  if getcwd() != $HOME
+    call s:source_if_exists(getcwd() . '/.vimrc')
+  endif
+endfunc
+
+call s:source_if_exists($VIMFILES.'/.localrc')
 call s:change_dir()
+
+func s:filetype_python() 
+  nmap <silent> <buffer> ]s :call <SID>python_super()<CR>
+  nmap <silent> <buffer> [s <C-^>
+  command! -buffer -nargs=0 -complete=command ImportRemove update | Execute autoflake --in-place --remove-all-unused-imports %<CR>
+endf
+
+func s:filetype_go() 
+  Cabbrb ife GoIfErr
+  Cabbrb gat GoAddTags
+  Cabbrb grt GoRemoveTags
+  Cabbrb gfs GoFillStruct
+  Cabbrb gi GoImpl
+  nnoremap <buffer><silent> gb :GoDocBrowser<CR>
+  nnoremap <buffer><silent> ]] :<c-u>call go#textobj#FunctionJump('n', 'next')<cr>
+  nnoremap <buffer><silent> [[ :<c-u>call go#textobj#FunctionJump('n', 'prev')<cr>
+  onoremap <buffer><silent> ]] :<c-u>call go#textobj#FunctionJump('o', 'next')<cr>
+  onoremap <buffer><silent> [[ :<c-u>call go#textobj#FunctionJump('o', 'prev')<cr>
+  xnoremap <buffer><silent> ]] :<c-u>call go#textobj#FunctionJump('v', 'next')<cr>
+  xnoremap <buffer><silent> [[ :<c-u>call go#textobj#FunctionJump('v', 'prev')<cr>
+  command! -bang -buffer A call go#alternate#Switch(<bang>0, 'edit')
+  command! -bang -buffer AV call go#alternate#Switch(<bang>0, 'vsplit')
+  command! -bang -buffer AS call go#alternate#Switch(<bang>0, 'split')
+  setlocal sw=4 ts=4
+endf
+
