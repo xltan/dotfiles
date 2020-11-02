@@ -9,23 +9,39 @@
     "rust",
     "go",
     "dart",
+    "markdown",
+    // "javascript",
+    // "typescript",
     "json",
-    "javascript",
-    "typescript"
+    "yaml"
   ],
-  "suggest.maxCompleteItemCount": 30,
   "diagnostic.errorSign": ">",
   "diagnostic.warningSign": "-",
   "diagnostic.checkCurrentLine": true,
   "diagnostic.enableMessage": "always",
+  "suggest.timeout": 1000,
   "suggest.noselect": false,
-  "suggest.maxPreviewWidth": 66,
+  "suggest.disableMenuShortcut": true,
+  "suggest.enablePreselect": true,
+  "suggest.maxPreviewWidth": 80,
+  "suggest.removeDuplicateItems": true,
+  "suggest.minTriggerInputLength": 2,
+  "suggest.detailMaxLength": 20,
+  "signature.maxWindowWidth": 80,
+  "signature.maxWindowHeight": 15,
+
+  "git.addedSign.hlGroup": "GitGutterAdd",
+  "git.changedSign.hlGroup": "GitGutterChange",
+  "git.removedSign.hlGroup": "GitGutterDelete",
+  "git.topRemovedSign.hlGroup": "GitGutterDelete",
+  "git.changeRemovedSign.hlGroup": "GitGutterChangeDelete",
+
+  // "suggest.maxCompleteItemCount": 50,
   // "tabnine.priority": 100,
   // "diagnostic.virtualTextPrefix": "▶ ",
   // "codeLens.enable": true,
   // "codeLens.separator": "",
   // "codeLens.subseparator": "|",
-  "suggest.minTriggerInputLength": 3,
   "list.insertMappings": {
     "<C-d>": "feedkeys:\\<C-f>",
     "<C-u>": "feedkeys:\\<C-b>",
@@ -37,7 +53,8 @@
   "rust-analyzer.serverPath": "rust-analyzer",
   "rust-analyzer.inlayHints.chainingHints": false,
   "rust-analyzer.completion.postfix.enable": false,
-  "rust-analyzer.lens.enable": false,
+  // "rust-analyzer.lens.enable": true,
+  // "rust-analyzer.lens.implementations": false,
   "flutter.lsp.initialization.closingLabels": false,
   "go.goplsPath": "gopls",
   // "go.goplsArgs": [
@@ -45,7 +62,16 @@
   // 	"auto"
   // ],
   "go.goplsOptions": {
-    "completeUnimported": true
+    "completeUnimported": true,
+    "usePlaceholders": true,
+    "linksInHover": true,
+    "gofumpt": true,
+    "staticcheck": true,
+    "analyses": {
+      "ST1000": false,
+      "ST1003": false,
+      "ST1021": false
+    }
   },
   "snippets.ultisnips.directories": ["UltiSnips", "gosnippets/UltiSnips"]
 }

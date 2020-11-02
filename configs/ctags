@@ -1,4 +1,4 @@
---languages=go,rust
+--languages=go,rust,c++
 --kinds-go=-m
 --kinds-go=-p
 --kinds-rust=-c

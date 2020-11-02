@@ -1,7 +1,7 @@
+!conf.d
 tags
 .DS_Store
 *.d
-!conf.d
 *.ll
 *.o
 *.lib
@@ -32,9 +32,9 @@ tags
 .hg/
 .svn/
 .git/
-.vscode/
 *.dSYM/
-*.lock
-/vendor/
-/node_modules/
+.vscode/
 target/
+vendor/
+node_modules/
+ansible_plugins/
