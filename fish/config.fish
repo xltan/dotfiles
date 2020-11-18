@@ -3,7 +3,7 @@ if not status is-interactive
 end
 
 set -gx LANG "en_US.UTF-8"
-set -gx RUSTC_WRAPPER $HOME/.cargo/bin/sccache
+set -gx RUSTC_WRAPPER sccache
 set -gx GOPATH $HOME/tools/go
 
 set -gx FZF_DEFAULT_COMMAND 'fd --type f --color=never'

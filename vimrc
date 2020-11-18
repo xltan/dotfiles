@@ -25,12 +25,21 @@ Plug 'tpope/vim-rhubarb'
 
 Plug 'tpope/vim-dispatch'
 Plug 'AdUki/vim-dispatch-neovim'
-nmap s<CR> :Start<CR>
+let g:dispatch_quickfix_height = 0
 nmap S<CR> :exec "Start -dir=" . expand("%:h")<CR>
 aug vimrc_dispatch
   au!
   au FileType,BufWrite * call s:setup_makeprg()
+  au ShellCmdPost * call s:shell_cmd_post()
 aug END
+
+func! s:shell_cmd_post()
+  if get(g:, "dispatch_flag", 0)
+    call s:copen_hack("\|wincmd p")
+    let g:dispatch_flag = 0
+  end
+endf
+
 let s:mtype = {
   \ 'dirvish': 'sh <sfile>',
   \ 'python': 'python %',
@@ -42,7 +51,7 @@ let s:mtype = {
   \ }
 let s:stype = {
   \ 'go': 'go',
-  \ 'rust': 'cargo',
+  \ 'rust': 'cargo -q',
   \ }
 func! s:setup_makeprg()
   let f = &filetype
@@ -59,15 +68,16 @@ func! s:setup_makeprg()
         endif
       endif
     endif
-    exec "nmap <buffer> g<cr> :Dispatch ". prg. '<CR>'
+    exec "nmap <buffer> g<cr> :Dispatch ". prg. '<cr>'
     exec "nmap <buffer> g<space> :Dispatch ". oprg. '<space>'
     exec "nmap <buffer> g! :Dispatch! ". oprg. '<space>'
+    exec "nmap <buffer> s<cr> :Start ". prg. '<cr>'
     exec "nmap <buffer> s<space> :Start ". oprg. '<space>'
-    exec "nmap <buffer> s! :Dispatch! ". oprg. '<space>'
+    exec "nmap <buffer> s! :Start! ". prg. '<cr>'
   end
 endf
 
-func s:get_go_func()
+func! s:get_go_func()
   let test = search('func \(Test\|Example\)', "bcnW")
   if test == 0
     return ""
@@ -75,7 +85,7 @@ func s:get_go_func()
   let line = getline(test)
   let name = split(split(line, " ")[1], "(")[0]
   return name
-endfunc
+endf
 
 Plug 'machakann/vim-sandwich'
 
@@ -96,6 +106,9 @@ Plug 'junegunn/gv.vim'
 Plug 'junegunn/vim-easy-align'
 vmap ga <Plug>(EasyAlign)
 nmap ga <Plug>(EasyAlign)
+let g:easy_align_delimiters = {
+  \ '#': { 'pattern': '#\+', 'delimiter_align': 'l', 'ignore_groups': [] },
+  \ }
 
 Plug 'junegunn/fzf', {'dir': '~/.fzf', 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -115,15 +128,15 @@ nnoremap <silent><leader>t :Tags<CR>
 nnoremap <silent><leader>; :History:<CR>
 nnoremap <silent><leader>/ :History/<CR>
 
-function! s:build_quickfix_list(lines)
+func! s:build_quickfix_list(lines)
   call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
   cwindow
   cc
-endfunction
+endf
 
-function! s:open_file(lines)
+func! s:open_file(lines)
   exec 'silent !open ' . a:lines[0]
-endfunction
+endf
 
 let g:fzf_action = {
   \ 'ctrl-q': function('s:build_quickfix_list'),
@@ -190,54 +203,9 @@ Plug 'tittanlee/fzf-tags'
 nmap <C-]> <Plug>(fzf_tags)
 " nnoremap <silent> <C-]> :tjump <C-r><C-w><CR>
 
-" Plug 'liuchengxu/vim-clap', { 'do': ':Clap install-binary' }
-" let g:clap_layout = { 'relative': 'editor' }
-" let g:clap#provider#cwd# = {
-"   \ 'syntax': 'clap_files',
-"   \ 'source': function("s:directory_history"),
-"   \ 'sink': 'e',
-"   \ }
-" let g:clap_insert_mode_only = v:true
-
-" aug clap_input
-"   au!
-"   au FileType clap_input inoremap <buffer><silent> <C-n> <C-R>=clap#handler#navigate_result('down')<CR>
-"   au FileType clap_input inoremap <buffer><silent> <C-p> <C-R>=clap#handler#navigate_result('up')<CR>
-" aug END
-
-" nnoremap <leader>f :Clap files<CR>
-" nnoremap <leader>r :Clap git_diff_files<CR>
-" nnoremap <leader>b :Clap buffers<CR>
-" nnoremap <leader>gh :Clap history<CR>
-" nnoremap <leader>h :Clap cwd<CR>
-" nnoremap <leader>v :Clap lines<CR>
-
-" nnoremap <leader>t :Clap tags<CR>
-" nnoremap <leader>gt :Clap proj_tags<CR>
-" nnoremap <leader>: :Clap hist:<CR>
-" nnoremap <leader>/ :Clap hist/<CR>
-"
-" Plug 'vn-ki/coc-clap'
-
-" Plug 'ryanoasis/vim-devicons'
-" Plug 'hardcoreplayers/spaceline.vim'
-
-" Plug 'voldikss/vim-floaterm'
-" let g:floaterm_position='right'
-" let g:floaterm_gitcommit = 'tabe'
-" let g:floaterm_keymap_new    = '<leader>gv'
-" let g:floaterm_keymap_prev   = '<leader>gp'
-" let g:floaterm_keymap_next   = '<leader>gn'
-" let g:floaterm_keymap_toggle = '<c-z>'
-" let g:floaterm_winblend = 10
-" let g:floaterm_width = 110
-" let g:floaterm_height = 0.9
-" vmap <leader>gv :<c-u>'<,'>FloatermSend<CR>
-" nnoremap <silent> <C-z> :update<CR>:FloatermToggle<CR>
-
 Plug 'xltan/lightline-colors.vim'
 Plug 'itchyny/lightline.vim'
-function! StatusDiagnostic() abort
+func! StatusDiagnostic() abort
   let info = get(b:, 'coc_diagnostic_info', {})
   if empty(info) | return '' | endif
   let msgs = []
@@ -250,7 +218,7 @@ function! StatusDiagnostic() abort
   let coc_status = get(g:, 'coc_status', '')
   if empty(msgs) | return coc_status | endif
   return join(msgs, ' ') . ' ' . coc_status
-endfunction
+endf
 let g:lightline = {
   \ 'colorscheme': 'tomorrow2',
   \ 'component': {
@@ -286,25 +254,40 @@ let g:lightline = {
   \ },
   \ }
 
-Plug 'tpope/vim-markdown'
-let g:markdown_fenced_languages = ['go', 'c', 'cpp', 'python', 'bash=sh', 'rust', 'javascript', 'js=javascript', 'json', 'yaml', 'css', 'xml', 'html']
+Plug 'plasticboy/vim-markdown'
+let g:vim_markdown_folding_disabled = 1
+let g:vim_markdown_conceal = 0
+" disable math tex conceal feature
+let g:tex_conceal = ""
+let g:vim_markdown_math = 1
+let g:vim_markdown_new_list_item_indent = 2
+
+" Plug 'tpope/vim-markdown'
+" let g:markdown_fenced_languages = [
+"   \ 'go', 'c', 'cpp', 'python', 'sh=sh', 
+"   \ 'bash=sh', 'rust', 'javascript', 
+"   \ 'js=javascript', 'json', 'yaml', 
+"   \ 'css', 'xml', 'html', 'make',
+"   \ ]
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
+let g:mkdp_markdown_css = expand('~/.markdown.css')
+let g:mkdp_highlight_css = expand('~/.highlight.css')
 
 Plug 'dhruvasagar/vim-table-mode'
 let g:table_mode_map_prefix = '<Leader>y'
 let g:table_mode_corner='|'
-function! s:isAtStartOfLine(mapping)
-  let text_before_cursor = getline('.')[0 : col('.')-1]
-  let mapping_pattern = '\V' . escape(a:mapping, '\')
-  let comment_pattern = '\V' . escape(substitute(&commentstring, '%s.*$', '', ''), '\')
-  return (text_before_cursor =~? '^' . ('\v(' . comment_pattern . '\v)?') . '\s*\v' . mapping_pattern . '\v$')
-endfunction
+" func! s:is_start_of_line(mapping)
+"   let text_before_cursor = getline('.')[0 : col('.')-1]
+"   let mapping_pattern = '\V' . escape(a:mapping, '\')
+"   let comment_pattern = '\V' . escape(substitute(&commentstring, '%s.*$', '', ''), '\')
+"   return (text_before_cursor =~? '^' . ('\v(' . comment_pattern . '\v)?') . '\s*\v' . mapping_pattern . '\v$')
+" endf
 
-inoreabbrev <expr> <bar><bar>
-  \ <SID>isAtStartOfLine('\|\|') ?
-  \ '<c-o>:TableModeEnable<cr><bar><space><bar><left><left>' : '<bar><bar>'
+" inoreabbrev <expr> <bar><bar>
+"   \ <SID>is_start_of_line('\|\|') ?
+"   \ '<c-o>:TableModeEnable<cr><bar><space><bar><left><left>' : '<bar><bar>'
 
-function! s:get_current_word(pattern)
+func! s:get_current_word(pattern)
   let line = getline('.')
   let npos = col('.') - 1
   let ppos = npos
@@ -322,9 +305,9 @@ function! s:get_current_word(pattern)
     let npos += 1
   endwhile
   return line[ppos+1:npos-1]
-endfunction
+endf
 
-function! s:get_args(args)
+func! s:get_args(args)
   if len(a:args) > 0
     let word = a:args
   else
@@ -333,13 +316,13 @@ function! s:get_args(args)
   return word
 endf
 
-function! s:std_get_commands(args)
+func! s:std_get_commands(args)
   let word = s:get_args(a:args)
   " if word =~ "^std"
   "   return 'silent !rustup doc '. word
   " endif
   return 'OpenBrowserSearch -' . &filetype . ' ' . word
-endfunction
+endf
 
 Plug 'wellle/targets.vim'
 let g:targets_aiAI = 'ai  '
@@ -351,39 +334,18 @@ let g:swap_no_default_key_mappings = 1
 map z[ <Plug>(swap-prev)
 map z] <Plug>(swap-next)
 
-" Plug 'lervag/vimtex'
-" let g:tex_flavor = 'latex'
-" let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSupport/displayline'
-" let g:vimtex_view_general_options = '-r @line @pdf @tex'
-" let g:vimtex_fold_enabled = 0
-" let g:vimtex_view_general_callback = 'ViewerCallback'
-
-" function! ViewerCallback(status) dict
-"   if a:status
-"     VimtexView
-"   endif
-" endfunction
-" if has('nvim')
-"   let g:vimtex_compiler_progname = 'nvr'
-" endif
-" aug vimtex_config
-"   au!
-"   au User VimtexEventQuit call vimtex#compiler#clean(0)
-"   " au User VimtexEventInitPost call vimtex#compiler#compile()
-" aug END
-
 Plug 'mbbill/undotree'
 nnoremap <silent> <leader>u :UndotreeToggle<CR>
 
 Plug 'kana/vim-niceblock'
 
 Plug 'haya14busa/vim-asterisk'
-map *   <Plug>(asterisk-*)
-map #   <Plug>(asterisk-#)
-map g*  <Plug>(asterisk-g*)
-map g#  <Plug>(asterisk-g#)
-map z*  <Plug>(asterisk-z*)
-map z#  <Plug>(asterisk-z#)
+" noremap *   <Plug>(asterisk-*)
+" noremap #   <Plug>(asterisk-#)
+" noremap g*  <Plug>(asterisk-g*)
+" noremap g#  <Plug>(asterisk-g#)
+" noremap z*  <Plug>(asterisk-z*)
+" noremap z#  <Plug>(asterisk-z#)
 
 Plug 'AndrewRadev/linediff.vim'
 
@@ -428,6 +390,8 @@ let g:sneak#label = 1
 let g:sneak#use_ic_scs = 1
 nmap s <Plug>Sneak_s
 nmap S <Plug>Sneak_S
+omap z <Plug>Sneak_s
+omap Z <Plug>Sneak_S
 
 func! s:scrub(s) abort
   "replace \\ with \ (greedy) #21
@@ -446,7 +410,7 @@ func! s:open_term(direction, cmd) abort "{{{
   else
     call gtfo#open#term(dir, a:cmd)
   endif
-endfunc
+endf
 
 Plug 'justinmk/vim-gtfo'
 nmap <silent> got :<c-u>call <SID>open_term("", "")<cr>
@@ -486,7 +450,12 @@ nmap gn <Plug>(coc-rename)
 nmap gz <Plug>(coc-fix-current)
 
 inoremap <silent><expr> <C-n> pumvisible() ? "\<C-n>" : coc#refresh()
-inoremap <silent><expr> <cr> pumvisible() ? "\<C-y>\<cr>" : "\<cr>"
+inoremap <silent><expr> <cr> pumvisible() ? "\<C-e>\<cr>" : "\<cr>"
+inoremap <silent><expr> <TAB>
+  \ pumvisible() ? coc#_select_confirm() :
+  \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+  \ <SID>check_back_space() ? "\<TAB>" :
+  \ coc#refresh()
 
 xmap <leader>a <Plug>(coc-codeaction-selected)
 nmap <leader>a v<Plug>(coc-codeaction-selected)
@@ -521,7 +490,7 @@ nmap <expr> [c &diff ? '[c' : '<Plug>(coc-git-prevchunk)'
 nmap <silent> ]g :CocCommand git.chunkUndo<CR>
 xmap <leader>x  <Plug>(coc-convert-snippet)
 
-function! s:goto_tag(tagkind) abort
+func! s:goto_tag(tagkind) abort
   let tagname = expand('<cWORD>')
   let winnr = winnr()
   let pos = getcurpos()
@@ -533,15 +502,15 @@ function! s:goto_tag(tagkind) abort
       \ 'items': [{'tagname': tagname, 'from': pos}]
       \ }, 't')
   endif
-endfunction
+endf
 
-function! s:show_documentation()
+func! s:show_documentation()
   if &filetype == 'vim'
     exec 'h '.expand('<cword>')
   else
     call CocActionAsync('doHover')
   endif
-endfunction
+endf
 
 Plug 'antoinemadec/coc-fzf'
 let g:coc_fzf_preview = 'up:70%'
@@ -590,21 +559,6 @@ if executable("rg")
   set grepprg=rg\ --vimgrep
 endif
 
-" " language related
-" Plug 'vim-python/python-syntax'
-" let g:python_version_3 = 1
-" let g:python_highlight_class_vars = 0
-" let g:python_highlight_indent_errors = 0
-" let g:python_highlight_space_errors = 0
-" let g:python_highlight_operators = 0
-" let g:python_highlight_all = 1
-" let g:python_slow_sync = 0
-" " a little bit slow
-" Plug 'Vimjas/vim-python-pep8-indent'
-
-" Plug 'xltan/pythonhelper.vim'
-" command! -range=% Isort :<line1>,<line2>! isort
-
 let c_no_curly_error = 1
 let g:cpp_no_function_highlight = 1
 let g:cpp_simple_highlight = 1
@@ -616,6 +570,19 @@ Plug 'dart-lang/dart-vim-plugin'
 Plug 'dag/vim-fish'
 Plug 'rust-lang/rust.vim'
 let g:cargo_shell_command_runner = 'Dispatch'
+
+Plug 'pangloss/vim-javascript'
+Plug 'leafgarland/typescript-vim'
+Plug 'peitalin/vim-jsx-typescript'
+Plug 'keith/swift.vim'
+Plug 'cespare/vim-toml'
+
+Plug 'mhinz/vim-crates'
+
+Plug 'airblade/vim-rooter'
+let g:rooter_manual_only = 1
+let g:rooter_cd_cmd = "lcd"
+let g:rooter_patterns = ['.git/', 'cargo.toml', 'go.mod']
 
 Plug 'fatih/vim-go'
 let g:go_def_mapping_enabled = 0
@@ -632,15 +599,84 @@ let g:go_echo_go_info = 0
 let g:go_def_mode = 'gopls'
 let g:go_template_autocreate = 1
 let g:go_template_use_pkg = 1
-" let g:go_gopls_options = ["-remote", "auto"]
-" let g:go_metalinter_autosave = 1
-" let g:go_metalinter_autosave_enabled = ['vet', 'golint']
+let g:go_gopls_options = ["-remote", "auto"]
+let g:go_metalinter_autosave = 0
+let g:go_metalinter_autosave_enabled = ['vet', 'golint']
 
-Plug 'pangloss/vim-javascript'
-Plug 'leafgarland/typescript-vim'
-Plug 'peitalin/vim-jsx-typescript'
-Plug 'keith/swift.vim'
-Plug 'cespare/vim-toml'
+" Plug 'liuchengxu/vim-clap', { 'do': ':Clap install-binary' }
+" let g:clap_layout = { 'relative': 'editor' }
+" let g:clap#provider#cwd# = {
+"   \ 'syntax': 'clap_files',
+"   \ 'source': function("s:directory_history"),
+"   \ 'sink': 'e',
+"   \ }
+" let g:clap_insert_mode_only = v:true
+" aug clap_input
+"   au!
+"   au FileType clap_input inoremap <buffer><silent> <C-n> <C-R>=clap#handler#navigate_result('down')<CR>
+"   au FileType clap_input inoremap <buffer><silent> <C-p> <C-R>=clap#handler#navigate_result('up')<CR>
+" aug END
+" nnoremap <leader>f :Clap files<CR>
+" nnoremap <leader>r :Clap git_diff_files<CR>
+" nnoremap <leader>b :Clap buffers<CR>
+" nnoremap <leader>gh :Clap history<CR>
+" nnoremap <leader>h :Clap cwd<CR>
+" nnoremap <leader>v :Clap lines<CR>
+" nnoremap <leader>t :Clap tags<CR>
+" nnoremap <leader>gt :Clap proj_tags<CR>
+" nnoremap <leader>: :Clap hist:<CR>
+" nnoremap <leader>/ :Clap hist/<CR>
+"
+" Plug 'vn-ki/coc-clap'
+
+" Plug 'ryanoasis/vim-devicons'
+" Plug 'hardcoreplayers/spaceline.vim'
+
+" Plug 'voldikss/vim-floaterm'
+" let g:floaterm_position='right'
+" let g:floaterm_gitcommit = 'tabe'
+" let g:floaterm_keymap_new    = '<leader>gv'
+" let g:floaterm_keymap_prev   = '<leader>gp'
+" let g:floaterm_keymap_next   = '<leader>gn'
+" let g:floaterm_keymap_toggle = '<c-z>'
+" let g:floaterm_winblend = 10
+" let g:floaterm_width = 110
+" let g:floaterm_height = 0.9
+" vmap <leader>gv :<c-u>'<,'>FloatermSend<CR>
+" nnoremap <silent> <C-z> :update<CR>:FloatermToggle<CR>
+
+" Plug 'lervag/vimtex'
+" let g:tex_flavor = 'latex'
+" let g:vimtex_view_general_viewer = '/Applications/Skim.app/Contents/SharedSupport/displayline'
+" let g:vimtex_view_general_options = '-r @line @pdf @tex'
+" let g:vimtex_fold_enabled = 0
+" let g:vimtex_view_general_callback = 'ViewerCallback'
+" func! ViewerCallback(status) dict
+"   if a:status
+"     VimtexView
+"   endif
+" endf
+" if has('nvim')
+"   let g:vimtex_compiler_progname = 'nvr'
+" endif
+" aug vimtex_config
+"   au!
+"   au User VimtexEventQuit call vimtex#compiler#clean(0)
+"   " au User VimtexEventInitPost call vimtex#compiler#compile()
+" aug END
+
+" Plug 'vim-python/python-syntax'
+" let g:python_version_3 = 1
+" let g:python_highlight_class_vars = 0
+" let g:python_highlight_indent_errors = 0
+" let g:python_highlight_space_errors = 0
+" let g:python_highlight_operators = 0
+" let g:python_highlight_all = 1
+" let g:python_slow_sync = 0
+" " a little bit slow
+" Plug 'Vimjas/vim-python-pep8-indent'
+" Plug 'xltan/pythonhelper.vim'
+" command! -range=% Isort :<line1>,<line2>! isort
 
 " Plug 'delphinus/vim-auto-cursorline'
 " let g:auto_cursorline_wait_ms = 5000
@@ -653,7 +689,6 @@ Plug 'cespare/vim-toml'
 " nnoremap [g :SignifyHunkUndo<CR>
 " nnoremap ]g :SignifyHunkDiff<CR>
 
-Plug 'mhinz/vim-crates'
 " Plug 'mhinz/vim-startify'
 " let g:startify_change_to_dir = 0
 " let g:startify_lists = [
@@ -664,25 +699,20 @@ Plug 'mhinz/vim-crates'
 "         \ { 'type': 'commands',  'header': ['   Commands']       },
 "         \ ]
 
-Plug 'airblade/vim-rooter'
-let g:rooter_manual_only = 1
-let g:rooter_cd_cmd = "lcd"
-let g:rooter_patterns = ['.git/', 'cargo.toml', 'go.mod']
-
 if has('nvim')
-"   Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
-"   let g:nvimgdb_config_override = {
-"     \ 'key_next': 'n',
-"     \ 'key_step': 's',
-"     \ 'key_finish': 'f',
-"     \ 'key_continue': 'c',
-"     \ 'key_until': '<space>',
-"     \ 'key_breakpoint': 'b',
-"     \ 'set_tkeymaps': "NvimGdbNoTKeymaps",
-"     \ }
-"   Plug 'nvim-treesitter/nvim-treesitter'
-"   Plug 'nvim-treesitter/playground'
-"   Plug 'norcalli/nvim-colorizer.lua'
+  " Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
+  " let g:nvimgdb_config_override = {
+  "   \ 'key_next': 'n',
+  "   \ 'key_step': 's',
+  "   \ 'key_finish': 'f',
+  "   \ 'key_continue': 'c',
+  "   \ 'key_until': '<space>',
+  "   \ 'key_breakpoint': 'b',
+  "   \ 'set_tkeymaps': "NvimGdbNoTKeymaps",
+  "   \ }
+  " Plug 'nvim-treesitter/nvim-treesitter'
+  " Plug 'nvim-treesitter/playground'
+  " Plug 'norcalli/nvim-colorizer.lua'
 else
   Plug 'vim-utils/vim-man'
 endif
@@ -712,17 +742,34 @@ let g:sandwich#recipes += [
   \   'input'   : ['0'],
   \ },
   \ ]
-function! RegInput(is_tail)
+func! RegInput(is_tail)
   if a:is_tail
     return ')'
   endif
   let tag = @0 . '('
   return tag
-endfunction
+endf
 
 " Eager-load these plugins so we can override their settings.
 runtime! plugin/unimpaired.vim
 runtime! plugin/rsi.vim
+runtime! plugin/dispatch.vim
+
+func! s:dispatch_hack(bang, qargs, count)
+  let g:dispatch_flag = 1
+  exec dispatch#compile_command(a:bang, a:qargs, a:count, '<mods>')
+endf
+
+func! s:make_hack(bang, qargs, count)
+  let g:dispatch_flag = 1
+  exec dispatch#compile_command(a:banng, '-- ' . a:qargs, a:count, '<mods>')
+endf
+
+command! -bang -nargs=* -range=-1 -complete=customlist,dispatch#command_complete Dispatch 
+  \ call s:dispatch_hack(<bang>0, <q-args>, <count> < 0 || <line1> == <line2> ? <count> : 0)
+
+command! -bang -nargs=* -range=-1 -complete=customlist,dispatch#make_complete Make 
+  \ call s:dispatch_hack(<bang>0, '-- ' . <q-args>, <count> < 0 || <line1> == <line2> ? <count> : 0)
 
 nnoremap <nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
 nnoremap <nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
@@ -745,10 +792,16 @@ if !has('nvim')
 endif
 packadd! cfilter
 
-nnoremap <silent> cos :if exists("g:syntax_on") <Bar>
+nnoremap <silent> coz :if exists("g:syntax_on") <Bar>
   \   syntax off <Bar>
   \ else <Bar>
   \   syntax on <Bar>
+  \ endif <CR>
+
+nnoremap <silent> cos :if stridx(@/, '\<') == 0 <Bar>
+  \   let @/=@/[2:-3] <Bar>
+  \ else <Bar>
+  \   let @/='\<'.@/.'\>' <Bar>
   \ endif <CR>
 
 nnoremap <silent> cof :if get(b:, "syntax_fromstart", v:false) <Bar>
@@ -759,16 +812,17 @@ nnoremap <silent> cof :if get(b:, "syntax_fromstart", v:false) <Bar>
 
 func! s:option_map(...)
   let [key, opt] = a:000[0:1]
-  let op = get(a:, 3, 'set '.opt.'!')
+  let op = get(a:, 3, 'setlocal '.opt.'!')
   exec printf("nnoremap co%s :%s<bar>set %s?<CR>", key, op, opt)
-endfunc
+endf
 call s:option_map('w', 'wrap')
+call s:option_map('i', 'ignorecase')
 call s:option_map('p', 'paste')
 call s:option_map('e', 'expandtab', 'setlocal expandtab!<bar>retab')
 call s:option_map('t', 'ts',
   \ 'let &ts = input("tabstop (". &ts ."): ")<bar>let &sw=&ts<bar>redraw')
 
-function! s:reset_color() abort
+func! s:reset_color() abort
   hi! link Folded GitGutterChange
   hi! link CocWarningSign Todo
   hi! link CocErrorSign GitGutterDelete
@@ -804,7 +858,7 @@ function! s:reset_color() abort
   hi! link PmenuSel Visual
   hi! link PmenuThumb Visual
   hi! link PmenuSbar Pmenu
-endfunction
+endf
 
 set background=dark
 color base16-tomorrow-night
@@ -818,23 +872,21 @@ set nobackup undofile backupdir=$VIMFILES/.swap directory=$VIMFILES/.swap// undo
 set ignorecase smartcase tagcase=match
 set exrc nofixeol listchars=tab:\|\ ,eol:¬
 set formatoptions+=j viminfo^='500
-set timeoutlen=500 updatetime=500 scrolloff=3 diffopt+=vertical,algorithm:patience
-" set sw=4 ts=4
-" set textwidth=120
-" set number relativenumber
-
+set timeoutlen=500 updatetime=500 scrolloff=3 diffopt+=vertical,algorithm:patience,indent-heuristic
+set shortmess+=c
+set inccommand=nosplit
 syn sync minlines=60
 
+" set sw=4 ts=4 textwidth=120 number relativenumber
 " set foldnestmax=2 foldmethod=expr foldcolumn=1 nofoldenable
 " set foldexpr=nvim_treesitter#foldexpr()
-
 " set cinoptions=:0,g0,(0,Ws,l1
 " set wildignore=*.pyc,*.pyo,*.exe,*.DS_Store,._*,*.svn,*.git,*.o,*.dSYM,*.ccls-cache,
 "     \*.vscode,tags,*.vs,*.pyproj,*.idea,*.clangd,*__pycache__,
 "     \*.bin,*.rlib,*.rmeta
 
 " for c-family files
-func! s:a(cmd)
+func! s:alternate(cmd)
   let name = expand('%:r')
   let ext = expand('%:e')
   let sources = ['c', 'cc', 'cpp', 'm', 'mm']
@@ -851,7 +903,7 @@ func! s:a(cmd)
       endfor
     endif
   endfor
-endfunc
+endf
 
 func! s:python_super()
   let pattern = '^class [^(]*(\zs[^)]*\ze):'
@@ -861,7 +913,7 @@ func! s:python_super()
   let sm = split(m, '\.')
   exec 'tag '.sm[len(sm)-1]
   return
-endfunc
+endf
 
 aug vimrc_filetype
   au!
@@ -881,13 +933,14 @@ aug vimrc_filetype
   au FileType fugitiveblame,fugitive nnoremap <buffer> q <c-w>q
   au FileType gitcommit setlocal foldmethod=syntax nofoldenable
 
-  au filetype markdown setlocal conceallevel=2
-    \| nnoremap <buffer><silent> gN O<Esc>C- [ ] 
+  au filetype markdown nnoremap <buffer><silent> gN O<Esc>C- [ ] 
     \| nnoremap <buffer><silent> gn o<Esc>C- [ ] 
     \| nnoremap <buffer><silent> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
     \| nnoremap <buffer><silent> <leader>q :q<CR>
+    " \| setlocal conceallevel=2
   au FileType lua,typescript,javascript,json,yaml,fish setlocal expandtab ts=2 sw=2
   au FileType tex setlocal ts=2 sw=2
+  au FileType sh setlocal ts=4 sw=4 expandtab
   au FileType make setlocal noexpandtab
   au FileType fzf tnoremap <buffer><silent> <Esc> <C-c>
     \| tnoremap <buffer><silent> <C-j> <C-n>
@@ -914,15 +967,15 @@ aug vimrc_misc
 aug END
 
 " Save current view settings on a per-window, per-buffer basis.
-function! s:winview_autosave()
+func! s:winview_autosave()
   if !exists("w:saved_view")
     let w:saved_view = {}
   endif
   let w:saved_view[bufnr("%")] = winsaveview()
-endfunction
+endf
 
 " Restore current view settings.
-function! s:winview_autorest()
+func! s:winview_autorest()
   let buf = bufnr("%")
   if exists("w:saved_view") && has_key(w:saved_view, buf)
     let v = winsaveview()
@@ -932,7 +985,7 @@ function! s:winview_autorest()
     endif
     unlet w:saved_view[buf]
   endif
-endfunction
+endf
 
 aug vimrc_autosave
   au!
@@ -951,7 +1004,7 @@ aug end
 "     exec "normal \<c-p>"
 "   end
 "   normal dv
-" endfunc
+" endf
 
 " func! s:stupid_diff()
 "   if winheight(0) < (&lines - 13)
@@ -959,7 +1012,7 @@ aug end
 "   endif
 "   nmap <buffer><silent> ]d :call <SID>goto_index("n")<CR>
 "   nmap <buffer><silent> [d :call <SID>goto_index("p")<CR>
-" endfunc
+" endf
 
 vnoremap <C-C> "+y
 vnoremap <C-Insert> "+y
@@ -980,7 +1033,7 @@ func! s:get_buffer_list()
   silent! ls
   redir END
   return buflist
-endfunc
+endf
 
 inoremap <C-^> <Esc><C-^>
 inoremap <C-l> <C-o>zz
@@ -993,20 +1046,20 @@ nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
 
 if has('nvim')
-  " lua <<EOF
-  " require 'nvim-treesitter.configs'.setup {
-  "   ensure_installed = { "query", "c", "cpp", "typescript", "javascript"},
-  "   highlight = {
-  "     enable = true,            -- false will disable the whole extension
-  "     disable = {"rust"},       -- list of language that will be disabled
-  "   },
-  " }
-  " require 'colorizer'.setup {
-  "   'css';
-  "   'javascript';
-  "   'vim';
-  " }
-  " EOF
+" lua <<EOF
+" require 'nvim-treesitter.configs'.setup {
+" ensure_installed = { "go", "c", "cpp", "typescript", "javascript"},
+" highlight = {
+" enable = true,            -- false will disable the whole extension
+" disable = {"rust"},       -- list of language that will be disabled
+" },
+" }
+" require 'colorizer'.setup {
+" 'css';
+" 'javascript';
+" 'vim';
+" }
+" EOF
   
   aug vimrc_term
     au!
@@ -1038,6 +1091,7 @@ vnoremap > >gv
 nnoremap gV `[v`]
 nnoremap Y y$
 vnoremap P y`>o<Esc>p
+nnoremap yp vapyP
 
 cnoremap <C-p> <Up>
 cnoremap <C-n> <Down>
@@ -1061,7 +1115,7 @@ elseif has("win32")
   let s:tortoise_svn_path = '"C:\Program Files\TortoiseSVN\bin\TortoiseProc.exe"'
   func! s:svn_command(cmd, path)
     exec 'silent! !start '. s:tortoise_svn_path. ' /command:'. a:cmd. ' /path:"'. a:path. '"'
-  endfunc
+  endf
   nnoremap <silent> <leader>tu :call <SID>svn_command('update /closeonend:3', expand('%:p'))<CR>
   nnoremap <silent> <leader>tw :call <SID>svn_command('commit /closeonend:3', expand('%:p'))<CR>
   nnoremap <silent> <leader>tc :call <SID>svn_command('commit /closeonend:3', getcwd())<CR>
@@ -1080,7 +1134,7 @@ func! s:closetab()
   let lasttab = tabpagenr()
   exec "normal g\<tab>"
   exec "tabclose " . lasttab
-endfunc
+endf
 nmap <silent><leader>w :call <SID>closetab()<CR>
 nmap [w gT
 nmap ]w gt
@@ -1096,6 +1150,11 @@ nmap <silent> <M-7> 7gt
 nmap <silent> <M-8> 8gt
 nmap <silent> <M-9> 9gt
 
+noremap <silent> [[ m':call search('{', 'b')<CR>:keepjumps normal w99[{<CR>^
+noremap <silent> ][ m':call search('}')<CR>:keepjumps normal b99]}<CR>
+noremap <silent> ]] m'j0:call search('{', 'b')<CR>:keepjumps normal w99[{<CR>:keepjumps normal! %<CR>:call search('{')<CR>^
+noremap <silent> [] m'k$:call search('}')<CR>:keepjumps normal b99]}<CR>:keepjumps normal! %<CR>:call search('}', 'b')<CR>
+
 nnoremap <leader>et :tabe ~/Documents/notes/todo.md<CR>
 nnoremap <leader>er :tabe ~/Documents/notes/reading.md<CR>
 nnoremap <leader>en :tabe ~/Documents/notes<CR>:lcd %:h<CR>:pwd<CR>
@@ -1104,7 +1163,13 @@ nnoremap <leader>es :tabe $VIMFILES/bundle/vim-extra-snippets/UltiSnips<CR>:lcd 
 nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
 nnoremap <leader><space> za
 nnoremap <silent><leader>z :call <SID>qfix_toggle()<CR>
-nnoremap <silent><leader>co :exec "Copen \| copen 10 \| normal G"<CR>
+nnoremap <silent><leader>co :call <SID>copen_hack("\|normal G")<CR>
+
+func! s:copen_hack(a)
+  let g:dispatch_quickfix_height = 10
+  exec "Copen | copen 10". a:a
+  let g:dispatch_quickfix_height = 0
+endf
 
 " used to track the quickfix window
 aug vimrc_qfix_toggle
@@ -1113,13 +1178,13 @@ aug vimrc_qfix_toggle
   au BufWinLeave * if exists("g:qfix_win") && expand("<abuf>") == g:qfix_win | unlet! g:qfix_win | endif
 aug END
 
-function! s:qfix_toggle()
+func! s:qfix_toggle()
   if exists("g:qfix_win")
     cclose
   else
-    exec "Copen \| copen 10"
+    call s:copen_hack('')
   endif
-endfunction
+endf
 
 func! s:preserve(command)
   let _s=@/
@@ -1127,14 +1192,14 @@ func! s:preserve(command)
   exec 'silent '.a:command
   call winrestview(v)
   let @/=_s
-endfunc
+endf
 
 nmap _$ :call <SID>preserve("%s/\\s\\+$//e")<CR>
 " nmap _= :call <SID>preserve("normal! gg=G")<CR>
 
 func! s:indent_len(str)
   return type(a:str) == 1 ? len(matchstr(a:str, '^\s*')) : 0
-endfunc
+endf
 
 func! s:indent_object(op, skip_blank, b, e, bd, ed)
   let i = min([s:indent_len(getline(a:b)), s:indent_len(getline(a:e))])
@@ -1166,7 +1231,7 @@ func! s:indent_object(op, skip_blank, b, e, bd, ed)
     endwhile
   endfor
   exec printf('normal! %dGV%dG', max([1, d[0] + a:bd]), min([x, d[1] + a:ed]))
-endfunc
+endf
 xnoremap <silent> ii :<C-u>call <SID>indent_object('>=', 1, line("'<"), line("'>"), 0, 0)<CR>
 onoremap <silent> ii :<C-u>call <SID>indent_object('>=', 1, line('.'), line('.'), 0, 0)<CR>
 xnoremap <silent> ai :<C-u>call <SID>indent_object('>=', 1, line("'<"), line("'>"), -1, 0)<CR>
@@ -1187,15 +1252,15 @@ func! s:tab_message(cmd)
     setlocal buftype=nofile bufhidden=wipe noswapfile nobuflisted nomodified
     silent put!=message
   endif
-endfunc
+endf
 
 func! s:source_if_exists(file)
   if filereadable(expand(a:file))
     exec 'source' a:file
   endif
-endfunc
+endf
 
-function! s:end_terminal() abort
+func! s:end_terminal() abort
   let col = col('.')
   if col == 1
     bd!
@@ -1203,20 +1268,14 @@ function! s:end_terminal() abort
     startinsert
     call feedkeys("\<C-d>", 'n')
   endif
-endfunction
+endf
 
-function! s:check_back_space() abort
+func! s:check_back_space() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~# '\s'
-endfunction
+endf
 
-inoremap <silent><expr> <TAB>
-  \ pumvisible() ? coc#_select_confirm() :
-  \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
-  \ <SID>check_back_space() ? "\<TAB>" :
-  \ coc#refresh()
-
-function! s:cppcheck()
+func! s:cppcheck()
   cclose
   update
   setlocal makeprg=cppcheck\ --enable=all\ %
@@ -1228,7 +1287,7 @@ function! s:cppcheck()
   echo curr_dir
   exec 'lcd ' . curr_dir
   exec 'lcd -'
-endfunction
+endf
 
 func! s:unescape()
   silent %s/\\n/\r/
@@ -1251,16 +1310,16 @@ function s:diff_current_quickfix_entry() abort
       wincmd l
     endfor
   endif
-endfunction
+endf
 
-function! s:add_mappings() abort
+func! s:add_mappings() abort
   nnoremap <buffer><silent> [<C-Q> :cpfile <BAR> :call <sid>diff_current_quickfix_entry()<CR>
   nnoremap <buffer><silent> ]<C-Q> :cnfile <BAR> :call <sid>diff_current_quickfix_entry()<CR>
   nnoremap <buffer><silent> [q :cprevious <BAR> :call <sid>diff_current_quickfix_entry()<CR>
   nnoremap <buffer><silent> ]q :cnext <BAR> :call <sid>diff_current_quickfix_entry()<CR>
   copen 10
   wincmd p
-endfunction
+endf
 
 func! s:code(args)
   let args = a:args
@@ -1268,7 +1327,7 @@ func! s:code(args)
     let args = '.'
   endif
   exec 'silent !code -r ' . args
-endfunc
+endf
 
 func! s:open_origin_file()
   let filename = @%
@@ -1277,7 +1336,7 @@ endf
 
 func! s:command_abbr(args, abbreviation, expansion)
   exec 'cabbr ' . a:args . a:abbreviation . ' <c-r>=getcmdpos() == 1 && getcmdtype() == ":" ? "' . a:expansion . '" : "' . a:abbreviation . '"<CR>'
-endfunc
+endf
 
 func! s:quickfix_replace(sstr)
   let w = ""
@@ -1288,7 +1347,7 @@ func! s:quickfix_replace(sstr)
     let w = expand("<cword>") . '/'
   endif
   exec 'cfdo %s/' . w . a:sstr . '/ | update'
-endfunc
+endf
 
 if has('gui_running')
   if has('win32')
@@ -1359,67 +1418,59 @@ Cabbr vp VagrantProvision
 call s:source_if_exists($VIMFILES.'/.localrc')
 if getcwd() != $HOME | call s:source_if_exists(getcwd() . '/.vimrc') | endif
 
-func s:filetype_python()
+func! s:filetype_python()
   nmap <buffer><silent> ]s :call <SID>python_super()<CR>
   nmap <buffer><silent> [s <C-^>
   command! -buffer -nargs=0 -complete=command ImportRemove update | Execute autoflake --in-place --remove-all-unused-imports %<CR>
 endf
 
-func s:toggle_equal()
+func! s:toggle_words(l, r)
   let cline = getline(".")
-  if stridx(cline, ":=") > 0
-    normal ^f:x
-  elseif stridx(cline, "=") > 0
-    normal ^f=i:
+  if stridx(cline, a:l) >= 0
+    let r = a:r
+    if stridx(r, '&') >= 0
+      let r = substitute(r, '&', '\\\&', '')
+      echo r
+    end
+    call setline('.', substitute(cline, a:l, r, ''))
+  elseif stridx(cline, a:r) >= 0
+    let r = a:l
+    if stridx(r, '&') >= 0
+      let r = substitute(r, '&', '\\\&', 'g')
+    end
+    call setline('.', substitute(cline, a:r, r, ''))
   end
 endf
 
-func s:toggle_mut()
-  let cline = getline(".")
-  if stridx(cline, "let mut") > 0
-    normal ^fmdw
-  elseif stridx(cline, "let") > 0
-    normal ^fta mut
-  end
-endf
-
-func s:filetype_go()
-  Cabbrb ife GoIfErr
-  Cabbrb gat GoAddTags
-  Cabbrb grt GoRemoveTags
-  Cabbrb gfs GoFillStruct
-  Cabbrb gi GoImpl
-  nnoremap <buffer><silent> s; :<c-u>call <SID>toggle_equal()<CR>
-  nnoremap <buffer><silent> ]] :<c-u>call go#textobj#FunctionJump('n', 'next')<cr>
-  nnoremap <buffer><silent> [[ :<c-u>call go#textobj#FunctionJump('n', 'prev')<cr>
-  onoremap <buffer><silent> ]] :<c-u>call go#textobj#FunctionJump('o', 'next')<cr>
-  onoremap <buffer><silent> [[ :<c-u>call go#textobj#FunctionJump('o', 'prev')<cr>
-  xnoremap <buffer><silent> ]] :<c-u>call go#textobj#FunctionJump('v', 'next')<cr>
-  xnoremap <buffer><silent> [[ :<c-u>call go#textobj#FunctionJump('v', 'prev')<cr>
-  command! -bang -buffer A call go#alternate#Switch(<bang>0, 'edit')
-  command! -bang -buffer AV call go#alternate#Switch(<bang>0, 'vsplit')
-  command! -bang -buffer AS call go#alternate#Switch(<bang>0, 'split')
+func! s:filetype_go()
+  Cabbrb gat CocCommand\ go.tags.add
+  Cabbrb grt CocCommand\ go.tags.clear
+  Cabbrb gi CocCommand\ go.impl.cursor
+  nnoremap <buffer><silent> s; :<c-u>call <SID>toggle_words(' := ',' = ')<CR>
   setlocal sw=4 ts=4
   aug filetype_go
     au! * <buffer>
     au BufWritePre <buffer> OrganizeImport
   aug END
+  silent au! vim-go-buffer
 endf
 
-func s:filetype_rust()
+func! s:filetype_rust()
   setlocal iskeyword+=!
-  nnoremap <buffer><silent> s; :<c-u>call <SID>toggle_mut()<CR>
+  nnoremap <buffer><silent> s; :<c-u>call <SID>toggle_words('let mut', 'let')<CR>
+  nnoremap <buffer><silent> s7 :<c-u>call <SID>toggle_words('&mut ', '&')<CR>
+  nnoremap <buffer><silent> s/ :<c-u>call <SID>toggle_words('{}', '{:?}')<CR>
 endf
 
-func s:filetype_cfamily()
+func! s:filetype_cfamily()
   setlocal expandtab ts=2 sw=2
   setlocal commentstring=//\ %s
-  command! -buffer -nargs=0 A call s:a('e')
-  command! -buffer -nargs=0 AV call s:a('botright vertical split')
+  command! -buffer -nargs=0 A call s:alternate('e')
+  command! -buffer -nargs=0 AV call s:alternate('botright vertical split')
   command! -buffer -nargs=0 Cppcheck call s:cppcheck()
 endf
 
-func s:filetype_vim()
+func! s:filetype_vim()
   setlocal expandtab ts=2 sw=2
   aug filetype_vim
     au! * <buffer>
@@ -1427,7 +1478,7 @@ func s:filetype_vim()
   aug END
 endf
 
-func s:bufwinenter()
+func! s:bufwinenter()
   if &filetype ==# 'help'
     wincmd L
     nnoremap <buffer><silent> q :bd<CR>
@@ -1437,5 +1488,6 @@ func s:bufwinenter()
     wincmd J
     setlocal nonu norelativenumber
     let g:qfix_win = bufnr("$")
+    nnoremap <buffer><silent> q :cclose<CR>
   endif
 endf

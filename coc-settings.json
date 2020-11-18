@@ -12,8 +12,8 @@
     "markdown",
     // "javascript",
     // "typescript",
-    "json",
-    "yaml"
+    // "yaml",
+    "json"
   ],
   "diagnostic.errorSign": ">",
   "diagnostic.warningSign": "-",
@@ -56,6 +56,8 @@
   // "rust-analyzer.lens.enable": true,
   // "rust-analyzer.lens.implementations": false,
   "flutter.lsp.initialization.closingLabels": false,
+  "refactor.beforeContext": 2,
+  "refactor.afterContext": 2,
   "go.goplsPath": "gopls",
   // "go.goplsArgs": [
   // 	"-remote",
@@ -70,8 +72,10 @@
     "analyses": {
       "ST1000": false,
       "ST1003": false,
+      "ST1005": false,
       "ST1021": false
     }
   },
-  "snippets.ultisnips.directories": ["UltiSnips", "gosnippets/UltiSnips"]
+  "snippets.ultisnips.directories": ["UltiSnips", "gosnippets/UltiSnips"],
+  "snippets.priority": 99
 }
