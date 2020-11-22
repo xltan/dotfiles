@@ -17,7 +17,7 @@ if not functions -q fisher
 end
 
 if status is-login
-  set -gx MANPAGER "nvim -u NORC -c 'set smartcase ignorecase ft=man' -c 'hi! link StatusLine Comment' -c 'cmap <C-a> <Home>' -"
+  set -gx MANPAGER "vi -u NORC -c 'set smartcase ignorecase ft=man' -c 'hi! link StatusLine Comment' -c 'cmap <C-a> <Home>' -"
   if status is-interactive
     and test -n "$SSH_CONNECTION"
     and not test -n "$TMUX"

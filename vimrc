@@ -960,7 +960,7 @@ aug vimrc_misc
   au BufRead,BufNewFile .localrc setlocal ft=vim
   au BufRead goscripts setlocal ft=go
   au BufRead *.mangle setlocal equalprg=c++filt
-  au BufRead Cargo.toml call crates#toggle()
+  " au BufRead Cargo.toml call crates#toggle()
   " au ColorScheme * call <SID>reset_color()
   " au WinEnter * if &diff | call<SID>stupid_diff() | endif
   " au FocusGained,CursorHold ?* if getcmdwintype() == '' | checktime | endif
