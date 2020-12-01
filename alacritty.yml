@@ -20,7 +20,7 @@ font:
   use_thin_strokes: true
   offset:
     x: 0
-    y: 2
+    y: 1
   glyph_offset:
     x: 0
     y: 2
