@@ -9,4 +9,5 @@ for rc in $(ls $BASE/configs); do
 done
 
 ln -sfv $BASE/coc-settings.json $HOME/.config/nvim/coc-settings.json
+ln -sfv $BASE/alacritty.yaml $HOME/.config/alacritty/alacritty.yml
 ln -sfv $BASE/configs/$rc ~/.$rc
