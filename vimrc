@@ -26,6 +26,7 @@ Plug 'tpope/vim-rhubarb'
 Plug 'tpope/vim-dispatch'
 Plug 'AdUki/vim-dispatch-neovim'
 let g:dispatch_quickfix_height = 0
+nmap s<CR> :Start<CR>
 nmap S<CR> :exec "Start -dir=" . expand("%:h")<CR>
 aug vimrc_dispatch
   au!
@@ -71,7 +72,7 @@ func! s:setup_makeprg()
     exec "nmap <buffer> g<cr> :Dispatch ". prg. '<cr>'
     exec "nmap <buffer> g<space> :Dispatch ". oprg. '<space>'
     exec "nmap <buffer> g! :Dispatch! ". oprg. '<space>'
-    exec "nmap <buffer> s<cr> :Start ". prg. '<cr>'
+    exec "nmap <buffer> s' :Start ". prg. '<cr>'
     exec "nmap <buffer> s<space> :Start ". oprg. '<space>'
     exec "nmap <buffer> s! :Start! ". prg. '<cr>'
   end
@@ -93,10 +94,11 @@ Plug 'machakann/vim-sandwich'
 inoremap (<CR> (<CR>)<Esc>O
 inoremap {<CR> {<CR>}<Esc>O
 inoremap [<CR> [<CR>]<Esc>O
-inoremap {; {<CR>};<Esc>O
-inoremap {, {<CR>},<Esc>O
-inoremap [; [<CR>];<Esc>O
-inoremap [, [<CR>],<Esc>O
+inoremap ({<CR> ({<CR>})<Esc>O
+inoremap ([<CR> ([<CR>])<Esc>O
+inoremap {; {};<Esc>hi
+inoremap [; [];<Esc>hi
+inoremap (; ();<Esc>hi
 
 Plug 'tpope/vim-fugitive'
 Plug 'shumphrey/fugitive-gitlab.vim'
@@ -261,6 +263,7 @@ let g:vim_markdown_conceal = 0
 let g:tex_conceal = ""
 let g:vim_markdown_math = 1
 let g:vim_markdown_new_list_item_indent = 2
+let g:vim_markdown_fenced_languages = ['js=javascript', 'ts=typescript']
 
 " Plug 'tpope/vim-markdown'
 " let g:markdown_fenced_languages = [
@@ -340,12 +343,12 @@ nnoremap <silent> <leader>u :UndotreeToggle<CR>
 Plug 'kana/vim-niceblock'
 
 Plug 'haya14busa/vim-asterisk'
-" noremap *   <Plug>(asterisk-*)
-" noremap #   <Plug>(asterisk-#)
-" noremap g*  <Plug>(asterisk-g*)
-" noremap g#  <Plug>(asterisk-g#)
-" noremap z*  <Plug>(asterisk-z*)
-" noremap z#  <Plug>(asterisk-z#)
+map *   <Plug>(asterisk-*)
+map #   <Plug>(asterisk-#)
+map g*  <Plug>(asterisk-g*)
+map g#  <Plug>(asterisk-g#)
+map z*  <Plug>(asterisk-z*)
+map z#  <Plug>(asterisk-z#)
 
 Plug 'AndrewRadev/linediff.vim'
 
@@ -406,15 +409,16 @@ func! s:open_term(direction, cmd) abort "{{{
   endif
 
   if !(empty($TMUX))
-    silent call system("tmux split-window " .  a:direction. " -c '" . dir . "'")
+    silent call system("tmux " .  a:direction. " -c '" . dir . "'")
   else
     call gtfo#open#term(dir, a:cmd)
   endif
 endf
 
 Plug 'justinmk/vim-gtfo'
-nmap <silent> got :<c-u>call <SID>open_term("", "")<cr>
-nmap <silent> gov :<c-u>call <SID>open_term("-h", "")<cr>
+nmap <silent> got :<c-u>call <SID>open_term("split-window", "")<cr>
+nmap <silent> goc :<c-u>call <SID>open_term("new-window", "")<cr>
+nmap <silent> gov :<c-u>call <SID>open_term("split-window -h", "")<cr>
 if has('win32')
   nmap <silent> gox :SilentExt start %<CR>
 else
@@ -431,6 +435,7 @@ let g:coc_global_extensions = [
   \ 'coc-json',
   \ 'coc-go',
   \ 'coc-clangd',
+  \ 'coc-sh',
   \ 'coc-emoji',
   \ 'coc-git',
   \ 'coc-rust-analyzer',
@@ -438,6 +443,7 @@ let g:coc_global_extensions = [
   \ 'coc-yaml',
   \ 'coc-flutter',
   \ 'coc-tsserver',
+  \ 'coc-css',
   \ 'coc-prettier',
   \ ]
 
@@ -576,6 +582,7 @@ Plug 'leafgarland/typescript-vim'
 Plug 'peitalin/vim-jsx-typescript'
 Plug 'keith/swift.vim'
 Plug 'cespare/vim-toml'
+Plug 'neoclide/jsonc.vim'
 
 Plug 'mhinz/vim-crates'
 
@@ -800,6 +807,8 @@ nnoremap <silent> coz :if exists("g:syntax_on") <Bar>
 
 nnoremap <silent> cos :if stridx(@/, '\<') == 0 <Bar>
   \   let @/=@/[2:-3] <Bar>
+  \ elseif stridx(@/, '\V\<') == 0 <Bar>
+  \   let @/=@/[4:-3] <Bar>
   \ else <Bar>
   \   let @/='\<'.@/.'\>' <Bar>
   \ endif <CR>
@@ -848,6 +857,7 @@ func! s:reset_color() abort
   exec "hi StatusLine guifg=#". g:base16_gui05 . " guibg=#" . g:base16_gui01
   exec "hi QuickfixLine guifg=#". g:base16_gui0A . " guibg=#" . g:base16_gui02
   exec "hi FzfWindow guifg=#". g:base16_gui02
+  exec "hi Search guifg=#". g:base16_gui02
 
   " hi link CocListsLine QuickfixLine
   " hi! link FloatermBorder Comment
@@ -872,7 +882,7 @@ set nobackup undofile backupdir=$VIMFILES/.swap directory=$VIMFILES/.swap// undo
 set ignorecase smartcase tagcase=match
 set exrc nofixeol listchars=tab:\|\ ,eol:¬
 set formatoptions+=j viminfo^='500
-set timeoutlen=500 updatetime=500 scrolloff=3 diffopt+=vertical,algorithm:patience,indent-heuristic
+set updatetime=500 scrolloff=3 diffopt+=vertical,algorithm:patience,indent-heuristic
 set shortmess+=c
 set inccommand=nosplit
 syn sync minlines=60
@@ -938,7 +948,7 @@ aug vimrc_filetype
     \| nnoremap <buffer><silent> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
     \| nnoremap <buffer><silent> <leader>q :q<CR>
     " \| setlocal conceallevel=2
-  au FileType lua,typescript,javascript,json,yaml,fish setlocal expandtab ts=2 sw=2
+  au FileType html,typescript,javascript,css,scss,json,yaml,fish,lua setlocal expandtab ts=2 sw=2
   au FileType tex setlocal ts=2 sw=2
   au FileType sh setlocal ts=4 sw=4 expandtab
   au FileType make setlocal noexpandtab
@@ -946,8 +956,9 @@ aug vimrc_filetype
     \| tnoremap <buffer><silent> <C-j> <C-n>
     \| tnoremap <buffer><silent> <C-k> <C-p>
     \| tnoremap <buffer><silent> <C-h> <BS>
-  au FileType cs,json,java,gomod,dot setlocal commentstring=//\ %s
+  au FileType cs,jsonc,java,gomod,dot setlocal commentstring=//\ %s
   au FileType cmake,tmux,cfg setlocal commentstring=#\ %s
+  au FileType scss setl iskeyword+=@-@
 aug END
 
 aug vimrc_misc
@@ -959,6 +970,7 @@ aug vimrc_misc
   au BufRead,BufNewFile *.tmpl setlocal ft=gohtmltmpl
   au BufRead,BufNewFile .localrc setlocal ft=vim
   au BufRead goscripts setlocal ft=go
+  au BufRead *.json setlocal ft=jsonc
   au BufRead *.mangle setlocal equalprg=c++filt
   " au BufRead Cargo.toml call crates#toggle()
   " au ColorScheme * call <SID>reset_color()
@@ -1072,7 +1084,7 @@ if has('nvim')
   tnoremap <expr> <M-r> '<C-\><C-N>"'.nr2char(getchar()).'pi'
   tnoremap [w <C-\><C-n>gT
   tnoremap ]w <C-\><C-n>gt
-  tnoremap g<Tab> <C-\><C-n>g<Tab>
+  tnoremap <C-Tab> <C-\><C-n>g<Tab>
   tnoremap <silent><C-d> <C-\><C-n>:call <SID>end_terminal()<CR>
   " tnoremap <C-^> <C-\><C-n>:FloatermToggle<CR>:
   " tnoremap <silent><C-z> <C-\><C-N>:FloatermToggle<CR>
@@ -1080,7 +1092,7 @@ else
   tnoremap <Esc> <C-w>N
   tnoremap [w <C-w>NgT
   tnoremap ]w <C-w>Ngt
-  tnoremap g<Tab> <C-w>Ng<Tab>
+  tnoremap <C-Tab> <C-w>Ng<Tab>
 endif
 
 nnoremap Q @q
@@ -1128,14 +1140,14 @@ elseif has("win32")
   nnoremap <silent> <leader>tr :call <SID>svn_command('revert', expand('%:p'))<CR>
 endif
 
-nmap <silent> <leader>q :bd<CR>
 
 func! s:closetab()
   let lasttab = tabpagenr()
   exec "normal g\<tab>"
   exec "tabclose " . lasttab
 endf
-nmap <silent><leader>w :call <SID>closetab()<CR>
+nmap <silent> <leader>q :bd<CR>
+nmap <silent> <leader>w :call <SID>closetab()<CR>
 nmap [w gT
 nmap ]w gt
 nmap [W :tabfirst<CR>
@@ -1394,6 +1406,7 @@ command! -nargs=0 QuickfixUndo cfdo exec "normal u" | update
 
 " Cabbr gdb GdbStartLLDB\ lldb
 
+Cabbr c Cargo
 Cabbr co Code
 Cabbr sf CtrlSF
 Cabbr gp Grep

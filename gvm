@@ -1,0 +1,2 @@
+#!/bin/sh
+ln -sfv $HOME/tools/go/bin/"$@" $HOME/.local/bin/go

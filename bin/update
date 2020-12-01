@@ -1,6 +1,12 @@
-#!/bin/sh
+#!/bin/bash
 SCRIPT=$(readlink "$0")
 BASE=$(dirname "$SCRIPT")
-vi +PlugUpdate +qa
 cd $BASE && git pull && cd -
 
+vi +PlugUpdate +qa
+
+case "$OSTYPE" in
+darwin*) 
+    fisher && brew update && brew upgrade && brew reinstall neovim tmux fish
+    ;;
+esac

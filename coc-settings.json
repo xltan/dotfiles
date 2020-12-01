@@ -10,8 +10,9 @@
     "go",
     "dart",
     "markdown",
-    // "javascript",
-    // "typescript",
+    "javascript",
+    "typescript",
+    "python",
     // "yaml",
     "json"
   ],
@@ -76,6 +77,9 @@
       "ST1021": false
     }
   },
+  "python.jediEnabled": false,
+  "python.analysis.memory.keepLibraryAst": true,
   "snippets.ultisnips.directories": ["UltiSnips", "gosnippets/UltiSnips"],
+  "snippets.snipmate.enable":false,
   "snippets.priority": 99
 }

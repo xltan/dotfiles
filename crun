@@ -1,0 +1,3 @@
+#!/bin/sh
+name=$(basename $1 .cc)
+clang++ -pedantic -std=c++17 $@ -o $name && ./$name && rm $name
