@@ -3,6 +3,7 @@
 BASE=$(cd "$(dirname "$0")"; pwd -P)
 
 mkdir -pv .bak
+
 for rc in $(ls $BASE/configs); do
   [ -e ~/."$rc" ] && rm -rf .bak/."$rc" && mv -v ~/."$rc" .bak/."$rc"
   ln -sfv "$BASE/configs/$rc" ~/."$rc"
@@ -10,7 +11,10 @@ done
 
 mkdir -pv $HOME/.config/nvim
 mkdir -pv $HOME/.config/alacritty
+mkdir -pv $HOME/.ctags.d
+mkdir -pv $HOME/.hammerspoon
 
 ln -sfv $BASE/coc-settings.json $HOME/.config/nvim/coc-settings.json
 ln -sfv $BASE/alacritty.yml $HOME/.config/alacritty/alacritty.yml
-ln -sfv $BASE/configs/$rc ~/.$rc
+ln -sfv $BASE/ctags $HOME/.ctags.d/default.ctags
+ln -sfv $BASE/hammerspoon_init.lua $HOME/.hammerspoon/init.lua
