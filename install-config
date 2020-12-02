@@ -8,6 +8,9 @@ for rc in $(ls $BASE/configs); do
   ln -sfv "$BASE/configs/$rc" ~/."$rc"
 done
 
+mkdir -pv $HOME/.config/nvim
+mkdir -pv $HOME/.config/alacritty
+
 ln -sfv $BASE/coc-settings.json $HOME/.config/nvim/coc-settings.json
 ln -sfv $BASE/alacritty.yml $HOME/.config/alacritty/alacritty.yml
 ln -sfv $BASE/configs/$rc ~/.$rc

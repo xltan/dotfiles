@@ -17,3 +17,4 @@ ln -sfv $BASE/init.vim ~/.config/nvim/init.vim
 ln -sv $BASE/indent ~/.vim/indent
 vim +PlugInstall +qall
 
+$HOME/.fzf/install
