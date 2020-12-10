@@ -2,6 +2,7 @@
   "imselect.defaultInput": "com.apple.keylayout.ABC",
   "imselect.enableStatusItem": false,
   "imselect.enableFloating": false,
+  "coc.preferences.currentFunctionSymbolAutoUpdate": true,
   "coc.preferences.colorSupport": false,
   "coc.preferences.formatOnSaveFiletypes": [
     "c",
@@ -10,10 +11,12 @@
     "go",
     "dart",
     "markdown",
+    "html",
     "javascript",
     "typescript",
     "python",
     // "yaml",
+    "jsonc",
     "json"
   ],
   "diagnostic.errorSign": ">",
@@ -30,6 +33,7 @@
   "suggest.detailMaxLength": 20,
   "signature.maxWindowWidth": 80,
   "signature.maxWindowHeight": 15,
+  "prettier.formatterPriority": -1,
 
   "git.addedSign.hlGroup": "GitGutterAdd",
   "git.changedSign.hlGroup": "GitGutterChange",
@@ -54,6 +58,7 @@
   "rust-analyzer.serverPath": "rust-analyzer",
   "rust-analyzer.inlayHints.chainingHints": false,
   "rust-analyzer.completion.postfix.enable": false,
+  "rust-analyzer.diagnostics.disabled": ["missing-unsafe"],
   // "rust-analyzer.lens.enable": true,
   // "rust-analyzer.lens.implementations": false,
   "flutter.lsp.initialization.closingLabels": false,
@@ -79,7 +84,7 @@
   },
   "python.jediEnabled": false,
   "python.analysis.memory.keepLibraryAst": true,
-  "snippets.ultisnips.directories": ["UltiSnips", "gosnippets/UltiSnips"],
-  "snippets.snipmate.enable":false,
-  "snippets.priority": 99
+  "snippets.snipmate.enable": false,
+  "snippets.priority": 99,
+  "clangd.path": "/Users/tanxl/.config/coc/extensions/coc-clangd-data/install/11.0.0/clangd_11.0.0/bin/clangd"
 }
