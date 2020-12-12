@@ -120,7 +120,7 @@ let g:fzf_buffers_jump = 1
 let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse --bind ctrl-f:page-down,ctrl-b:page-up'
 let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs"
 nnoremap <silent><leader>f :Files<CR>
-nnoremap <silent><leader>r :Files %:h<CR>
+nnoremap <silent><leader>r :exec 'Files '. <SID>root()<CR>
 nnoremap <silent><leader>b :Buffers<CR>
 nnoremap <silent><leader>gh :History<CR>
 nnoremap <silent><leader>h :CHistory<CR>
@@ -211,6 +211,13 @@ func! CocFunc()
   let c = get(b:, 'coc_current_function', '')
   return c !=# '' ? "\uf6a6 " .c : ''
 endf
+function! CocGitBranch() abort
+  let status = get(g:, 'coc_git_status', '')
+  if len(status) > 0
+    return status[3:]
+  endif
+  return ''
+endfunction
 let g:lightline = {
   \ 'colorscheme': 'tomorrow2',
   \ 'component': {
@@ -222,7 +229,7 @@ let g:lightline = {
   \           [ 'custom_relativepath', 'cocfunc', 'cocstatus', 'modified'] ],
   \  'right': [ [ 'percentwin' ],
   \            [ 'lineinfo' ],
-  \            [ 'gitbranch',  'mode' ]]
+  \            [ 'cocbranch', 'mode' ] ]
   \ },
   \ 'inactive': {
   \   'left': [ [ 'custom_relativepath' ] ],
@@ -243,7 +250,7 @@ let g:lightline = {
   \ 'component_function': {
   \   'cocstatus': 'coc#status',
   \   'cocfunc': 'CocFunc',
-  \   'gitbranch': 'FugitiveHead',
+  \   'cocbranch': 'CocGitBranch',
   \ },
   \ }
 
@@ -369,11 +376,12 @@ Plug 'justinmk/vim-dirvish'
 func! s:filetype_dirvish()
   " silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d
   " silent! unmap <buffer><silent> <C-p>
-  nnoremap <buffer><silent> q :bd<CR>
-  nnoremap <buffer><silent> o :call dirvish#open("p", 1)<CR><C-w>p
-  nnoremap <buffer><silent> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
-  nnoremap <buffer><silent> gr :noau Dirvish %<CR>
-  nnoremap <buffer><silent> gh :Silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>:set conceallevel=3<CR>
+  nnoremap <buffer> q :bd<CR>
+  nnoremap <buffer> o :call dirvish#open("p", 1)<CR><C-w>p
+  nnoremap <buffer> gs :sort ,^.*[\/],<CR>:set conceallevel=3<CR>
+  nnoremap <buffer> gr :noau Dirvish %<CR>
+  nnoremap <buffer> gh :Silent keeppatterns g@\v[\\/]\.[^\/]+[\\/]?$@d<CR>:set conceallevel=3<CR>
+  nnoremap <buffer> ; :Shdo! {}<Left><Left><Left>
   if has('win32')
     nnoremap <buffer><silent> gx :SExec start <C-R><C-L><CR>
   else
@@ -419,7 +427,7 @@ else
   nmap <silent> gox :SExec open %<CR>
 endif
 cmap %% <C-R>=fnameescape(expand('%:h'))<CR>/
-nmap gon :sav %%
+nmap gon :sav %% \| read #<Left><Left><Left><Left><Left><Left><Left><Left><Left>
 
 " Plug 'neoclide/coc.nvim', {'tag': '*'}
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -531,6 +539,7 @@ let g:openbrowser_search_engines = {
   \ 'python': 'http://docs.python.org/dev/search.html?q={query}&check_keywords=yes&area=default',
   \ 'go': 'https://pkg.go.dev/search?q={query}',
   \ 'cpp': 'https://en.cppreference.com/mwiki/index.php?search={query}',
+  \ 'stackoverflow': 'https://stackoverflow.com/search?q={query}',
   \ }
 nmap gx <Plug>(openbrowser-smart-search)
 vmap gx <Plug>(openbrowser-smart-search)
@@ -559,8 +568,9 @@ endfunction
 vmap <leader>gs <Plug>CtrlSFVwordExec
 nmap <leader>gs gz*<Plug>CtrlSFCwordPath<CR>
 nmap <leader>gz z*<Plug>CtrlSFCwordPath -W<CR>
-nmap <silent><leader>gw mz:silent grep <c-r><c-w> %% <cr>:copen<cr>:wincmd p<cr>`z
+nmap <leader>gw mz:silent grep <c-r><c-w> %% <cr>:copen<cr>:wincmd p<cr>`z
 nmap <leader>go :CtrlSFToggle<CR>
+nmap <leader>gr :CocCommand git.toggleGutters<CR>
 
 if executable("rg")
   set grepprg=rg\ --vimgrep
@@ -586,11 +596,6 @@ Plug 'cespare/vim-toml'
 Plug 'neoclide/jsonc.vim'
 
 Plug 'mhinz/vim-crates'
-
-Plug 'airblade/vim-rooter'
-let g:rooter_manual_only = 1
-let g:rooter_cd_cmd = "lcd"
-let g:rooter_patterns = ['.git/', 'cargo.toml', 'go.mod']
 
 " Plug 'fatih/vim-go'
 " let g:go_def_mapping_enabled = 0
@@ -706,6 +711,8 @@ let g:startify_lists = [
         \ { 'type': 'bookmarks', 'header': ['   Bookmarks']      },
         \ { 'type': 'commands',  'header': ['   Commands']       },
         \ ]
+let g:startify_session_persistence = 1
+let g:startify_files_number = 5
 
 if has('nvim')
   " Plug 'sakhnik/nvim-gdb', { 'do': ':!./install.sh \| UpdateRemotePlugins' }
@@ -887,7 +894,7 @@ set exrc nofixeol listchars=tab:\|\ ,eol:¬
 set formatoptions+=j viminfo^='500
 set updatetime=100 scrolloff=3 diffopt+=vertical,algorithm:patience,indent-heuristic
 set shortmess+=c
-set nu rnu
+set nu rnu scl=number
 set inccommand=nosplit
 syn sync minlines=60
 
@@ -1180,6 +1187,7 @@ nnoremap <leader>cd :lcd %:h<CR>:pwd<CR>
 nnoremap <leader><space> za
 nnoremap <silent><leader>z :call <SID>qfix_toggle()<CR>
 nnoremap <silent><leader>co :call <SID>copen_hack("\|normal G")<CR>
+nnoremap <silent><leader>cq Ilet @q='mz<ESC>$a`z'
 
 func! s:copen_hack(a)
   let g:dispatch_quickfix_height = 10
@@ -1355,6 +1363,7 @@ func! s:command_abbr(args, abbreviation, expansion)
 endf
 
 func! s:quickfix_replace(sstr)
+  normal mZ
   let w = ""
   let idx = stridx(a:sstr, '/')
   if idx == 0
@@ -1363,6 +1372,7 @@ func! s:quickfix_replace(sstr)
     let w = expand("<cword>") . '/'
   endif
   exec 'cfdo %s/' . w . a:sstr . '/ | update'
+  normal `Z
 endf
 
 if has('gui_running')
@@ -1376,12 +1386,38 @@ if has('gui_running')
   command! -nargs=0 -complete=command Restart exec g:prog_name . " %" | quitall
 endif
 
+func! s:rooter(...)
+  exec "lcd ". call("s:root", a:000)
+endf
+
+func! s:root(...)
+  if len(a:000) == 0
+    let patterns = ['.git/', 'cargo.toml', 'go.mod', 'Makefile']
+  else
+    let patterns = a:1
+  endif
+  let dir = fnamemodify(expand('%:p', 1), ':h')
+  while 1
+    for pattern in patterns
+      if !empty(globpath(dir, pattern, 1))
+        return fnameescape(dir)
+      endif
+    endfor
+    let [current, dir] = [dir, fnamemodify(dir, ':h')]
+    if current == dir | break | endif
+  endw
+  return ''
+endf
+
+command! -nargs=0 Rooter call s:rooter()
+command! -nargs=0 Rootg call s:rooter(['.git/'])
 command! -nargs=* -complete=tag Grep silent grep <args> | cwindow | cc
 command! -nargs=+ SExec exec 'silent !'. <q-args> | redraw!
 command! -nargs=+ Exec exec '!'. <q-args> | redraw!
 command! -nargs=+ Silent exec 'silent <args>' | redraw!
 command! -nargs=? CodeCommand call s:code(<q-args>)
 command! -nargs=? Code exec 'CodeCommand -g ' . expand('%:p').':'.line('.') . ' --folder-uri '.getcwd()
+command! -nargs=? Mcdir exec 'Mkdir! ' . expand('%:h'). '/' . <q-args> | if &filetype == "dirvish" | Dirvish % | endif
 
 command! -nargs=0 Only %bd|e#
 command! -nargs=0 Todo exec "Grep 'XFIXME'"
@@ -1410,6 +1446,7 @@ command! -nargs=0 QuickfixUndo cfdo exec "normal u" | update
 
 " Cabbr gdb GdbStartLLDB\ lldb
 
+Cabbr nw noau\ write
 Cabbr c Cargo
 Cabbr co Code
 Cabbr sf CtrlSF
@@ -1421,6 +1458,7 @@ Cabbr qr QuickfixReplace
 Cabbr qu QuickfixUndo
 Cabbr ms SExec\ ms
 Cabbr sy Startify
+Cabbr tsy tabe\|Startify
 
 Cabbr Gfa Git\ fa\ --prune
 
@@ -1428,6 +1466,8 @@ Cabbr ob OpenBrowserSmartSearch
 Cabbr os OpenBrowserSearch
 Cabbr og OpenBrowserSearch\ -go
 Cabbr oc OpenBrowserSearch\ -cpp
+Cabbr ost OpenBrowserSearch\ -stackoverflow
+Cabbr ogh OpenBrowserSearch\ -github
 
 Cabbr db DiffBranch
 Cabbr gl GV\ -22

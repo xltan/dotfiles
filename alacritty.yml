@@ -133,6 +133,14 @@ colors:
   
   indexed_colors: []
 
+cursor:
+  style:
+    shape: Block
+    blinking: On
+  vi_mode_style: None
+  blink_interval: 500
+  unfocused_hollow: true
+  thickness: 0.15
 
 key_bindings:
   - { key: Key0,   mods: Alt,     chars:  "\x1b0"          }
