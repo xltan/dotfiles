@@ -119,8 +119,8 @@ let g:fzf_buffers_jump = 1
 
 let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse --bind ctrl-f:page-down,ctrl-b:page-up'
 let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs"
-nnoremap <silent><leader>f :Files<CR>
-nnoremap <silent><leader>r :exec 'Files '. <SID>root()<CR>
+nnoremap <silent><leader>r :Files<CR>
+nnoremap <silent><leader>f :exec 'Files '. <SID>root()<CR>
 nnoremap <silent><leader>b :Buffers<CR>
 nnoremap <silent><leader>gh :History<CR>
 nnoremap <silent><leader>h :CHistory<CR>
