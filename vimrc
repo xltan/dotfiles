@@ -23,11 +23,19 @@ Plug 'tpope/vim-projectionist'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-rhubarb'
 
+Plug 'vim-test/vim-test'
+nmap <silent> t<CR> :TestSuite<CR>
+nmap <silent> t<C-n> :TestNearest<CR>
+nmap <silent> t<C-f> :TestFile<CR>
+nmap <silent> t<C-l> :TestLast<CR>
+nmap <silent> t<C-g> :TestVisit<CR>
+let g:test#strategy = 'dispatch'
+
 Plug 'tpope/vim-dispatch'
 Plug 'AdUki/vim-dispatch-neovim'
 let g:dispatch_quickfix_height = 0
-nmap s<CR> :Start<CR>
-nmap S<CR> :exec "Start -dir=" . expand("%:h")<CR>
+nmap s' :Start<CR>
+nmap S' :exec "Start -dir=" . expand("%:h")<CR>
 aug vimrc_dispatch
   au!
   au FileType,BufWritePost * call s:setup_makeprg()
@@ -72,7 +80,7 @@ func! s:setup_makeprg()
     exec "nmap <buffer> g<cr> :Dispatch ". prg. '<cr>'
     exec "nmap <buffer> g<space> :Dispatch ". oprg. '<space>'
     exec "nmap <buffer> g! :Dispatch! ". oprg. '<space>'
-    exec "nmap <buffer> s' :Start ". prg. '<cr>'
+    exec "nmap <buffer> s<cr> :Start ". prg. '<cr>'
     exec "nmap <buffer> s<space> :Start ". oprg. '<space>'
     exec "nmap <buffer> s! :Start! ". prg. '<cr>'
   end
@@ -91,14 +99,20 @@ endf
 Plug 'machakann/vim-sandwich'
 
 " Plug 'tpope/vim-endwise'
-inoremap (<CR> (<CR>)<Esc>O
-inoremap {<CR> {<CR>}<Esc>O
-inoremap [<CR> [<CR>]<Esc>O
-inoremap ({<CR> ({<CR>})<Esc>O
-inoremap ([<CR> ([<CR>])<Esc>O
-inoremap {; {};<Esc>hi
-inoremap [; [];<Esc>hi
-inoremap (; ();<Esc>hi
+let delimitMate_expand_space = 1
+let delimitMate_expand_cr = 1
+let delimitMate_matchpairs = "(:),[:],{:}"
+Plug 'Raimondi/delimitMate'
+
+" inoremap (<CR> (<CR>)<Esc>O
+" inoremap {<CR> {<CR>}<Esc>O
+" inoremap [<CR> [<CR>]<Esc>O
+" inoremap ({<CR> ({<CR>})<Esc>O
+" inoremap ([<CR> ([<CR>])<Esc>O
+" inoremap {; {};<Esc>hi
+" inoremap [; [];<Esc>hi
+" inoremap (; ();<Esc>hi
+" inoremap (\| (\|\|)<Esc>hi
 
 Plug 'tpope/vim-fugitive'
 Plug 'shumphrey/fugitive-gitlab.vim'
@@ -119,8 +133,8 @@ let g:fzf_buffers_jump = 1
 
 let $FZF_DEFAULT_OPTS='--inline-info --layout=reverse --bind ctrl-f:page-down,ctrl-b:page-up'
 let $FZF_DEFAULT_COMMAND="fd --type f --color never --no-ignore-vcs"
-nnoremap <silent><leader>r :Files<CR>
-nnoremap <silent><leader>f :exec 'Files '. <SID>root()<CR>
+nnoremap <silent><leader>f :Files<CR>
+nnoremap <silent><leader>r :exec 'Files '. <SID>root()<CR>
 nnoremap <silent><leader>b :Buffers<CR>
 nnoremap <silent><leader>gh :History<CR>
 nnoremap <silent><leader>h :CHistory<CR>
@@ -173,7 +187,7 @@ command! CHistory call fzf#run(fzf#wrap({
   \ }))
 
 func! s:file_history_from_directory(directory)
-  return fzf#vim#_uniq(filter(fzf#vim#_recent_files(), "s:file_is_in_directory(fnamemodify(v:val, ':p'), a:directory)"))
+  return fzf#vim#_uniq([expand('%:~:.')] + filter(fzf#vim#_recent_files(), "s:file_is_in_directory(fnamemodify(v:val, ':p'), a:directory)"))
 endf
 
 func! s:file_is_in_directory(file, directory)
@@ -218,6 +232,27 @@ function! CocGitBranch() abort
   endif
   return ''
 endfunction
+
+function! CocStatus() abort
+  let info = get(b:, 'coc_diagnostic_info', {})
+  if empty(info) | return '' | endif
+  let msgs = []
+  if get(info, 'error', 0)
+    call add(msgs, 'E' . info['error'])
+  endif
+  if get(info, 'warning', 0)
+    call add(msgs, 'W' . info['warning'])
+  endif
+  let coc_status = get(g:, 'coc_status', '')
+  if &filetype == "rust" && coc_status =~ "indexing"
+    let coc_status = ''
+  endif
+  if len(msgs) == 0
+    return coc_status
+  endif
+  return join(msgs, ' ') . ' ' . coc_status
+endfunction
+
 let g:lightline = {
   \ 'colorscheme': 'tomorrow2',
   \ 'component': {
@@ -248,7 +283,7 @@ let g:lightline = {
   \    't':      'T',
   \ },
   \ 'component_function': {
-  \   'cocstatus': 'coc#status',
+  \   'cocstatus': 'CocStatus',
   \   'cocfunc': 'CocFunc',
   \   'cocbranch': 'CocGitBranch',
   \ },
@@ -265,9 +300,9 @@ let g:vim_markdown_fenced_languages = ['js=javascript', 'ts=typescript']
 
 " Plug 'tpope/vim-markdown'
 " let g:markdown_fenced_languages = [
-"   \ 'go', 'c', 'cpp', 'python', 'sh=sh', 
-"   \ 'bash=sh', 'rust', 'javascript', 
-"   \ 'js=javascript', 'json', 'yaml', 
+"   \ 'go', 'c', 'cpp', 'python', 'sh=sh',
+"   \ 'bash=sh', 'rust', 'javascript',
+"   \ 'js=javascript', 'json', 'yaml',
 "   \ 'css', 'xml', 'html', 'make',
 "   \ ]
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() } }
@@ -402,8 +437,15 @@ func! s:scrub(s) abort
   return substitute(a:s, '\\\\\+', '\', 'g')
 endf
 
-func! s:open_term(direction, other, cmd) abort "{{{
-  let dir = s:scrub(expand("%:p:h", 1))
+func! s:open_term(direction, dir, other) abort "{{{
+  if a:dir == 0
+    let dir = expand("%:p:h", 1)
+  else
+    let dir = s:root()
+    if dir == ''
+      let dir = expand("%:p:h", 1)
+    endif
+  endif
   if !isdirectory(dir) "this happens if a directory was deleted outside of vim.
     call s:beep('invalid/missing directory: '.dir)
     return
@@ -412,22 +454,26 @@ func! s:open_term(direction, other, cmd) abort "{{{
   if !(empty($TMUX))
     silent call system("tmux " .  a:direction. " -c '" . dir . "' ". a:other)
   else
-    call gtfo#open#term(dir, a:cmd)
+    call gtfo#open#term(dir)
   endif
 endf
 
 Plug 'justinmk/vim-gtfo'
-nmap <silent> got :<c-u>silent call <SID>open_term('split-window', '', '')<cr>
-nmap <silent> gos :<c-u>silent call <SID>open_term('split-window', '-l 20%', '')<cr>
-nmap <silent> gov :<c-u>silent call <SID>open_term('split-window -h', '-l 35%', '')<cr>
-nmap <silent> goc :<c-u>silent call <SID>open_term('new-window', '', '')<cr>
+nmap <silent> goT :<c-u>silent call <SID>open_term('split-window', 0, '')<cr>
+nmap <silent> got :<c-u>silent call <SID>open_term('split-window', 1, '')<cr>
+nmap <silent> goS :<c-u>silent call <SID>open_term('split-window', 0, '-l 20%')<cr>
+nmap <silent> gos :<c-u>silent call <SID>open_term('split-window', 1, '-l 20%')<cr>
+nmap <silent> goV :<c-u>silent call <SID>open_term('split-window -h', 0, '-l 35%')<cr>
+nmap <silent> gov :<c-u>silent call <SID>open_term('split-window -h', 1, '-l 35%')<cr>
+nmap <silent> goC :<c-u>silent call <SID>open_term('new-window', 0, '')<cr>
+nmap <silent> goc :<c-u>silent call <SID>open_term('new-window', 1, '')<cr>
 if has('win32')
   nmap <silent> gox :SExec start %<CR>
 else
   nmap <silent> gox :SExec open %<CR>
 endif
 cmap %% <C-R>=fnameescape(expand('%:h'))<CR>/
-nmap gon :sav %% \| read #<Left><Left><Left><Left><Left><Left><Left><Left><Left>
+nmap gon :e %% \| 0read #<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
 
 " Plug 'neoclide/coc.nvim', {'tag': '*'}
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
@@ -459,12 +505,13 @@ nmap gn <Plug>(coc-rename)
 nmap gz <Plug>(coc-fix-current)
 
 inoremap <silent><expr> <C-n> pumvisible() ? "\<C-n>" : coc#refresh()
-inoremap <silent><expr> <cr> pumvisible() ? "\<C-e>\<cr>" : "\<cr>"
+imap <silent><expr> <cr> pumvisible() ? "\<C-e>\<Plug>delimitMateCR" : "\<Plug>delimitMateCR"
 inoremap <silent><expr> <TAB>
   \ pumvisible() ? coc#_select_confirm() :
   \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
   \ <SID>check_back_space() ? "\<TAB>" :
   \ coc#refresh()
+vmap <Tab> <Plug>(coc-snippets-select)
 
 xmap <leader>a <Plug>(coc-codeaction-selected)
 nmap <leader>a v<Plug>(coc-codeaction-selected)
@@ -476,6 +523,9 @@ nmap <silent> <leader>ca :CocFzfList actions<CR>
 nmap <silent> <leader>cc :CocFzfList commands<CR>
 nmap <silent> <leader>cl :CocFzfList<CR>
 nmap <silent> <leader>cr :CocRestart<CR>
+
+nnoremap gJ :s/\s\+/\r<CR>
+vnoremap gJ :<C-u>'<,'>s/\s\+/\r<CR>
 
 omap if <Plug>(coc-funcobj-i)
 xmap if <Plug>(coc-funcobj-i)
@@ -570,7 +620,7 @@ nmap <leader>gs gz*<Plug>CtrlSFCwordPath<CR>
 nmap <leader>gz z*<Plug>CtrlSFCwordPath -W<CR>
 nmap <leader>gw mz:silent grep <c-r><c-w> %% <cr>:copen<cr>:wincmd p<cr>`z
 nmap <leader>go :CtrlSFToggle<CR>
-nmap <leader>gr :CocCommand git.toggleGutters<CR>
+nmap cog :CocCommand git.toggleGutters<CR>
 
 if executable("rg")
   set grepprg=rg\ --vimgrep
@@ -780,10 +830,10 @@ func! s:make_hack(bang, qargs, count)
   exec dispatch#compile_command(a:banng, '-- ' . a:qargs, a:count, '<mods>')
 endf
 
-command! -bang -nargs=* -range=-1 -complete=customlist,dispatch#command_complete Dispatch 
+command! -bang -nargs=* -range=-1 -complete=customlist,dispatch#command_complete Dispatch
   \ call s:dispatch_hack(<bang>0, <q-args>, <count> < 0 || <line1> == <line2> ? <count> : 0)
 
-command! -bang -nargs=* -range=-1 -complete=customlist,dispatch#make_complete Make 
+command! -bang -nargs=* -range=-1 -complete=customlist,dispatch#make_complete Make
   \ call s:dispatch_hack(<bang>0, '-- ' . <q-args>, <count> < 0 || <line1> == <line2> ? <count> : 0)
 
 nnoremap <nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<C-f>"
@@ -794,12 +844,6 @@ vnoremap <nowait><expr> <C-f> coc#float#has_scroll() ? coc#float#scroll(1) : "\<
 vnoremap <nowait><expr> <C-b> coc#float#has_scroll() ? coc#float#scroll(0) : "\<C-b>"
 
 inoremap <C-E> <End>
-inoremap <M-t> <esc>diwbPa <esc>ea
-if !has("gui_running") " from tpope/vim-rsi
-  silent! exec "set <F36>=\<esc>t"
-  map! <F36> <M-t>
-  map <F36> <M-t>
-endif
 
 set mps+=<:>
 if !has('nvim')
@@ -852,6 +896,7 @@ func! s:reset_color() abort
   hi! link diffIndexLine Comment
   hi! link Delimiter Normal
   hi! link TSParameter Normal
+  hi! link TypescriptEndColons Normal
   hi DiffAdded guibg=NONE
   hi DiffRemoved guibg=NONE
   hi ErrorMsg guibg=NONE
@@ -867,12 +912,12 @@ func! s:reset_color() abort
   exec "hi QuickfixLine guifg=#". g:base16_gui0A . " guibg=#" . g:base16_gui02
   exec "hi FzfWindow guifg=#". g:base16_gui02
   exec "hi Search guifg=#". g:base16_gui02
+  exec "hi CocHintSign guifg=#63686f"
 
   " hi link CocListsLine QuickfixLine
   " hi! link FloatermBorder Comment
   hi! link goSpaceError Comment
   hi! link jsonCommentError Comment
-  hi! link CocHintSign Comment
   hi! link CocHoverRange Comment
 
   hi! link PmenuSel Visual
@@ -893,6 +938,7 @@ set ignorecase smartcase tagcase=match
 set exrc nofixeol listchars=tab:\|\ ,eol:¬
 set formatoptions+=j viminfo^='500
 set updatetime=100 scrolloff=3 diffopt+=vertical,algorithm:patience,indent-heuristic
+set timeoutlen=500
 set shortmess+=c
 set nu rnu scl=number
 set inccommand=nosplit
@@ -955,7 +1001,7 @@ aug vimrc_filetype
 
   au filetype markdown nnoremap <buffer><silent> gN O<Esc>C- [ ] 
     \| nnoremap <buffer><silent> gn o<Esc>C- [ ] 
-    \| nnoremap <buffer><silent> gd :<HOME>silent! <END>S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>
+    \| nnoremap <buffer><silent> gd mz:silent! S/- [{ ,x}]/- [{x, }]/<CR>:nohl<CR>`z
     \| nnoremap <buffer><silent> <leader>q :q<CR>
     " \| setlocal conceallevel=2
   au FileType html,typescript,javascript,css,scss,json,yaml,fish,lua setlocal expandtab ts=2 sw=2
@@ -1044,7 +1090,7 @@ exec 'inoremap <script> <C-Q> <C-G>u' . paste#paste_cmd['i']
 exec 'vnoremap <script> <C-Q> ' . paste#paste_cmd['v']
 
 nnoremap <silent> <C-S> :update<CR>
-vnoremap <silent> <C-S> <C-C>:update<CR>
+vnoremap <silent> <C-S> :startinsert<cr><C-c>:update<cr>
 inoremap <silent> <C-S> <Esc>:update<CR>
 inoremap <silent> ZZ <Esc>ZZ
 
@@ -1057,15 +1103,46 @@ func! s:get_buffer_list()
   return buflist
 endf
 
+func! s:move_to_char(str)
+  let c = col('.')
+  let s = getline('.')
+  for i in split(a:str, '\zs')
+    let p = stridx(s, i, c)
+    if p != -1
+      startinsert
+      call cursor(line('.'), p+2)
+      return 0
+    endif
+  endfor
+  return -1
+endf
+
+func! s:omni_jump()
+  let res = s:move_to_char('})''"|')
+  if res != -1
+    return
+  endif
+
+  if line('.') == line('$')
+    normal o
+  else
+    normal j
+    startinsert
+    call cursor(line('.'), col('.')+1)
+  end
+endf
+
 inoremap <C-^> <Esc><C-^>
 inoremap <C-l> <C-o>zz
-inoremap <C-k> <C-o>k
-inoremap <C-j> <C-o>j
+inoremap <C-k> <Up>
+inoremap <silent><C-j> <Esc>:call <SID>omni_jump()<cr>
 
 nnoremap <C-h> <C-w>h
 nnoremap <C-j> <C-w>j
 nnoremap <C-k> <C-w>k
 nnoremap <C-l> <C-w>l
+
+nnoremap <C-w>t :tab sp<CR>
 
 if has('nvim')
 " lua <<EOF
@@ -1082,12 +1159,12 @@ if has('nvim')
 " 'vim';
 " }
 " EOF
-  
   aug vimrc_term
     au!
     au TermLeave * setlocal scrolloff=3
-    au TermOpen * setlocal statusline=%{b:term_title} | nnoremap <buffer> q a<CR>
-    au BufEnter term://* startinsert
+    au TermOpen * setlocal statusline=%{b:term_title} | startinsert | nnoremap <buffer> q a<CR>
+    au BufEnter,BufWinEnter term://* startinsert
+    au BufLeave term://* stopinsert
   aug END
 
   tnoremap <Esc> <C-\><C-n>
@@ -1113,7 +1190,7 @@ vnoremap > >gv
 nnoremap gV `[v`]
 nnoremap Y y$
 vnoremap P y`>o<Esc>p
-nnoremap yp vapyP
+nnoremap yp vapyP}j
 
 cnoremap <C-p> <Up>
 cnoremap <C-n> <Down>
@@ -1503,6 +1580,15 @@ func! s:toggle_words(l, r)
   end
 endf
 
+func! s:toggle_ending()
+  let cline = getline(".")
+  if stridx(cline, ";") > 0
+    s/;$//
+  else
+    s/;\@<!$/;/
+  end
+endf
+
 func! s:filetype_go()
   Cabbrb gat CocCommand\ go.tags.add
   Cabbrb grt CocCommand\ go.tags.clear
@@ -1518,7 +1604,8 @@ endf
 
 func! s:filetype_rust()
   setlocal iskeyword+=!
-  nnoremap <buffer><silent> s; :<c-u>call <SID>toggle_words('let mut', 'let')<CR>
+  nnoremap <buffer><silent> s; mz:<c-u>call <SID>toggle_ending()<CR>`z
+  nnoremap <buffer><silent> sm :<c-u>call <SID>toggle_words('let mut', 'let')<CR>
   nnoremap <buffer><silent> s7 :<c-u>call <SID>toggle_words('&mut ', '&')<CR>
   nnoremap <buffer><silent> s/ :<c-u>call <SID>toggle_words('{}', '{:?}')<CR>
 endf

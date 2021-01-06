@@ -1,6 +1,8 @@
---languages=go,rust,c++,python
+--languages=go,rust,c++,python,javascript,typescript
 --kinds-go=-m
 --kinds-go=-p
 --kinds-rust=-c
 --kinds-rust=-m
 -n
+--exclude=node_modules
+--exclude=dist
