@@ -2,7 +2,6 @@ require("nvim-treesitter.configs").setup({
 	sync_install = false,
 	auto_install = true,
 
-	context_commentstring = { enable = true },
 	highlight = {
 		enable = true, -- false will disable the whole extension
 		disable = function(_, buf)
@@ -26,7 +25,7 @@ require("nvim-treesitter.configs").setup({
 		-- 	node_decremental = "grm",
 		-- },
 	},
-	indent = { enable = true, disable = { "python", "yaml" } },
+	indent = { enable = true, disable = { "yaml" } },
 	textobjects = {
 		select = {
 			enable = true,

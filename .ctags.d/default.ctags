@@ -1,1 +1,11 @@
-/Users/sinon/tools/dotfiles/configs/ctags
+--languages=go,rust,c++,python,javascript,typescript,ruby
+--kinds-go=-m
+--kinds-go=-p
+--kinds-rust=-c
+--kinds-rust=-m
+--exclude=node_modules
+--exclude=dist
+--exclude=ansible_plugins
+--exclude=.direnv
+--exclude=*/client/static
+--extras-all=-{anonymous}

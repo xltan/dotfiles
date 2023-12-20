@@ -13,9 +13,9 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-	{ "folke/lazy.nvim",             version = false },
+	{ "folke/lazy.nvim", version = false },
 	{ "nvim-tree/nvim-web-devicons", lazy = true },
-	{ "nvim-lua/plenary.nvim",       lazy = true },
+	{ "nvim-lua/plenary.nvim", lazy = true },
 	{
 		"EdenEast/nightfox.nvim",
 		lazy = false, -- make sure we load this during startup if it is your main colorscheme
@@ -34,7 +34,9 @@ require("lazy").setup({
 			"JoosepAlviste/nvim-ts-context-commentstring",
 		},
 		config = function()
+			vim.g.skip_ts_context_commentstring_module = true
 			require("config.treesitter")
+			require("ts_context_commentstring").setup({})
 		end,
 		event = lazy_file_event,
 	},
@@ -89,7 +91,7 @@ require("lazy").setup({
 		end,
 		event = lazy_file_event,
 	},
-	{ "AndrewRadev/linediff.vim",   cmd = "Linediff" },
+	{ "AndrewRadev/linediff.vim", cmd = "Linediff" },
 	{
 		"nvim-lualine/lualine.nvim",
 		dependencies = "WhoIsSethDaniel/lualine-lsp-progress.nvim",
@@ -259,12 +261,12 @@ require("lazy").setup({
 				require("leap").leap({ target_windows = target_windows })
 			end
 			for _, _each in ipairs({
-				{ { "n" },      "s",  "<Plug>(leap-forward-to)" },
-				{ { "n" },      "S",  "<Plug>(leap-backward-to)" },
-				{ { "x", "o" }, "z",  "<Plug>(leap-forward-to)" },
-				{ { "x", "o" }, "Z",  "<Plug>(leap-backward-to)" },
+				{ { "n" }, "s", "<Plug>(leap-forward-to)" },
+				{ { "n" }, "S", "<Plug>(leap-backward-to)" },
+				{ { "x", "o" }, "z", "<Plug>(leap-forward-to)" },
+				{ { "x", "o" }, "Z", "<Plug>(leap-backward-to)" },
 				-- { { "n", "x", "o" }, "gs", "<Plug>(leap-cross-window)" },
-				{ { "n" },      "gs", leap_all_windows },
+				{ { "n" }, "gs", leap_all_windows },
 			}) do
 				local modes, lhs, rhs = unpack(_each)
 				for _, mode in ipairs(modes) do
@@ -380,7 +382,11 @@ require("lazy").setup({
 			"williamboman/mason.nvim",
 			"williamboman/mason-lspconfig.nvim",
 			"kosayoda/nvim-lightbulb",
-			"simrat39/rust-tools.nvim",
+			{
+				"mrcjkb/rustaceanvim",
+				version = "^3",
+				ft = { "rust" },
+			},
 			"akinsho/flutter-tools.nvim",
 			"onsails/lspkind.nvim",
 			{
@@ -393,8 +399,7 @@ require("lazy").setup({
 		config = function()
 			require("config.lsp")
 		end,
-
-		event = "VeryLazy",
+		-- event = "VeryLazy",
 	},
 	{
 		"hrsh7th/nvim-cmp",
@@ -440,7 +445,7 @@ require("lazy").setup({
 		config = true,
 		event = lazy_file_event,
 	},
-	{ "xltan/vim-goimpl",           cmd = "GoImpl" },
+	{ "xltan/vim-goimpl", cmd = "GoImpl" },
 	{ "leafgarland/typescript-vim", ft = { "typescript", "javascript" } },
 	{
 		"cespare/vim-toml",
@@ -460,8 +465,8 @@ require("lazy").setup({
 	},
 
 	{ "hashivim/vim-terraform", ft = "terraform" },
-	{ "keith/swift.vim",        ft = "swift" },
-	{ "neoclide/jsonc.vim",     ft = { "json", "jsonc" } },
+	{ "keith/swift.vim", ft = "swift" },
+	{ "neoclide/jsonc.vim", ft = { "json", "jsonc" } },
 	{
 		"iamcco/markdown-preview.nvim",
 		ft = "markdown",

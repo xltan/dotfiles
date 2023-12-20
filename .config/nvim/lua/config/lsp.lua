@@ -128,17 +128,6 @@ local default_options = {
 	capabilities = capabilities,
 }
 
-local rust_tools = require("rust-tools")
-rust_tools.setup({
-	server = {
-		on_attach = function(client)
-			client.server_capabilities.semanticTokensProvider = nil
-			on_attach(client)
-		end,
-		capabilities = capabilities,
-	},
-})
-
 require("flutter-tools").setup({
 	lsp = default_options,
 })

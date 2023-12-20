@@ -1,1 +1,3 @@
-/Users/sinon/tools/dotfiles/dotconfigs/inputrc
+set show-all-if-ambiguous on
+set bind-tty-special-chars Off
+set completion-ignore-case on
