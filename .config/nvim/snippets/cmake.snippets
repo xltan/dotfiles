@@ -1,0 +1,48 @@
+snippet init
+	cmake_minimum_required(VERSION ${1:3.10.0})
+	project(${2:name})
+
+	add_executable(${PROJECT_NAME} ${3:main.cc})
+
+snippet glob
+	file(GLOB ${1:srcs} *.${0:cpp})
+
+snippet link "taget link libraries" b
+	target_link_libraries(${1:${PROJECT_NAME}} ${2:${CONAN_LIBS}})
+
+snippet feature
+	target_compile_features(${1:${PROJECT_NAME}} ${3:PUBLIC} ${2:cxx_std_17})
+
+snippet bin
+	add_executable(${1:${PROJECT_NAME}} ${2:${SRCS}})
+
+snippet prop
+	set_target_properties(${1:target} ${2:PROPERTIES} ${3:COMPILE_FLAGS} ${0:"-O2"})
+
+snippet cflags
+	set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "$1")
+
+snippet	cxxflags
+	set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "$1")
+
+snippet conan
+	include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+	conan_basic_setup()
+
+snippet tags "Description" b
+	set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+snippet build "build type" b
+	SET(CMAKE_CXX_STANDARD 11)
+	SET(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+	SET(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+	SET(CMAKE_CXX_FLAGS_RELEASE "-O2")
+	SET(DEFAULT_BUILD_TYPE "RelWithDebInfo")
+
+	IF(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+		MESSAGE(STATUS "Setting build type to default '${DEFAULT_BUILD_TYPE}'")
+		SET(CMAKE_BUILD_TYPE "${DEFAULT_BUILD_TYPE}")
+	ENDIF()
+
+snippet c17 "c++ 17"
+	target_compile_features(${1:mylib} INTERFACE cxx_std_17)

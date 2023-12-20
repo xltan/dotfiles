@@ -1,0 +1,86 @@
+snippet pl "println" b
+	fmt.Println(${1:w})
+
+snippet pf "printf" b
+	fmt.Printf("${1:%v\n}", ${2:var})
+
+snippet fp "file printf" b
+	fmt.Fprintf(${1:w}, "${2:%v\n}", ${3:var})
+
+snippet ef "errorf" 
+	fmt.Errorf("${1:%v}", ${2:err})
+
+snippet ife "if err" b
+	if err != nil {
+		${1}
+	}
+
+snippet gof "go func" b
+	go func(${1}) {
+		${2}
+	}()
+
+snippet ctx "context" i
+	ctx context.Context
+
+snippet as "assert" b
+	if !${1:predicate} {
+		t.Error("${2:predicate error}")
+	}
+
+snippet ase "assert_eq" b
+	if ${1:actual} != ${2:expected} {
+		t.Errorf("actual: %v, expected: %v\n", $1, $2)
+	}
+
+snippet bench "func BenchmarkXYZ(b *testing.B) { ... }"
+	func Benchmark${1:Method}(b *testing.B) {
+		var x ${2:int}
+		for i := 0; i < b.N; i++ {
+			x = ${0:${VISUAL}}
+		}
+		r = x
+	}
+
+snippet test "func TestXYZ(t *testing.T) { ... }"
+	func Test${1:Function}(t *testing.T) {
+		${0:${VISUAL}}
+	}
+
+snippet tt
+	var tests = []struct {
+		name string
+		expected string
+		given string
+	}{
+		{"${1}", "${2}", "${3}",},
+	}
+	for _, tt := range tests {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T){
+			actual := ${0:${VISUAL}}(tt.given)
+			if actual != tt.expected {
+					t.Errorf("$0(%s): expected %s, actual %s", tt.given, tt.expected, actual)
+			}
+
+		})
+	}
+
+snippet iota "const ( ... = iota )"
+	const (
+		${1:NAME} ${2:Type} = iota
+		${0}
+	)
+
+snippet ap= "a = append(a, value)"
+	${1:slice} = append($1, ${0:value})
+
+
+snippet ticker "ticker"
+	ticker := time.NewTicker(500 * time.Millisecond)
+	for {
+		select {
+		case ${1:t := } <-ticker.C:
+			$0
+		}
+	}

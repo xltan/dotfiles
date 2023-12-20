@@ -1,0 +1,236 @@
+snippet c "const" i
+	const ${0}
+
+snippet ca "const auto" i
+	const auto ${0}
+
+snippet a "auto" i
+	auto ${0}
+
+snippet a& "auto &" i
+	auto& ${0}
+
+snippet ca& "const auto&" i
+	const auto& ${0}
+
+snippet main
+	int main() {
+		${0}
+	}
+
+snippet maina "main args" b
+	int main(int argc, char *argv[]) {
+		${0}
+	}
+
+snippet in< "include file" b
+	#include <${1:iostream}>
+
+snippet in" "include file" b
+	#include "${1:iostream}"
+
+snippet let "let to auto" b
+	auto
+
+snippet scst "static cast" w
+	static_cast<${1:T}>(${2})
+
+snippet rcst "reinterpret cast" w
+	reinterpret_cast<${1:T *}>(${2})
+
+snippet ccst "const cast" w
+	const_cast<${1:T} *>(${2})
+
+snippet dcst "dynamic cast"
+	dynamic_cast<${1:T} *>(${2})
+
+snippet up "Unique Pointer" i
+	std::unique_ptr<${1:T}> ${0}
+
+snippet sp "shared Pointer" i
+	std::shared_ptr<${1:T}> ${0}
+
+snippet ms "make shared"
+	make_shared<${1:T}>
+
+snippet mu "make unique"
+	make_unique<${1:T}>
+
+snippet vec "vector (v)"
+	vector<${1:T}> ${2:v};
+
+snippet vi "vector<int> (v)"
+	vector<int> ${2:v};
+
+snippet vii "vector<pair<int, int>> (v)"
+	vector<pair<int, int>> ${2:v};
+
+snippet map "map"
+	map<${1:string}, ${2:int}> ${3:m};
+
+snippet umap "unordered_map"
+	unordered_map<${1:string}, ${2:int}> ${3:m};
+
+snippet set "set (set)"
+	set<${1:key}> ${3:s};
+
+snippet uset "unordered_set"
+	unordered_set<${1:key}> ${3:s};
+
+snippet all "container" i
+	${1:v}.begin(), $1.end()$0
+
+snippet call "container" i
+	${1:v}.cbegin(), $1.cend()$0
+
+snippet tp "template" b
+	template <typename ${1:T}>
+
+snippet fori "for iterator loop (for)"
+	for (auto it = $1.begin(); it != ${1:c}.end(); ++it) {
+		${VISUAL}$0
+	}
+
+snippet copy "copy construtor"
+	${1:Type}(const $1& ${2:t}) {
+		printf("$1 copy ctor\n");
+		${3}
+	}
+
+	$1& operator=(const $1& $2) {
+		printf("$1 copy assign, release old, allocate new\n");
+		return *this;
+	}
+
+snippet move "move construtor"
+	${1:Type}($1&& ${2:t}){
+		printf("$1 move ctor\n");
+		${3}
+	}
+
+	$1& operator=($1&& $2) {
+		printf("$1 move assign, release old, allocate new\n");
+		return *this;
+	}
+
+snippet hdr "test header" b
+	#include <map>
+	#include <stack>
+	#include <vector>
+	#include <memory>
+	#include <iterator>
+	#include <iostream>
+	#include <algorithm>
+	#include <cstdlib>
+	#include <cstring>
+	using namespace std;
+
+	template <typename T, typename F = void>
+	class is_string : public false_type {};
+
+	template <typename T>
+	class is_string<T, void_t<decltype(declval<T>().c_str())>> : public true_type {
+	};
+
+	template <typename T, typename F = void>
+	class is_container : public false_type {};
+
+	template <typename T>
+	class is_container<T, void_t<decltype(declval<T>().begin())>>
+		: public true_type {};
+
+	template <typename T>
+	enable_if_t<is_container<T>::value && !is_string<T>::value, ostream> &
+	operator<<(ostream &out, T &t) {
+		out << "{";
+		auto a = t.begin();
+		if (a != t.end()) {
+			out << *a;
+			while (++a != t.end()) {
+				out << ", " << *a;
+			}
+		}
+		out << "}";
+		return out;
+	}
+
+	template <typename T, ssize_t N>
+	enable_if_t<(sizeof(T) > 1), ostream> &operator<<(ostream &out, T (&a)[N]) {
+		out << "[";
+		if (N > 0) {
+			out << a[0];
+			for (int i = 1; i < N; ++i) {
+				out << ", " << a[i];
+			}
+		}
+		out << "]";
+		return out;
+	}
+
+snippet bench "benchmark" b
+	static void ${1:bench}(benchmark::State& state) {
+		for(auto _ : state) {
+			${VISUAL}$0
+		}
+	}
+	BENCHMARK($1);
+
+snippet binc "benchmark include" b
+	#include <benchmark/benchmark.h>
+
+snippet bmain "benchmark include" b
+	BENCHMARK_MAIN();
+
+snippet gtest "gtest" b
+	TEST(${1:testname1}, ${2:testname2}) {
+		${VISUAL}$0
+	}
+
+	int main(int argc, char** argv) {
+		::testing::InitGoogleTest(&argc, argv);
+		return RUN_ALL_TESTS();
+	}
+
+snippet	lmain "leetcode" b
+	int main() {
+		Solution sol;
+		sol.${1:twoSum}(${2:args});
+	}
+
+snippet	inf "informer" b
+	class ${1:Informer} {
+	public:
+		$1() { cout << "ctor $1\n"; }
+		$1(const $1& a) { cout << "copy ctor $1\n"; }
+		$1& operator=(const $1& a) {
+			cout << "copy assign $1\n";
+			return *this;
+		}
+		$1($1&& a) { cout << "move ctor $1\n"; }
+		$1& operator=($1&& a) {
+			cout << "move assign $1\n";
+		return *this;
+		}
+		~$1() { cout << "dtor $1\n"; }
+	};
+
+snippet typeof "get type of parameter"
+	using TY = std::decay_t<decltype(${1:arg})>;
+
+snippet ifc "if constexpr"
+	if constexpr (${1:true}) {
+		${2}
+	}
+
+snippet match "match"
+	if constexpr (std::is_same_v<TY, ${1:int}>) {
+		${2}
+	}
+
+snippet ustd "using namespace std" b
+	using namespace std;
+	$1
+
+snippet s "std"
+	std::$1
+

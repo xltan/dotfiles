@@ -1,0 +1,72 @@
+snippet .sv ".svelte(..)" i
+	.svelte${0}
+
+snippet fn "function"
+	function
+
+snippet lambda "anonymous function(..)" i
+	(${1}) => $2
+
+snippet patch_fetch
+	async function zendeskFetch(
+	  input: RequestInfo,
+	  init?: RequestInit,
+	): Promise<Response> {
+	  if (input !== ZENDESK_CONFIG_URL) {
+	    return await fetch(input, init);
+	  }
+
+	  if (window.duo.in_china) {
+	    return ZENDESK_CONFIG_PROMISE;
+	  }
+
+	  try {
+	    return await fetch(input, init);
+	  } catch {
+	    return ZENDESK_CONFIG_PROMISE;
+	  }
+	}
+
+	let oldOpen = window.XMLHttpRequest.prototype.open;
+
+	function zendeskOpen(
+	  method: string,
+	  input: string,
+	  async?: boolean,
+	  username?: string | null,
+	  password?: string | null,
+	): void {
+	  const url = new URL(input);
+	  if (url.origin === "https://testcenter.zendesk.com") {
+	    url.host = "localhost:5678";
+	  }
+	  input = url.toString();
+	  return oldOpen.call(this, method, input, async, username, password);
+	}
+
+	/**
+	 * When child nodes is appended on a node, this callback will be called with the added nodes.
+	 */
+	function onAppend(elem: Node, callback: (_: Node) => void) {
+	  const observer = new MutationObserver(mutations => {
+	    mutations.forEach(m => {
+	      m.addedNodes.forEach(n => {
+		callback(n);
+	      });
+	    });
+	  });
+	  observer.observe(elem, { childList: true });
+	}
+
+	async function loadZendesk() {
+	  // Some magic property to patch the `fetch` of zendesk iframe.
+	  onAppend(document.body, (node: Node) => {
+	    if (node.nodeName === "IFRAME") {
+	      const elem = node as HTMLIFrameElement;
+	      if (elem.getAttribute("data-product") === "web_widget") {
+		elem.contentWindow.fetch = zendeskFetch;
+		(elem.contentWindow as any).XMLHttpRequest.prototype.open = zendeskOpen;
+	      }
+	    }
+	  });
+

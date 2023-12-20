@@ -1,0 +1,29 @@
+snippet in< "include file" b
+	#include <${1:stdio.h}>
+	$0
+
+snippet in" "include file" b
+	#include "${1:test.h}"
+
+snippet main
+	int main() {
+		${0}
+	}
+
+snippet maina "main args" b
+	int main(int argc, char *argv[]) {
+		${0}
+	}
+
+snippet fun "function" b
+	${1:void} ${2:func}(${3}) {
+		${4}
+	}
+
+snippet for "for loop (for)"
+	for (int ${2:i} = 0; $2 < ${1:count}; ++$2) {
+		${VISUAL}$0
+	}
+
+snippet "i(\d+)"  "int32_t" r
+	int`!p snip.rv = match.group(1)`_t 

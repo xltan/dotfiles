@@ -1,0 +1,104 @@
+snippet skip "rustfmt::skip" b
+	#[rustfmt::skip]
+
+snippet main "fn main"
+	fn main() {
+		$1
+	}
+
+snippet col "collect" w
+	collect::<${1:Vec<_>}>()
+
+snippet ok "ok" w
+	Ok(${1:()})
+
+snippet debug "ok" w
+	#[derive(Debug)]
+
+snippet bench "Bench function" b
+	#[bench]
+	fn ${1:bench_function_name}(b: &mut test::Bencher) {
+		b.iter(|| {
+			${0}
+		})
+	}
+
+snippet new "Constructor function"
+	pub fn new(${2}) -> ${1:Self} {
+		$1 { ${3} }
+	}
+
+snippet fmt "format!"
+	format!("${1}{${2}}", ${3});
+
+snippet d "dbg! debugging macro" e
+	dbg!(${0})
+
+snippet safe "unsafe block" 
+	unsafe{${0:${VISUAL}}}
+
+	# Testing
+snippet as "assert!"
+	assert!(${1:predicate});
+
+snippet ase "assert_eq!"
+	assert_eq!(${1:actual}, ${2:expected});
+
+snippet test "Unit test function"
+	#[test]
+	fn ${1:func}_test() {
+		${0}
+	}
+
+snippet testmod "Test module" b
+	#[cfg(test)]
+	mod tests {
+		use super::*;
+
+		#[test]
+		fn ${1:func}_test() {
+			$0
+		}
+	}
+
+snippet ii "impl iterator" w
+	impl Iterator<Item = ${1:isize}>
+
+snippet macro "macro_rules!" b
+	macro_rules! ${1:name} {
+		(${2:matcher}) => (
+			$3
+		)
+	}
+
+	# Attributes
+snippet allow "allow lint attribute" b
+	#[allow(${1:unused_variables})]
+
+snippet cfg "cfg attribute" b
+	#[cfg(${1:target_os = "linux"})]
+
+snippet feat "feature attribute" b
+	#![feature(${1:plugin})]
+
+snippet der "#[derive(..)]" b
+	#[derive(${1:Debug})]
+
+snippet attr "#[..]" b
+	#[${1:inline}]
+
+snippet doc "document" b
+	/// ${1:doc}
+	/// \`\`\`rust
+	/// $2
+	/// \`\`\`
+
+snippet pl "println!(..)" w
+	println!("${1:{\}}"$2);
+
+snippet pd "println!(..)" w
+	println!("${1} = {:?}", ${1});
+
+snippet pv "println!(..)" w
+	println!("${1} = {:#?}", ${1});
+	$0
