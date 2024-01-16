@@ -1,0 +1,11 @@
+/tags.temp
+/tags.lock
+/tags
+/.cache/
+/node_modules/
+compile_commands.json
+/.envrc
+/.direnv/
+.projections.json
+.luarc.json
+.parcel-cache/
