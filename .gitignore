@@ -2,6 +2,7 @@
 /tags.lock
 /tags
 /.cache/
+/.local/
 /node_modules/
 compile_commands.json
 /.envrc

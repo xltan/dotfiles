@@ -47,3 +47,4 @@ ansible_plugins/
 .parcel-cache/
 .dart_tool/
 .idea/
+.local/
