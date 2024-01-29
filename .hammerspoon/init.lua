@@ -46,3 +46,19 @@ hs.hotkey.bind(
 		end
 	end
 )
+
+-- Kill all other windows
+hs.hotkey.bind(
+	{ "shift", "cmd" },
+	"q",
+	function() -- change your own hotkey combo here, available keys could be found here:https://www.hammerspoon.org/docs/hs.hotkey.html#bind
+		local current_win = hs.window.frontmostWindow()
+		local app = current_win:application()
+    -- closes all other windows
+    for _, win in ipairs(app:allWindows()) do
+      if win ~= current_win then
+        win:close()
+      end
+    end
+	end
+)
