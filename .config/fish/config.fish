@@ -8,6 +8,7 @@ set -gx DENO_INSTALL "$HOME/.deno"
 set -gx FZF_DEFAULT_COMMAND 'fd --type f --strip-cwd-prefix --hidden --follow --exclude .swap --exclude .undo'
 set -gx FZF_CTRL_T_COMMAND "command find -L \$dir -type f 2> /dev/null | sed '1d; s#^\./##'"
 set -gx GPG_TTY (tty)
+set -gx PYTHONPATH .
 
 fish_add_path /usr/local/sbin $HOME/.duolingo/bin $HOME/.local/bin $HOME/.cargo/bin $HOME/.deno/bin $GOPATH/bin \
   $HOME/tools/flutter/bin $PYENV_ROOT/bin $HOMEBREW_ROOT/bin $HOMEBREW_ROOT/sbin \
