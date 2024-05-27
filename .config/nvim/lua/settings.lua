@@ -28,7 +28,6 @@ local opts = {
 	nu = true,
 	rnu = true,
 	cursorline = true,
-	syntax = false,
 	termguicolors = true,
 	backupdir = vim_home .. "/.swap",
 	directory = vim_home .. "/.swap//",

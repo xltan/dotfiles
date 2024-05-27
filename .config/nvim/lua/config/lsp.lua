@@ -41,6 +41,7 @@ local normal_servers = {
 	"gopls",
 	"html",
 	"jsonls",
+	"ruff_lsp",
 	"pyright",
 	"svelte",
 	"stylelint_lsp",
@@ -111,6 +112,10 @@ local on_attach = function(client)
 	if vim.tbl_contains(use_other_formating_servers, client.name) then
 		client.server_capabilities.documentFormattingProvider = false
 	end
+	if client.name == "ruff_lsp" then
+		-- Disable hover in favor of Pyright
+		client.server_capabilities.hoverProvider = false
+	end
 	if client.server_capabilities.documentFormattingProvider then
 		vim.cmd([[
     augroup LspFormatting
@@ -172,6 +177,20 @@ local server_options = {
 		-- init_options = {
 		-- 	camelCase = true,
 		-- },
+	},
+	pyright = {
+		settings = {
+			pyright = {
+				-- Using Ruff's import organizer
+				disableOrganizeImports = true,
+			},
+			python = {
+				analysis = {
+					-- Ignore all files for analysis to exclusively use Ruff for linting
+					ignore = { "*" },
+				},
+			},
+		},
 	},
 }
 

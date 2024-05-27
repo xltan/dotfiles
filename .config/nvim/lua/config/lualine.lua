@@ -32,7 +32,6 @@ require("lualine").setup({
 			"aerial",
 		},
 		lualine_x = {
-			"lsp_progress",
 			"branch",
 		},
 

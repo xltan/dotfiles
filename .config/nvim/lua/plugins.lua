@@ -94,7 +94,6 @@ require("lazy").setup({
 	{ "AndrewRadev/linediff.vim", cmd = "Linediff" },
 	{
 		"nvim-lualine/lualine.nvim",
-		dependencies = "WhoIsSethDaniel/lualine-lsp-progress.nvim",
 		config = function()
 			require("config.lualine")
 		end,

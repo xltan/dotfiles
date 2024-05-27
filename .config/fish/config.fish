@@ -10,6 +10,7 @@ set -gx FZF_CTRL_T_COMMAND "command find -L \$dir -type f 2> /dev/null | sed '1d
 set -gx GPG_TTY (tty)
 set -gx PYTHONPATH .
 
+
 fish_add_path /usr/local/sbin $HOME/.duolingo/bin $HOME/.local/bin $HOME/.cargo/bin $HOME/.deno/bin $GOPATH/bin \
   $HOME/tools/flutter/bin $PYENV_ROOT/bin $HOMEBREW_ROOT/bin $HOMEBREW_ROOT/sbin \
   $BUN_INSTALL/bin $DENO_INSTALL/bin $HOME/.npm-global/node_modules/.bin
@@ -102,3 +103,5 @@ if status is-login
   end
 end
 
+
+alias assume="source (brew --prefix)/bin/assume.fish"
