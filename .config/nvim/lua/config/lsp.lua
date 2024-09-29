@@ -25,7 +25,7 @@ vim.diagnostic.config({
 
 local special_servers = {
 	"rust_analyzer",
-	"tsserver",
+	"ts_ls",
 	"denols",
 }
 
@@ -56,7 +56,7 @@ local normal_servers = {
 }
 
 local use_other_formating_servers = {
-	"tsserver",
+	"ts_ls",
 	"lua_ls",
 	"stylelint_lsp",
 	"jsonls",
@@ -204,7 +204,7 @@ lspconfig.denols.setup({
 	root_dir = lspconfig.util.root_pattern("deno.json", "deno.jsonc"),
 })
 
-lspconfig.tsserver.setup({
+lspconfig.ts_ls.setup({
 	on_attach = on_attach,
 	capabilities = capabilities,
 	root_dir = lspconfig.util.root_pattern("package.json"),

@@ -30,6 +30,7 @@
 [core]
 	excludesfile = ~/.gitignore
 	pager = delta
+	ignoreCase = false
 [color]
 	ui = auto
 [url "ssh://gitlab@git.garena.com/"]

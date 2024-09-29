@@ -86,10 +86,12 @@ abbr -a icat "kitten icat"
 abbr -a lg "lazygit"
 abbr -a gs "gh copilot suggest"
 abbr -a ge "gh copilot explain"
+abbr -a nr "npm run"
 
 alias v 'nvim --listen $HOME/.config/nvim/pipe/$(basename $PWD)'
 alias vim 'nvim --listen $HOME/.config/nvim/pipe/$(basename $PWD)'
 alias mux 'tmux new -ADs scratch'
+alias rgs 'rg --smart-case --hidden --no-heading --column'
 
 alias ... 'cd ../..'
 alias .... 'cd ../../..'
@@ -105,3 +107,17 @@ end
 
 
 alias assume="source (brew --prefix)/bin/assume.fish"
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+# if test -f /Users/sinon/.pyenv/versions/anaconda3-2024.06-1/bin/conda
+#     eval /Users/sinon/.pyenv/versions/anaconda3-2024.06-1/bin/conda "shell.fish" "hook" $argv | source
+# else
+#     if test -f "/Users/sinon/.pyenv/versions/anaconda3-2024.06-1/etc/fish/conf.d/conda.fish"
+#         . "/Users/sinon/.pyenv/versions/anaconda3-2024.06-1/etc/fish/conf.d/conda.fish"
+#     else
+#         set -x PATH "/Users/sinon/.pyenv/versions/anaconda3-2024.06-1/bin" $PATH
+#     end
+# end
+# <<< conda initialize <<<
+
