@@ -41,7 +41,7 @@ local normal_servers = {
 	"gopls",
 	"html",
 	"jsonls",
-	"ruff_lsp",
+	"ruff",
 	"pyright",
 	"svelte",
 	"stylelint_lsp",
@@ -112,7 +112,7 @@ local on_attach = function(client)
 	if vim.tbl_contains(use_other_formating_servers, client.name) then
 		client.server_capabilities.documentFormattingProvider = false
 	end
-	if client.name == "ruff_lsp" then
+	if client.name == "ruff" then
 		-- Disable hover in favor of Pyright
 		client.server_capabilities.hoverProvider = false
 	end
