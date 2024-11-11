@@ -5,6 +5,8 @@
 	defaultBranch = main
 [credential]
 	helper = cache
+[remote "origin"]
+    fetch = +refs/heads/*:refs/remotes/origin/*
 [filter "media"]
 	clean = git-media-clean %f
 	smudge = git-media-smudge %f

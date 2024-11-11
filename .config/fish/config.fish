@@ -17,7 +17,7 @@ fish_add_path /usr/local/sbin $HOME/.duolingo/bin $HOME/.local/bin $HOME/.cargo/
 if not status is-interactive
     exit
 end
-
+#
 function reorder-path
     set -f dot_paths
     set -f other_paths
@@ -54,8 +54,8 @@ function fish_user_key_bindings
     end
 end
 
-alias page 'page -WfC -q 90000 -z 90000' # some sensible flags
-set -gx PAGER page
+# alias page 'page -WfC -q 90000 -z 90000' # some sensible flags
+# set -gx PAGER page
 set -gx DELTA_PAGER 'less -RFX'
 set fish_greeting
 
