@@ -1,3 +1,8 @@
+if status is-login; and not test -n "$TMUX"
+    tmux new -ADs scratch; and kill %self
+    echo "tmux failed to start; using plain fish shell"
+end
+
 set -gx QUIET_DIRENV_DET 1
 set -gx EDITOR vi
 set -gx GOPATH $HOME/tools/go
@@ -9,6 +14,7 @@ set -gx FZF_DEFAULT_COMMAND 'fd --type f --strip-cwd-prefix --hidden --follow --
 set -gx FZF_CTRL_T_COMMAND "command find -L \$dir -type f 2> /dev/null | sed '1d; s#^\./##'"
 set -gx GPG_TTY (tty)
 set -gx PYTHONPATH .
+set -gx MANPAGER "vi +Man!"
 
 fish_add_path /usr/local/sbin $HOME/.duolingo/bin $HOME/.local/bin $HOME/.cargo/bin $HOME/.deno/bin $GOPATH/bin \
     $HOME/tools/flutter/bin $PYENV_ROOT/bin $HOMEBREW_ROOT/bin $HOMEBREW_ROOT/sbin \
@@ -17,7 +23,7 @@ fish_add_path /usr/local/sbin $HOME/.duolingo/bin $HOME/.local/bin $HOME/.cargo/
 if not status is-interactive
     exit
 end
-#
+
 function reorder-path
     set -f dot_paths
     set -f other_paths
@@ -92,20 +98,8 @@ alias v 'nvim --listen $HOME/.config/nvim/pipe/$(basename $PWD)'
 alias vim 'nvim --listen $HOME/.config/nvim/pipe/$(basename $PWD)'
 alias mux 'tmux new -ADs scratch'
 alias rgs 'rg --smart-case --hidden --no-heading --column'
-
 alias ... 'cd ../..'
 alias .... 'cd ../../..'
-
-if status is-login
-    set -gx MANPAGER "vi +Man!"
-    if test -n "$SSH_CONNECTION"
-        and not test -n "$TMUX"
-        tmux has-session -t o; and tmux attach-session -t o; or tmux new-session -s o; and kill %self
-        echo "tmux failed to start; using plain fish shell"
-    end
-end
-
-
 alias assume="source (brew --prefix)/bin/assume.fish"
 
 # >>> conda initialize >>>
