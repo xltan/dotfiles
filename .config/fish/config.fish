@@ -100,7 +100,7 @@ alias mux 'tmux new -ADs scratch'
 alias rgs 'rg --smart-case --hidden --no-heading --column'
 alias ... 'cd ../..'
 alias .... 'cd ../../..'
-alias assume="source (brew --prefix)/bin/assume.fish"
+alias assume "source (brew --prefix)/bin/assume.fish"
 
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
