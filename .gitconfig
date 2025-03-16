@@ -2,7 +2,7 @@
 	name = Sinon
 	email = lidmuse@gmail.com
 [init]
-	defaultBranch = main
+	defaultBranch = master
 [credential]
 	helper = cache
 [filter "media"]
@@ -77,6 +77,7 @@
 	ff = merge --ff-only
 	noff = merge --no-ff
 	pullff = pull --ff-only
+	up = pull --ff-only origin master
 	fa = !git fetch --all --prune && git merge
 	last = log -1 HEAD
 	unstage = reset HEAD --
