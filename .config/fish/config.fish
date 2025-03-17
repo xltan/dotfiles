@@ -102,6 +102,8 @@ alias ... 'cd ../..'
 alias .... 'cd ../../..'
 alias assume "source (brew --prefix)/bin/assume.fish"
 
+set -gx OPENSSL_DIR "$(brew --prefix openssl@3)"
+
 # >>> conda initialize >>>
 # !! Contents within this block are managed by 'conda init' !!
 # if test -f /Users/sinon/.pyenv/versions/anaconda3-2024.06-1/bin/conda

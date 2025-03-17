@@ -29,12 +29,6 @@ defaults write NSGlobalDomain AppleFontSmoothing -int 2
 # Disable press-and-hold for keys in favor of key repeat.
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 
-# Set a fast KeyRepeat rate. We prefer 1 (15ms). The default minimum is 2 (30ms). May require reboot.
-defaults write NSGlobalDomain KeyRepeat -int 1
-
-# Set a fast initial key repeat. We prefer 4 (60ms). The default minimum is 15 (225ms). May require reboot.
-defaults write NSGlobalDomain InitialKeyRepeat -int 4
-
 ## NSGlobalDomain NS*
 
 # Save to disk (not to iCloud) by default.
@@ -80,9 +74,6 @@ defaults write com.apple.finder ShowStatusBar -bool true
 
 # Show path bar.
 defaults write com.apple.finder ShowPathbar -bool true
-
-# Disable warning when the user does empty trash.
-defaults write com.apple.finder WarnOnEmptyTrash -bool false
 
 ## Dock
 
@@ -141,16 +132,3 @@ defaults write com.apple.terminal StringEncodings -array 4
 
 # Avoid creating .DS_Store files on network volumes.
 defaults write com.apple.desktopservices DSDontWriteNetworkStores -bool true
-
-## Trackpad
-
-# Enable tap to click (Trackpad), also for login menu.
-defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool true
-defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-sudo defaults write com.apple.AppleMultitouchTrackpad Clicking 1
-
-## Finally
-
-# Kill affected applications.
-for app in Safari Finder Dock Mail SystemUIServer; do killall "$app" >/dev/null 2>&1; done

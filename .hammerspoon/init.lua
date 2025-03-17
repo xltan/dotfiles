@@ -6,6 +6,9 @@ local appKeyMappings = {
 	["^Code"] = { -- Another example app
 		{ { "cmd", "ctrl" }, "r", { "cmd", "ctrl", "shift" }, "r" },
 	},
+	["^Cursor"] = { -- Another example app
+		{ { "cmd", "ctrl" }, "r", { "cmd", "ctrl", "shift" }, "r" },
+	},
 	["^OpenVPN Connect"] = { -- Another example app
 		{
 			{ "cmd" },
