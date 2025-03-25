@@ -2,7 +2,7 @@
 /tags.lock
 /tags
 /.cache/
-/.local/
+/.local
 /node_modules/
 compile_commands.json
 pyrightconfig.json

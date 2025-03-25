@@ -101,6 +101,7 @@ alias rgs 'rg --smart-case --hidden --no-heading --column'
 alias ... 'cd ../..'
 alias .... 'cd ../../..'
 alias assume "source (brew --prefix)/bin/assume.fish"
+alias co cursor
 
 set -gx OPENSSL_DIR "$(brew --prefix openssl@3)"
 
