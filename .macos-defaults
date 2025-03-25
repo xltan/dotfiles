@@ -109,9 +109,6 @@ defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool 
 # Enable WebKit Developer Extras
 defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
 
-# Don't open "safe" downloads i.e. don't open files automatically after downloading
-defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
-
 # Enable AutoFill
 defaults write com.apple.Safari AutoFillFromAddressBook -bool true
 defaults write com.apple.Safari AutoFillPasswords -bool true
@@ -122,11 +119,6 @@ defaults write com.apple.Safari AutoFillMiscellaneousForms -bool true
 
 # Use AirDrop over every interface.
 defaults write com.apple.NetworkBrowser BrowseAllInterfaces 1
-
-## Terminal
-
-# Only use UTF-8 in Terminal.app.
-defaults write com.apple.terminal StringEncodings -array 4
 
 ## Desktop Services
 
