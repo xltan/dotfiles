@@ -12,3 +12,9 @@ pyrightconfig.json
 .projections.json
 .luarc.json
 .parcel-cache/
+.DS_Store
+mobile-js/
+mobile-css/
+mobile-files.json
+settings.local.json
+claude.local.md

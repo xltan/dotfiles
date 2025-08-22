@@ -15,10 +15,23 @@ set -gx FZF_CTRL_T_COMMAND "command find -L \$dir -type f 2> /dev/null | sed '1d
 set -gx GPG_TTY (tty)
 set -gx PYTHONPATH .
 set -gx MANPAGER "vi +Man!"
+set -gx LANG en_US.UTF-8
+set -gx LC_ALL en_US.UTF-8
+set -gx ANDROID_HOME $HOME/Library/Android/sdk
+set -gx ANDROID_SDK_ROOT $HOME/Library/Android/sdk
+set -gx ANDROID_AVD_HOME $HOME/.android/avd
+set -gx JAVA_HOME /Library/Java/JavaVirtualMachines/zulu-17.jdk/Contents/Home
+set -gx BUN_INSTALL "$HOME/.bun"
 
 fish_add_path /usr/local/sbin $HOME/.duolingo/bin $HOME/.local/bin $HOME/.cargo/bin $HOME/.deno/bin $GOPATH/bin \
     $HOME/tools/flutter/bin $PYENV_ROOT/bin $HOMEBREW_ROOT/bin $HOMEBREW_ROOT/sbin \
-    $BUN_INSTALL/bin $DENO_INSTALL/bin $HOME/.npm-global/node_modules/.bin
+    $BUN_INSTALL/bin $DENO_INSTALL/bin $HOME/.npm-global/node_modules/.bin \
+    $ANDROID_HOME/tools $ANDROID_HOME/tools/bin $ANDROID_HOME/platform-tools $ANDROID_HOME/emulator \
+    /Applications/Android\ Studio.app/Contents/MacOS \
+    $HOME/.konan/kotlin-native-prebuilt-macos-aarch64-2.1.21/bin \
+    $BUN_INSTALL/bin
+
+set -gx OPENSSL_DIR "$(brew --prefix openssl@3)"
 
 if not status is-interactive
     exit
@@ -68,11 +81,12 @@ set fish_greeting
 test -d .venv/bin; and source .venv/bin/activate.fish
 test -d .pyenv/bin; and source .pyenv/bin/activate.fish
 type -q zoxide; and source (zoxide init fish | psub)
-type -q fnm; and source (fnm env --use-on-cd | psub)
+type -q fnm; and source (fnm env --use-on-cd --shell fish | psub)
 type -q fzf; and source (fzf --fish | psub)
 
 type -q direnv; and source (direnv hook fish | psub)
 type -q pyenv; and source (pyenv init - | psub)
+type -q rbenv; and source (rbenv init - | psub)
 
 function mcd
     mkdir -pv "$argv"
@@ -82,38 +96,24 @@ end
 function npmig
     # function to install npm packages to .npm-global
     cd $HOME/.npm-global
-    npm install --save "$argv"
+    /opt/homebrew/bin/npm install --save "$argv"
     cd -
 end
 
-abbr -a c cargo
+abbr -a c cursor
+abbr -a ca cargo
+abbr -a b bun
 abbr -a g git
 abbr -a icat "kitten icat"
 abbr -a lg lazygit
 abbr -a gs "gh copilot suggest"
 abbr -a ge "gh copilot explain"
 abbr -a nr "npm run"
+abbr -a cc claude
 
-alias v 'nvim --listen $HOME/.config/nvim/pipe/$(basename $PWD)'
 alias vim 'nvim --listen $HOME/.config/nvim/pipe/$(basename $PWD)'
 alias mux 'tmux new -ADs scratch'
 alias rgs 'rg --smart-case --hidden --no-heading --column'
 alias ... 'cd ../..'
 alias .... 'cd ../../..'
 alias assume "source (brew --prefix)/bin/assume.fish"
-alias co cursor
-
-set -gx OPENSSL_DIR "$(brew --prefix openssl@3)"
-
-# >>> conda initialize >>>
-# !! Contents within this block are managed by 'conda init' !!
-# if test -f /Users/sinon/.pyenv/versions/anaconda3-2024.06-1/bin/conda
-#     eval /Users/sinon/.pyenv/versions/anaconda3-2024.06-1/bin/conda "shell.fish" "hook" $argv | source
-# else
-#     if test -f "/Users/sinon/.pyenv/versions/anaconda3-2024.06-1/etc/fish/conf.d/conda.fish"
-#         . "/Users/sinon/.pyenv/versions/anaconda3-2024.06-1/etc/fish/conf.d/conda.fish"
-#     else
-#         set -x PATH "/Users/sinon/.pyenv/versions/anaconda3-2024.06-1/bin" $PATH
-#     end
-# end
-# <<< conda initialize <<<

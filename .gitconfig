@@ -2,7 +2,7 @@
 	name = Sinon
 	email = lidmuse@gmail.com
 [init]
-	defaultBranch = main
+	defaultBranch = master
 [credential]
 	helper = cache
 [filter "media"]
