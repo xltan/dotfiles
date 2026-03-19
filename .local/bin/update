@@ -1,6 +1,0 @@
-#!/bin/bash
-
-# update brew
-brew update && brew upgrade --force-bottle
-
-rustup update
